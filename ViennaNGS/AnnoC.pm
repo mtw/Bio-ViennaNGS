@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-09-04 15:14:30 mtw>
+# Last changed Time-stamp: <2013-09-04 15:33:34 mtw>
 #
 #
 # ***********************************************************************
@@ -189,11 +189,11 @@ Variables: feat fstat
 
 =head1 AUTHOR
 
-Michael T. Wolfinger, E<lt>michael@wolfinger.euE<gt>
+Michael Thomas Wolfinger, E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2013 by Michael T. Wolfinger
+Copyright (C) 2013 by Michael Thomas Wolfinger
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.12.4 or,
