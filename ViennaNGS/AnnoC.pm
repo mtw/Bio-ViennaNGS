@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-09-04 11:18:52 mtw>
+# Last changed Time-stamp: <2013-09-04 15:14:30 mtw>
 #
 #
 # ***********************************************************************
@@ -9,22 +9,15 @@
 # *  Copyright 2013 Michael Thomas Wolfinger <michael@wolfinger.eu>
 # *  All rights reserved
 # *
-# *  This program is free software: you can redistribute it and/or modify
-# *  it under the terms of the GNU General Public License as published by
-# *  the Free Software Foundation, either version 3 of the License, or
-# *  (at your option) any later version.
+# * This library is free software; you can redistribute it and/or modify
+# * it under the same terms as Perl itself, either Perl version 5.12.4 or,
+# * at your option, any later version of Perl 5 you may have available.
 # *
 # *  This program is distributed in the hope that it will be useful,
 # *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-# *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# *  GNU General Public License for more details.
+# *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # *
-# *  You should have received a copy of the GNU General Public License
-# *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-# *
-# *  This copyright notice MUST APPEAR in all copies of the script!
 # ***********************************************************************
-#
 
 package ViennaNGS::AnnoC;
 
@@ -35,8 +28,8 @@ use Data::Dumper;
 use Bio::Tools::GFF;
 
 our @ISA       = qw(Exporter);
-our $VERSION   = '0.01';
-our @EXPORT    = qw(parse_gff $feat $fstat);
+our $VERSION   = '0.02';
+our @EXPORT    = qw(parse_gff feature_summary $feat $fstat);
 our @EXPORT_OK = qw(%features %featstat);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -53,13 +46,19 @@ our $fstat     = \%featstat;
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 sub parse_gff {
-  my ($i,$gffio,$feature,$gbkey);
-  my $in_file = shift;
+  my ($i,$in_file,$gffio,$feature,$gbkey);
+  $in_file = shift;
 
   $gffio = Bio::Tools::GFF->new(-file        => $in_file,
 				-gff_version  => 3,
 			       );
   $gffio->ignore_sequence(1);
+  if (my $header = $gffio->next_segment() ){
+    $featstat{accession}= $header->display_id();
+  }
+  else{
+    warn "INFO parse_gff: could not parse GFF header\n";
+  }
 
   while($feature = $gffio->next_feature()) {
     my ($uid,$feat_name);
@@ -111,13 +110,13 @@ sub parse_gff {
       $features{$uid}->{uid}       = $uid;
     }
     else { # CDS / tRNA / rRNA / etc
-      #print "Overwriting \$f{$uid}, it was a $$f{$uid}->{gbkey} and will be a $gbkey\n";
       $features{$uid}->{gbkey} = $gbkey;  # gbkey for tRNA/ rRNA/ CDS etc
     }
   }
 
   # finally generate some statistics on features present in this annotation
   $featstat{total} = 0;
+  $featstat{origin} = "ViennaNGS::AnnoC::parse_gff version ".$VERSION;
   foreach my $ft (keys %features){
     $featstat{total}++;
     my $key = $features{$ft}->{gbkey};
@@ -130,30 +129,62 @@ sub parse_gff {
  # print Dumper (\%features);
 }
 
+# feature_summary($fstat,$path)
+# Print summary of $featstat hash
+#
+# ARG1: reference to $featstat hash
+# ARG2: path for output file summary.txt
+sub feature_summary {
+  my ($fn, $summary_name);
+  my ($summary, $wd) = @_;
+  #print Dumper($summary);
+  $fn = $$summary{accession}.".summary.txt";
+  $wd .= "/" unless ($wd =~ /\/$/);
+  $summary_name = $wd.$fn;
+  open my $smry, ">", $summary_name or die $!;
+
+  print $smry "Accession\t $$summary{accession}\n";
+  print $smry "Origin   \t $$summary{origin}\n";
+  foreach my $ft (sort keys %$summary){
+    next if ($ft =~ /total/ || $ft =~ /accession/ || $ft =~ /origin/);
+    print $smry "$ft\t$$summary{$ft}\n";
+  }
+  print $smry "Total\t$$summary{total}\n";
+  close $smry;
+}
 
 1;
 __END__
 
 =head1 NAME
 
-ViennaNGS::AnnoC - Perl extension for converting annotation formats
+ViennaNGS::AnnoC - Perl extension for converting sequence annotation formats
 
 =head1 SYNOPSIS
 
   use ViennaNGS::AnnoC;
-  gff2bed($gff);
+
+  parse_gff($gff3_file);
+  feature_summary($fstat,$path)
 
 =head1 DESCRIPTION
 
-gff2bed converts GFF3 to BED12. gff2bed expects the path to a GFF3
-file and returns two hash references: $feat is a reference to a HOH
-containing the raw annotation information for each feature found in
-the GFF3 file. $fstat references a hash containing some statistics of
-the features found in the GFF3 file.
+parse_gff parses GFF3 annotation files. The GFF3 specification is
+available at http://www.sequenceontology.org/resources/gff3.html
+parse_gff expects the path to a GFF3 file as argument and returns two
+hash references: $feat is a reference to a HOH containing the raw
+annotation information for each feature found in the GFF3 file. $fstat
+references a hash containing summary statistics of the features found
+in the GFF3 file.
+
+feature_summary generates a summary file for all features parsed by
+parse_gff. feature_summary expects two arguments, first a refence to
+the summary hash generated by parse_gff and second the path where the
+summary.txt output should be written.
 
 =head2 EXPORT
 
-Routines: gff2bed
+Routines: parse_gff feature_summary
 Variables: feat fstat
 
 =head1 AUTHOR
