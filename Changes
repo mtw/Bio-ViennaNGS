@@ -1,0 +1,6 @@
+Revision history for Perl extension ViennaNGS.
+
+0.01  Fri Sep 13 12:02:47 2013
+	- original version; created by h2xs 1.23 with options
+		-XA -n ViennaNGS
+
