@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-09-16 00:09:09 mtw>
+# Last changed Time-stamp: <2013-09-16 14:03:48 mtw>
 #
 #
 # ***********************************************************************
@@ -24,11 +24,7 @@ package ViennaNGS;
 use Exporter;
 use strict;
 use warnings;
-use Data::Dumper;
 use Bio::Perl;
-#use Bio::Seq;
-#use Bio::SeqIO;
-#use Bio::DB::Fasta;
 
 our @ISA = qw(Exporter);
 our $VERSION = '0.01';
