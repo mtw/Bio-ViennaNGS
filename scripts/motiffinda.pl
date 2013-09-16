@@ -1,12 +1,18 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-09-16 00:27:38 mtw>
+# Last changed Time-stamp: <2013-09-16 13:29:31 mtw>
 #
 # Find motifs in annotated sequences. The motif is provided as regex
 # via the command line
 #
 # usage: motiffinda.pl -motif <REXGEX> -gff <GFFFILE> -fa <FASTAFILE>
-#                      -inframe
+#                      -offset <OFFSET> -inframe
+#
+# The motif must be privided within braces, because use $1 to obtain
+# the position of the motif within the query sequece.
+#
+# ./motiffinda.pl -motif "(ACATG\w{4,13}ACATG)" -gff NC_000913.gff
+#                 -fa NC_000913.fna -offset 1
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -44,9 +50,10 @@ use ViennaNGS::AnnoC;
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-my ($gff_in,$fa_in);
+my ($gff_in,$fa_in,$obj);
 my $motif      = undef;
 my $inframe    = 0;
+my $offset     = 0;
 my $timestamp  = strftime("%Y%m%d-%H%M", localtime(time));  # timestamp
 my @fa_ids     = ();
 
@@ -59,6 +66,7 @@ Getopt::Long::config('no_ignore_case');
                            "fa=s"       => \$fa_in,
                            "motif=s"    => \$motif,
 			   "inframe"    => \$inframe,
+			   "offset=i"   => \$offset,
                            "-help"      => \&usage,
                            "v");
 unless ($gff_in =~ /^\//) {$gff_in = "./".$gff_in;}
@@ -75,22 +83,56 @@ parse_gff($gff_in);
 #print Dumper($fstat);
 
 # 2) parse Fasta file, populate @fastaids
-get_fasta_dbobjects($fa_in);
+get_fasta_ids($fa_in);
 #print Dumper(\@fastaids);
 foreach my $id (@fastaids) {
-  my $obj = $fastadb->get_Seq_by_id($id);  # Bio::PrimarySeq::Fasta
-  print Dumper($obj);
+  $obj = $fastadb->get_Seq_by_id($id);  # Bio::PrimarySeq::Fasta
+  #print Dumper($obj);
+
+  # 3) find motif in annotated regions
+  find_motifs();
 }
 
-# 3) find motif in annotates regions
-find_motifs();
+
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
+# loop over all features parsed from GFF3 and see if we have the motif
 sub find_motifs {
+  my ($id,$start,$stop,$strand,$name,$seq,$length);
 
+  foreach $id (keys %$feat){
+    my $have_motif = 0;
+    my @fm = ();  # AoH for storing found motifs and their position
+
+    next unless ($$feat{$id}->{gbkey} eq "CDS");
+    $start  = $$feat{$id}->{start};
+    $stop   = $$feat{$id}->{end};
+    $strand = $$feat{$id}->{strand};
+    $name   = $$feat{$id}->{name};
+    $length = $$feat{$id}->{length};
+    $seq    = get_stranded_subsequence($obj,$start,$stop,$strand);
+    #  $seq    =~ s/T/U/g; # make RNA from DNA
+    while ($seq =~ m/$motif/g) {
+      my $p = pos($seq)-length($1)+1;
+      $have_motif++;
+      push (@fm, {motif=>$1,pos=>$p,name=>$name,strand=>$strand,start=>$start,stop=>$stop});
+    }
+    for (my $i=0;$i<$have_motif;$i++) {
+      next unless (($inframe == 1) && (($fm[$i]->{pos}+$offset)%3==0));
+      # ATG in frame
+      print ">$fm[$i]->{name}|$fm[$i]->{strand}|rel $fm[$i]->{pos}|";
+      if ($fm[$i]->{strand} == 1){
+	print "abs ".eval($fm[$i]->{pos}+$fm[$i]->{start}-1)."\n";
+      }
+      else {
+	print "abs ".eval($fm[$i]->{stop}-$fm[$i]->{pos}+1)."\n";
+      }
+      print "$fm[$i]->{motif}\n";
+    }
+  }
 }
 
 
@@ -103,6 +145,7 @@ program specific options:                                    default:
  -motif    <string>  motif to search for (as regex)           ($motif)
  -gff      <string>  GFF3 file annotation file                ($gff_in)
  -fa       <string>  (multi) fasta file holding sequence      ($fa_in)
+ -offset   <int>     offset for determination of frame        ($offset)
  -inframe            print only motifs in current ORF         ($inframe)
 EOF
 exit;
