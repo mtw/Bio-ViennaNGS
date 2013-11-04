@@ -4,3 +4,7 @@ Revision history for Perl extension ViennaNGS.
 	- original version; created by h2xs 1.23 with options
 		-XA -n ViennaNGS
 	- added get_stranded_subsequence()
+
+0.02  Mon Nov 4 2013
+	- added split_bam()
+        - added scripts/bam_split.pl
