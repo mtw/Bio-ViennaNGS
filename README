@@ -1,4 +1,4 @@
-ViennaNGS version 0.02
+ViennaNGS version 0.03
 ======================
 
 ViennaNGS is a collection of Perl Modules for Next-Generation Sequencng (NGS) analysis.
@@ -17,6 +17,9 @@ DEPENDENCIES
 This module requires these other modules and libraries:
 
   Bio::Perl
+  Bio::DB::Sam (requires samtools)
+  File::Basename
+  File::Temp
 
 COPYRIGHT AND LICENCE
 

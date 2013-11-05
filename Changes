@@ -8,3 +8,6 @@ Revision history for Perl extension ViennaNGS.
 0.02  Mon Nov 4 2013
 	- added split_bam()
         - added scripts/bam_split.pl
+
+0.03  Tue Nov 5 2013
+    	- added bam2bw()
