@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-11-04 22:19:37 mtw>
+# Last changed Time-stamp: <2013-11-05 12:02:12 mtw>
 #
 #
 # ***********************************************************************
@@ -41,7 +41,6 @@ our @EXPORT_OK = ();
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 
-
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -60,8 +59,12 @@ sub get_stranded_subsequence {
   return $seq;
 }
 
+# split_bam ( $bam,$reverse,$want_uniq,$log )
+# Splits BAM file $bam according to [+] and [-] strand
+# Returns array with newly splitted BAM files
 sub split_bam {
   my %data = ();
+  my @processed_bam = ();
   my ($bamfile,$reverse,$want_uniq,$log) = @_;
   my ($bam,$sam,$bn,$path,$ext,$header,$flag);
   my ($bam_pos,$bam_neg,$tmpname_pos,$tmpname_neg,$bamname_pos,$bamname_neg);
@@ -175,6 +178,7 @@ sub split_bam {
 
   rename ($tmpname_pos, $bamname_pos);
   rename ($tmpname_neg, $bamname_neg);
+  push (@processed_bam, ($bamname_pos,$bamname_neg));
 
   # error checks
   unless ($data{count}{pe_alis} + $data{count}{se_alis} == $data{count}{cur}) {
@@ -221,6 +225,7 @@ sub split_bam {
   printf LOG "#-----------------------------------------------------------------\n";
   printf LOG "Dumper output:\n". Dumper(\%data);
   close(LOG);
+  return @processed_bam;
 }
 
 1;
