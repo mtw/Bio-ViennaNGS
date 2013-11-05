@@ -1,11 +1,11 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-10-30 00:10:29 mtw>
+# Last changed Time-stamp: <2013-11-05 16:06:38 mtw>
 #
 # Extract annotation from ENSEMBL FASTA files and convert to BED
 #
-# usage: motiffinda.pl -fa <FASTAFILE>
-##
+# usage: ensembl_fa2bed.pl -fa <FASTAFILE>
+#
 # ***********************************************************************
 # *  Copyright notice
 # *
