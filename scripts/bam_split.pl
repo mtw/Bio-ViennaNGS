@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-11-05 12:03:08 mtw>
+# Last changed Time-stamp: <2013-11-05 15:02:42 mtw>
 #
 # Split BAM files according to their strands, optionally filter unique mappers
 #
@@ -35,13 +35,16 @@ use ViennaNGS;
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
-my ($bam,$bam_pos,$bam_neg);
+my ($bam_pos,$bam_neg);
 my ($rev,$uniq,$bw) = (0)x3;
 my $logfile = "bam_split.log";
+my $chromsi = undef;
+my $bam     = undef;
 
 Getopt::Long::config('no_ignore_case');
 &usage() unless GetOptions("bam=s"           => \$bam,
 			   "bw"              => sub{$bw = 1},
+			   "c=s"             => \$chromsi,
 			   "r"               => sub{$rev = 1},
 			   "u"               => sub{$uniq = 1},
 			   "log=s"           => \$logfile,
@@ -52,13 +55,18 @@ Getopt::Long::config('no_ignore_case');
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
+die "ERROR: no BAM file provided" unless (defined $bam);
+die "ERROR: chrom_sizes file needed for generating BigWig coverage profiles\n"
+  unless (defined $chromsi && $bw == 1);
+
+$logfile = $bam . ".bam_split.log";
 ($bam_pos,$bam_neg) = split_bam($bam,$rev,$uniq,$logfile);
+bam2bw($bam_pos,$chromsi);
+bam2bw($bam_neg,$chromsi);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
-
-
 
 sub usage {
  print <<EOF;
@@ -66,17 +74,18 @@ sub usage {
 bam_split.pl:  Split a BAM file according to strands.
 
 Optionally filter unique alignments by inspecting NH:i SAM attribute
-Optionally create BedGraph and BigWig files for UCSC visualization
+Optionally create BedGraph and BigWig coverage for UCSC visualization
 
 usage: $0 -bam <BAMFILE> [options]
 program specific options:                                   default:
- -bam          <string> specify BAM file                    ($bam)
- -bw                    create BedGraph and BigWig files    ($bw)
- -r                     reverse +/- strand mapping (due to  ($rev)
-                        RNA-seq configuration)
- -u                     filter unique alignemnts            ($uniq)
- -log          <file>   log file                            ($logfile)
- -help                  print this information
+ -bam      <string> specify BAM file                        ($bam)
+ -bw                create BedGraph and BigWig files        ($bw)
+ -c                 chrom_sizes for generating BigWigs      ($chromsi)
+ -r                 reverse +/- strand mapping (due to      ($rev)
+                    RNA-seq configuration)
+ -u                 filter unique alignemnts                ($uniq)
+ -log      <file>   log file                                ($logfile)
+ -help               print this information
 
 EOF
 exit;
