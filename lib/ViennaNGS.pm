@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-11-05 12:02:12 mtw>
+# Last changed Time-stamp: <2013-11-05 13:55:11 mtw>
 #
 #
 # ***********************************************************************
@@ -32,7 +32,7 @@ use File::Temp qw(tempfile);
 
 our @ISA = qw(Exporter);
 our $VERSION = '0.02';
-our @EXPORT = qw(get_stranded_subsequence split_bam);
+our @EXPORT = qw(get_stranded_subsequence split_bam bam2bw);
 
 our @EXPORT_OK = ();
 
@@ -228,6 +228,34 @@ sub split_bam {
   return @processed_bam;
 }
 
+# bam2bw ( $bam,$chromsizes )
+# Generate BedGraph and BigWig coverage from BAM via two external toolsprograms:
+# genomeCoverageBed from BEDtools
+# bedGraphToBigWig from UCSC Genome Browser tools
+sub bam2bw {
+  my ($bamfile,$chromsizes) = @_;
+  my $genomeCoverageBed = `which genomeCoverageBed`; chomp($genomeCoverageBed);
+  my $bedGraphToBigWig = `which bedGraphToBigWig`; chomp($bedGraphToBigWig);
+  my $outpath = "./";
+  my $outfolder = $outpath."vis";
+  my ($GCB_cmd,$BGTBW_cmd);
+
+  unless (-e $bamfile) {
+    die "ERROR: Cannot find $bamfile\n";
+  }
+  unless (-e $chromsizes) {
+    die "ERROR: Cannot find $chromsizes ...BigWig cannot be generated\n"; 
+  }
+  mkdir $outfolder;
+  
+$GCB_cmd = "$genomeCoverageBed -ibam $bamfile -bg -g $chromsizes > $outfolder/$bamfile.bg";
+  $BGTBW_cmd = "$bedGraphToBigWig $outfolder/$bamfile.bg $chromsizes $outfolder/$bamfile.bw";
+    
+  print STDERR ">> $GCB_cmd\n>> $BGTBW_cmd\n";
+  system($GCB_cmd);
+  system($BGTBW_cmd);
+}
+
 1;
 __END__
 
@@ -271,6 +299,17 @@ treated separately, thus allowing for scenarios where eg. one read is
 a multi-mapper, whereas its associate mate is a unique mapper,
 resulting in an ambiguous alignment of the entire fragment. $log hold
 the name (and path) of the log file.
+
+=head2 bam2bw($bam,$chromsizes)
+
+Creates BedGraph and BigWig coverage files from BAM. These can easily
+be visualized as TrackHubs within the UCSC Genome Browser (see
+http://genome.ucsc.edu/goldenPath/help/hgTrackHubHelp.html). Internally,
+the conversion is accomplished by two third-party applications:
+genomeCoverageBed (from BEDtools, see
+http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html)
+and bedGraphToBigWig (from the UCSC Genome Browser, see
+http://hgdownload.cse.ucsc.edu/admin/exe/).
 
 =head1 SEE ALSO
 
