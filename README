@@ -1,7 +1,33 @@
-ViennaNGS version 0.03
+ViennaNGS v0.03
 ======================
 
-ViennaNGS is a collection of Perl Modules for Next-Generation Sequencng (NGS) analysis.
+ViennaNGS is a collection of Perl Modules for Next-Generation Sequencng
+(NGS) analysis. It comes with a set of utility programs for accomplishing
+routine tasks often required in NGS data processing. The utilities serve as
+reference implementation of the routines implemented in the library and
+reside within the 'scripts' folder:
+
+bam_split.pl: 
+Split (paired-end and single-end) BAM alignment files by strand and compute
+statistics. Optionally creates BedGraph and BigWig files for coverage
+visualization in Genome browsers.
+
+gff2bed.pl:
+Convert RefSeq GFF3 annotation files to BED12 format. Individual BED12
+files are created for each feature type (CDS/tRNA/rRNA/etc.). Tested with
+RefSeq bacterial GFF3 annotation.  
+
+ensembl_fa2bed.pl
+Extract annotation information from ENSEMBL FASTA and convert to BED format.
+
+motiffinda.pl:
+Find motifs in annotated sequences. The motif can be provied as regex.
+
+newUCSCdb.pl:
+Create a new genome database for the UCSC genome browser. Based on the UCSC
+reference documentation for adding new genome databases (see
+http://genomewiki.ucsc.edu/index.php/Building_a_new_genome_database) 
+
 
 INSTALLATION
 
