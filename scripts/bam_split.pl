@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-11-04 21:42:36 mtw>
+# Last changed Time-stamp: <2013-11-05 12:03:08 mtw>
 #
 # Split BAM files according to their strands, optionally filter unique mappers
 #
@@ -28,7 +28,6 @@
 
 use strict;
 use warnings;
-use local::lib;
 use Getopt::Long;
 use Data::Dumper;
 use ViennaNGS;
@@ -36,12 +35,13 @@ use ViennaNGS;
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
-my $bam;
-my ($rev,$uniq) = (0)x2;
+my ($bam,$bam_pos,$bam_neg);
+my ($rev,$uniq,$bw) = (0)x3;
 my $logfile = "bam_split.log";
 
 Getopt::Long::config('no_ignore_case');
 &usage() unless GetOptions("bam=s"           => \$bam,
+			   "bw"              => sub{$bw = 1},
 			   "r"               => sub{$rev = 1},
 			   "u"               => sub{$uniq = 1},
 			   "log=s"           => \$logfile,
@@ -52,7 +52,7 @@ Getopt::Long::config('no_ignore_case');
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-split_bam($bam,$rev,$uniq,$logfile);
+($bam_pos,$bam_neg) = split_bam($bam,$rev,$uniq,$logfile);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
@@ -61,12 +61,17 @@ split_bam($bam,$rev,$uniq,$logfile);
 
 
 sub usage {
-  print <<EOF;
-Split a BAM file according to strands, optionally report unique alignments
+ print <<EOF;
+
+bam_split.pl:  Split a BAM file according to strands.
+
+Optionally filter unique alignments by inspecting NH:i SAM attribute
+Optionally create BedGraph and BigWig files for UCSC visualization
 
 usage: $0 -bam <BAMFILE> [options]
 program specific options:                                   default:
  -bam          <string> specify BAM file                    ($bam)
+ -bw                    create BedGraph and BigWig files    ($bw)
  -r                     reverse +/- strand mapping (due to  ($rev)
                         RNA-seq configuration)
  -u                     filter unique alignemnts            ($uniq)
