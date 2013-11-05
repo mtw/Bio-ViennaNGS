@@ -10,7 +10,8 @@ reside within the 'scripts' folder:
 bam_split.pl: 
 Split (paired-end and single-end) BAM alignment files by strand and compute
 statistics. Optionally creates BedGraph and BigWig files for coverage
-visualization in Genome browsers.
+visualization in Genome browsers (see dependencies on third-patry tools
+below).
 
 gff2bed.pl:
 Convert RefSeq GFF3 annotation files to BED12 format. Individual BED12
@@ -46,6 +47,16 @@ This module requires these other modules and libraries:
   Bio::DB::Sam (requires samtools)
   File::Basename
   File::Temp
+
+Computation of BigWig files from BAM is accomplished via two calls to
+third-party tools internally. genomeCoverageBed from the BEDtools suite
+(http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html) is
+used to create a BedGraph coverage file at first place. In a second step,
+the BedGraph is converted to BigWig by bedGraphToBig, a UCSC Genome
+Browser utility (http://hgdownload.cse.ucsc.edu/admin/exe/).
+Make sure that both third-party utilities (genomeCoverageBed and
+bedGraphToBigWig) are available on your system.
+ 
 
 COPYRIGHT AND LICENCE
 
