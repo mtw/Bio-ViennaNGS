@@ -1,4 +1,4 @@
-ViennaNGS v0.03
+ViennaNGS v0.04
 ======================
 
 ViennaNGS is a collection of Perl Modules for Next-Generation Sequencng
@@ -28,6 +28,10 @@ newUCSCdb.pl:
 Create a new genome database for the UCSC genome browser. Based on the UCSC
 reference documentation for adding new genome databases (see
 http://genomewiki.ucsc.edu/index.php/Building_a_new_genome_database) 
+
+DEXSeq_gff2bed.pl: 
+Convert flat GFF file produced by DEXSeq's dexseq_prepare_annotation.py to
+BED6 for easy UCSC integration.
 
 
 INSTALLATION

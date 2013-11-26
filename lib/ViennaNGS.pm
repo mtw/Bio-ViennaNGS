@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-11-05 15:38:37 mtw>
+# Last changed Time-stamp: <2013-11-26 21:48:34 mtw>
 #
 #
 # ***********************************************************************
@@ -31,7 +31,7 @@ use File::Basename qw(basename fileparse);
 use File::Temp qw(tempfile);
 
 our @ISA = qw(Exporter);
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 our @EXPORT = qw(get_stranded_subsequence split_bam bam2bw);
 
 our @EXPORT_OK = ();
