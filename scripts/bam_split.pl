@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-11-05 15:02:42 mtw>
+# Last changed Time-stamp: <2013-12-04 16:24:59 mtw>
 #
 # Split BAM files according to their strands, optionally filter unique mappers
 #
@@ -61,8 +61,10 @@ die "ERROR: chrom_sizes file needed for generating BigWig coverage profiles\n"
 
 $logfile = $bam . ".bam_split.log";
 ($bam_pos,$bam_neg) = split_bam($bam,$rev,$uniq,$logfile);
-bam2bw($bam_pos,$chromsi);
-bam2bw($bam_neg,$chromsi);
+if ($bw == 1) {
+  bam2bw($bam_pos,$chromsi);
+  bam2bw($bam_neg,$chromsi);
+}
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
