@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-11-26 21:48:34 mtw>
+# Last changed Time-stamp: <2013-12-04 16:26:19 mtw>
 #
 #
 # ***********************************************************************
@@ -168,8 +168,8 @@ sub split_bam {
     }
 
     # collect statistics of SAM flags
-   $flag = $read->flag;
-   unless (exists $data{flag}{$flag}){
+    $flag = $read->flag;
+    unless (exists $data{flag}{$flag}){
       $data{flag}{$flag} = 0;
     }
     $data{flag}{$flag}++;
@@ -229,7 +229,7 @@ sub split_bam {
 }
 
 # bam2bw ( $bam,$chromsizes )
-# Generate BedGraph and BigWig coverage from BAM via two external toolsprograms:
+# Generate BedGraph and BigWig coverage from BAM via two external tools:
 # genomeCoverageBed from BEDtools
 # bedGraphToBigWig from UCSC Genome Browser tools
 sub bam2bw {
@@ -247,10 +247,10 @@ sub bam2bw {
     die "ERROR: Cannot find $chromsizes ...BigWig cannot be generated\n"; 
   }
   mkdir $outfolder;
-  
+
 $GCB_cmd = "$genomeCoverageBed -ibam $bamfile -bg -g $chromsizes > $outfolder/$bamfile.bg";
   $BGTBW_cmd = "$bedGraphToBigWig $outfolder/$bamfile.bg $chromsizes $outfolder/$bamfile.bw";
-    
+
   print STDERR ">> $GCB_cmd\n>> $BGTBW_cmd\n";
   system($GCB_cmd);
   system($BGTBW_cmd);
