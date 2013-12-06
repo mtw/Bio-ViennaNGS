@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-12-04 16:26:19 mtw>
+# Last changed Time-stamp: <2013-12-06 15:11:57 mtw>
 #
 #
 # ***********************************************************************
@@ -65,8 +65,9 @@ sub get_stranded_subsequence {
 sub split_bam {
   my %data = ();
   my @processed_bam = ();
+  my $verbose = 1;
   my ($bamfile,$reverse,$want_uniq,$log) = @_;
-  my ($bam,$sam,$bn,$path,$ext,$header,$flag);
+  my ($bam,$sam,$bn,$path,$ext,$header,$flag,$NH,$eff_strand);
   my ($bam_pos,$bam_neg,$tmpname_pos,$tmpname_neg,$bamname_pos,$bamname_neg);
   my %count_entries = (
 		       total     => 0,
@@ -99,62 +100,90 @@ sub split_bam {
     or die "Could not open bam_neg file for writing: $!";
 
   $bam_pos->header_write($header);$bam_neg->header_write($header);
+  if($reverse == 1) {  # switch +/- strand mapping
+    my $tmp = $bam_pos;$bam_pos = $bam_neg;$bam_neg = $tmp;
+  }
 
   while (my $read= $bam->read1() ) {
     my @NHval = ();
-    my $NH;
     $data{count}{total}++;
+    if($verbose == 1){print STDERR $read->query->name."\t";}
 
     # check if NH (the SAM tag used to indicate multiple mappings) is set
     if ($read->has_tag("NH")) {
       @NHval = $read->get_tag_values("NH");
       $NH = $NHval[0];
-      if ($NH == 1) {$data{count}{uniq}++;}
+      if ($NH == 1) {
+	$data{count}{uniq}++;
+	if ($verbose == 1) {print STDERR "NH:i:1\t";}
+      }
       else {
 	$data{count}{mult}++;
+	if ($verbose == 1) {print STDERR "NH:i:".$NH."\t";}
 	if ($want_uniq == 1) { # skip processing this read if it is a mutli-mapper
 	  $data{count}{skip}++;
 	  next;
 	}
       }
       $data{count}{cur}++;
-      # print $aln->query->name $NH \n";
     }
     else{
       warn "Read ".$read->query->name." does not have NH attribute\n";
     }
 
-    if($reverse == 1) {  # switch +/- strand mapping
-      my $tmp = $bam_pos;$bam_pos = $bam_neg;$bam_neg = $tmp;
-    }
+    my $strand = $read->strand;
 
     if ( $read->get_tag_values('PAIRED') ) { # paired-end
+      if($verbose == 1) {print STDERR "pe\t";}
       $data{count}{pe_alis}++;
       if ( $read->get_tag_values('FIRST_MATE') ){ # 1st mate; take its strand as granted
-	if ( $read->strand eq "1" ){
+	if($verbose == 1) {print STDERR "FIRST_MATE\t".$strand." ";}
+	if ( $strand eq "1" ){
 	  $bam_pos->write1($read);
-	  ($reverse == 0) ? $data{count}{pos}++ : $data{count}{neg}++;
+	  if ($reverse == 0){
+	    $data{count}{pos}++; $eff_strand=$strand;
+	  }
+	  else {
+	    $data{count}{neg}++; $eff_strand=-1*$strand;
+	  }
 	}
-	elsif ($read->strand eq "-1") {
+	elsif ($strand eq "-1") {
 	  $bam_neg->write1($read);
-	  ($reverse == 0) ? $data{count}{neg}++ : $data{count}{pos}++;
+	  if ($reverse == 0){
+	    $data{count}{neg}++; $eff_strand=$strand;
+	  }
+	  else {
+	    $data{count}{pos}++;$eff_strand=-1*$strand;
+	  }
 	}
 	else {die "Strand neither + nor - ...exiting!\n";}
       }
       else{ # 2nd mate; reverse strand since the fragment it belongs to is ALWAYS located
             # on the other strand
-	if ( $read->strand eq "1" ) {
+	if($verbose == 1) {print STDERR "SECOND_MATE\t".$strand." ";}
+	if ( $strand eq "1" ) {
 	  $bam_neg->write1($read);
-	  ($reverse == 0) ? $data{count}{neg}++ : $data{count}{pos}++;
+	  if ($reverse == 0){
+	    $data{count}{neg}++;$eff_strand=$strand;
+	  }
+	  else {
+	    $data{count}{pos}++; $eff_strand=-1*$strand;
+	  }
 	}
-	elsif ( $read->strand eq "-1" ) {
+	elsif ( $strand eq "-1" ) {
 	  $bam_pos->write1($read);
-	  ($reverse == 0) ? $data{count}{pos}++ : $data{count}{neg}++
+	  if ($reverse == 0){
+	    $data{count}{pos}++;$eff_strand=$strand;
+	  }
+	  else {
+	    $data{count}{neg}++;$eff_strand=-1*$strand;
+	  }
 	}
 	else {die "Strand neither + nor - ...exiting!\n";}
       }
     }
     else { # single-end
+      if($verbose == 1) {print STDERR "se\t";}
       $data{count}{se_alis}++;
       if ( $read->strand eq "1" ){
 	$bam_pos->write1($read);
@@ -166,6 +195,7 @@ sub split_bam {
       }
       else {die "Strand neither + nor - ...exiting!\n";}
     }
+    if($verbose == 1) {print STDERR "--> ".$eff_strand."\t";}
 
     # collect statistics of SAM flags
     $flag = $read->flag;
@@ -173,7 +203,7 @@ sub split_bam {
       $data{flag}{$flag} = 0;
     }
     $data{flag}{$flag}++;
-
+    if ($verbose == 1) {print STDERR "\n";}
   } # end while
 
   rename ($tmpname_pos, $bamname_pos);
