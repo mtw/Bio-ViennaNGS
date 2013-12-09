@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-12-06 12:13:20 mtw>
+# Last changed Time-stamp: <2013-12-09 14:05:50 mtw>
 #
 # Split BAM files according to their strands, optionally filter unique mappers
 #
@@ -35,18 +35,20 @@ use ViennaNGS;
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
-my ($bam_pos,$bam_neg);
-my ($rev,$uniq,$bw) = (0)x3;
+my ($bam_p,$bam_n,$bed_p,$bed_n);
+my ($rev,$wantuniq,$wantbed,$bw) = (0)x4;
 my $logfile = "bam_split.log";
 my $chromsi = undef;
 my $bam     = undef;
+my @result = ();
 
 Getopt::Long::config('no_ignore_case');
 &usage() unless GetOptions("bam=s"           => \$bam,
+			   "bed"             => sub{$wantbed = 1},
 			   "bw"              => sub{$bw = 1},
 			   "c=s"             => \$chromsi,
 			   "r"               => sub{$rev = 1},
-			   "u"               => sub{$uniq = 1},
+			   "u"               => sub{$wantuniq = 1},
 			   "log=s"           => \$logfile,
                            "-help"           => \&usage,
                            "v");
@@ -59,13 +61,22 @@ die "ERROR: no BAM file provided" unless (defined $bam);
 if ($bw == 1) {
   die "ERROR: chrom_sizes file needed for generating BigWig coverage profiles\n"
     unless (defined $chromsi);
+  unless ($wantbed == 1){
+    warn "setting -bed option; BED files required for BigWig conversion will be created\n";
+    $wantbed = 1;
+  }
 }
 
 $logfile = $bam . ".bam_split.log";
-($bam_pos,$bam_neg) = split_bam($bam,$rev,$uniq,$logfile);
+@result = split_bam($bam,$rev,$wantuniq,$wantbed,$logfile);
+$bam_p = $result[0]; # BAM file containing fragments of [+] strand
+$bam_n = $result[1]; # BAM file containing fragments of [-] strand
+$bed_p = $result[2]; # BED file containing fragments of [+] strand
+$bed_n = $result[3]; # BED file containing fragments of [-] strand
+
 if ($bw == 1) {
-  bam2bw($bam_pos,$chromsi);
-  bam2bw($bam_neg,$chromsi);
+  bam2bw($bam_p,$chromsi);
+  bam2bw($bam_n,$chromsi);
 }
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -83,11 +94,12 @@ Optionally create BedGraph and BigWig coverage for UCSC visualization
 usage: $0 -bam <BAMFILE> [options]
 program specific options:                                   default:
  -bam      <string> specify BAM file                        ($bam)
+ -bed               create BED file for each split BAM      ($wantbed)
  -bw                create BedGraph and BigWig files        ($bw)
  -c                 chrom_sizes for generating BigWigs      ($chromsi)
  -r                 reverse +/- strand mapping (due to      ($rev)
                     RNA-seq configuration)
- -u                 filter unique alignemnts                ($uniq)
+ -u                 filter unique alignemnts                ($wantuniq)
  -log      <file>   log file                                ($logfile)
  -help               print this information
 
