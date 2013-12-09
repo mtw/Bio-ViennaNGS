@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-12-09 16:18:12 mtw>
+# Last changed Time-stamp: <2013-12-09 16:48:19 mtw>
 #
 #
 # ***********************************************************************
@@ -71,7 +71,7 @@ sub split_bam {
   my ($bam,$sam,$bn,$path,$ext,$header,$flag,$NH,$eff_strand,$tmp);
   my ($bam_pos,$bam_neg,$tmp_bam_pos,$tmp_bam_neg,$bamname_pos,$bamname_neg);
   my ($bed_pos,$bed_neg,$bedname_pos,$bedname_neg);
-  my ($seq_id,$start,$stop,$strand,$target_names);
+  my ($seq_id,$start,$stop,$strand,$target_names,$id,$score);
   my %count_entries = (
 		       total     => 0,
 		       uniq      => 0,
@@ -144,6 +144,8 @@ sub split_bam {
     $seq_id = $target_names->[$read->tid];
     $start  = $read->start;
     $stop   = $read->end;
+    $id     = $read->qname;
+    $score  = 100;
 
     if ( $read->get_tag_values('PAIRED') ) { # paired-end
       if($verbose == 1) {print STDERR "pe\t";}
@@ -152,7 +154,7 @@ sub split_bam {
 	if($verbose == 1) {print STDERR "FIRST_MATE\t".$strand." ";}
 	if ( $strand eq "1" ){
 	  $bam_pos->write1($read);
-	  if ($want_bed){printf $bed_pos "%s\t%d\t%d\t",$seq_id,eval($start-1),$stop;}
+	  if ($want_bed){printf $bed_pos "%s\t%d\t%d\t%s\t%d\t",$seq_id,eval($start-1),$stop,$id,$score;}
 	  if ($reverse == 0){
 	    $data{count}{pos}++; $eff_strand=$strand;
 	    if ($want_bed){printf $bed_pos "%s\n", "+";}
@@ -164,7 +166,7 @@ sub split_bam {
 	}
 	elsif ($strand eq "-1") {
 	  $bam_neg->write1($read);
-	  if ($want_bed){printf $bed_neg "%s\t%d\t%d\t",$seq_id,eval($start-1),$stop;}
+	  if ($want_bed){printf $bed_neg "%s\t%d\t%d\t%s\t%d\t",$seq_id,eval($start-1),$stop,$id,$score;}
 	  if ($reverse == 0){
 	    $data{count}{neg}++; $eff_strand=$strand;
 	    if ($want_bed){printf $bed_neg "%s\n", "-";}
@@ -181,7 +183,7 @@ sub split_bam {
 	if($verbose == 1) {print STDERR "SECOND_MATE\t".$strand." ";}
 	if ( $strand eq "1" ) {
 	  $bam_neg->write1($read);
-	  if ($want_bed){printf $bed_neg "%s\t%d\t%d\t",$seq_id,eval($start-1),$stop;}
+	  if ($want_bed){printf $bed_neg "%s\t%d\t%d\t%s\t%d\t",$seq_id,eval($start-1),$stop,$id,$score;}
 	  if ($reverse == 0){
 	    $data{count}{neg}++;$eff_strand=$strand;
 	    if ($want_bed){printf $bed_neg "%s\n", "-";}
@@ -193,7 +195,7 @@ sub split_bam {
 	}
 	elsif ( $strand eq "-1" ) {
 	  $bam_pos->write1($read);
-	  if ($want_bed){printf $bed_pos "%s\t%d\t%d\t",$seq_id,eval($start-1),$stop;}
+	  if ($want_bed){printf $bed_pos "%s\t%d\t%d\t%s\t%d\t",$seq_id,eval($start-1),$stop,$id,$score;}
 	  if ($reverse == 0){
 	    $data{count}{pos}++;$eff_strand=$strand;
 	    if ($want_bed){printf $bed_pos "%s\n", "+";}
@@ -211,7 +213,7 @@ sub split_bam {
       $data{count}{se_alis}++;
       if ( $read->strand eq "1" ){
 	$bam_pos->write1($read);
-	if ($want_bed){printf $bed_pos "%s\t%d\t%d\t",$seq_id,eval($start-1),$stop;}
+	if ($want_bed){printf $bed_pos "%s\t%d\t%d\t%s\t%d\t",$seq_id,eval($start-1),$stop,$id,$score;}
 	if ($reverse == 0){
 	  $data{count}{pos}++;$eff_strand=$strand;
 	  if ($want_bed){printf $bed_pos "%s\n", "+";}
@@ -223,7 +225,7 @@ sub split_bam {
       }
       elsif ($read->strand eq "-1") {
 	$bam_neg->write1($read);
-	if ($want_bed){printf $bed_neg "%s\t%d\t%d\t",$seq_id,eval($start-1),$stop;}
+	if ($want_bed){printf $bed_neg "%s\t%d\t%d\t%s\t%d\t",$seq_id,eval($start-1),$stop,$id,$score;}
 	if ($reverse == 0){
 	  $data{count}{neg}++;$eff_strand=$strand;
 	  if ($want_bed){printf $bed_neg "%s\n", "-";}
