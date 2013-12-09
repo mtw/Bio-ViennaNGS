@@ -9,7 +9,7 @@ reside within the 'scripts' folder:
 
 bam_split.pl: 
 Split (paired-end and single-end) BAM alignment files by strand and compute
-statistics. Optionally creates BedGraph and BigWig files for coverage
+statistics. Optionally creates BED, BedGraph and BigWig files for coverage
 visualization in Genome browsers (see dependencies on third-patry tools
 below).
 
