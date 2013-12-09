@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-12-09 16:48:19 mtw>
+# Last changed Time-stamp: <2013-12-09 16:59:07 mtw>
 #
 #
 # ***********************************************************************
@@ -144,7 +144,7 @@ sub split_bam {
     $seq_id = $target_names->[$read->tid];
     $start  = $read->start;
     $stop   = $read->end;
-    $id     = $read->qname;
+    $id     = "x"; # $read->qname; 
     $score  = 100;
 
     if ( $read->get_tag_values('PAIRED') ) { # paired-end
