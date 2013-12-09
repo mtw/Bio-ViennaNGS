@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-12-06 15:11:57 mtw>
+# Last changed Time-stamp: <2013-12-09 16:18:12 mtw>
 #
 #
 # ***********************************************************************
@@ -59,16 +59,19 @@ sub get_stranded_subsequence {
   return $seq;
 }
 
-# split_bam ( $bam,$reverse,$want_uniq,$log )
+# split_bam ( $bam,$reverse,$want_uniq,$want_bed,$log )
 # Splits BAM file $bam according to [+] and [-] strand
 # Returns array with newly splitted BAM files
 sub split_bam {
   my %data = ();
-  my @processed_bam = ();
-  my $verbose = 1;
-  my ($bamfile,$reverse,$want_uniq,$log) = @_;
-  my ($bam,$sam,$bn,$path,$ext,$header,$flag,$NH,$eff_strand);
-  my ($bam_pos,$bam_neg,$tmpname_pos,$tmpname_neg,$bamname_pos,$bamname_neg);
+  my @NHval = ();
+  my @processed_files = ();
+  my $verbose = 0;
+  my ($bamfile,$reverse,$want_uniq,$want_bed,$log) = @_;
+  my ($bam,$sam,$bn,$path,$ext,$header,$flag,$NH,$eff_strand,$tmp);
+  my ($bam_pos,$bam_neg,$tmp_bam_pos,$tmp_bam_neg,$bamname_pos,$bamname_neg);
+  my ($bed_pos,$bed_neg,$bedname_pos,$bedname_neg);
+  my ($seq_id,$start,$stop,$strand,$target_names);
   my %count_entries = (
 		       total     => 0,
 		       uniq      => 0,
@@ -86,26 +89,33 @@ sub split_bam {
 
   open(LOG, ">", $log) or die $!;
 
-  (undef,$tmpname_pos) = tempfile('BAM_POS_XXXXXXX',UNLINK=>0);
-  (undef,$tmpname_neg) = tempfile('BAM_NEG_XXXXXXX',UNLINK=>0);
+  (undef,$tmp_bam_pos) = tempfile('BAM_POS_XXXXXXX',UNLINK=>0);
+  (undef,$tmp_bam_neg) = tempfile('BAM_NEG_XXXXXXX',UNLINK=>0);
 
   $bam = Bio::DB::Bam->open($bamfile, "r");
   $header = $bam->header;
+  $target_names = $header->target_name;
 
   ($bn,$path,$ext) = fileparse($bamfile, qr /\..*/);
   $bamname_pos = $bn.".pos".$ext; $bamname_neg = $bn.".neg".$ext;
-  $bam_pos = Bio::DB::Bam->open($tmpname_pos,'w')
+  $bam_pos = Bio::DB::Bam->open($tmp_bam_pos,'w')
     or die "Could not open bam_pos file for writing: $!";
-  $bam_neg = Bio::DB::Bam->open($tmpname_neg,'w')
+  $bam_neg = Bio::DB::Bam->open($tmp_bam_neg,'w')
     or die "Could not open bam_neg file for writing: $!";
+
+  if ($want_bed == 1){
+     $bedname_pos = $bn.".pos.bed"; $bedname_neg = $bn.".neg.bed";
+     open($bed_pos, ">", $bedname_pos); open($bed_neg, ">", $bedname_neg);
+  }
 
   $bam_pos->header_write($header);$bam_neg->header_write($header);
   if($reverse == 1) {  # switch +/- strand mapping
-    my $tmp = $bam_pos;$bam_pos = $bam_neg;$bam_neg = $tmp;
+    $tmp = $bam_pos;$bam_pos = $bam_neg;$bam_neg = $tmp;
+    $tmp = $bed_pos;$bed_pos = $bed_neg;$bed_neg = $tmp;
   }
 
   while (my $read= $bam->read1() ) {
-    my @NHval = ();
+    @NHval = ();
     $data{count}{total}++;
     if($verbose == 1){print STDERR $read->query->name."\t";}
 
@@ -127,11 +137,13 @@ sub split_bam {
       }
       $data{count}{cur}++;
     }
-    else{
-      warn "Read ".$read->query->name." does not have NH attribute\n";
-    }
+    else{ warn "Read ".$read->query->name." does not have NH attribute\n";}
 
-    my $strand = $read->strand;
+  #  print Dumper ($read->query);
+    $strand = $read->strand;
+    $seq_id = $target_names->[$read->tid];
+    $start  = $read->start;
+    $stop   = $read->end;
 
     if ( $read->get_tag_values('PAIRED') ) { # paired-end
       if($verbose == 1) {print STDERR "pe\t";}
@@ -140,20 +152,26 @@ sub split_bam {
 	if($verbose == 1) {print STDERR "FIRST_MATE\t".$strand." ";}
 	if ( $strand eq "1" ){
 	  $bam_pos->write1($read);
+	  if ($want_bed){printf $bed_pos "%s\t%d\t%d\t",$seq_id,eval($start-1),$stop;}
 	  if ($reverse == 0){
 	    $data{count}{pos}++; $eff_strand=$strand;
+	    if ($want_bed){printf $bed_pos "%s\n", "+";}
 	  }
 	  else {
 	    $data{count}{neg}++; $eff_strand=-1*$strand;
+	    if ($want_bed){printf $bed_pos "%s\n", "-";}
 	  }
 	}
 	elsif ($strand eq "-1") {
 	  $bam_neg->write1($read);
+	  if ($want_bed){printf $bed_neg "%s\t%d\t%d\t",$seq_id,eval($start-1),$stop;}
 	  if ($reverse == 0){
 	    $data{count}{neg}++; $eff_strand=$strand;
+	    if ($want_bed){printf $bed_neg "%s\n", "-";}
 	  }
 	  else {
 	    $data{count}{pos}++;$eff_strand=-1*$strand;
+	    if ($want_bed){printf $bed_neg "%s\n", "+";}
 	  }
 	}
 	else {die "Strand neither + nor - ...exiting!\n";}
@@ -163,20 +181,26 @@ sub split_bam {
 	if($verbose == 1) {print STDERR "SECOND_MATE\t".$strand." ";}
 	if ( $strand eq "1" ) {
 	  $bam_neg->write1($read);
+	  if ($want_bed){printf $bed_neg "%s\t%d\t%d\t",$seq_id,eval($start-1),$stop;}
 	  if ($reverse == 0){
 	    $data{count}{neg}++;$eff_strand=$strand;
+	    if ($want_bed){printf $bed_neg "%s\n", "-";}
 	  }
 	  else {
 	    $data{count}{pos}++; $eff_strand=-1*$strand;
+	    if ($want_bed){printf $bed_neg "%s\n", "+";}
 	  }
 	}
 	elsif ( $strand eq "-1" ) {
 	  $bam_pos->write1($read);
+	  if ($want_bed){printf $bed_pos "%s\t%d\t%d\t",$seq_id,eval($start-1),$stop;}
 	  if ($reverse == 0){
 	    $data{count}{pos}++;$eff_strand=$strand;
+	    if ($want_bed){printf $bed_pos "%s\n", "+";}
 	  }
 	  else {
 	    $data{count}{neg}++;$eff_strand=-1*$strand;
+	    if ($want_bed){printf $bed_pos "%s\n", "-";}
 	  }
 	}
 	else {die "Strand neither + nor - ...exiting!\n";}
@@ -187,11 +211,27 @@ sub split_bam {
       $data{count}{se_alis}++;
       if ( $read->strand eq "1" ){
 	$bam_pos->write1($read);
-	($reverse == 0) ? $data{count}{pos}++ : $data{count}{neg}++;
+	if ($want_bed){printf $bed_pos "%s\t%d\t%d\t",$seq_id,eval($start-1),$stop;}
+	if ($reverse == 0){
+	  $data{count}{pos}++;$eff_strand=$strand;
+	  if ($want_bed){printf $bed_pos "%s\n", "+";}
+	}
+	else {
+	  $data{count}{neg}++;$eff_strand=-1*$strand;
+	  if ($want_bed){printf $bed_pos "%s\n", "-";}
+	}
       }
       elsif ($read->strand eq "-1") {
 	$bam_neg->write1($read);
-	($reverse == 0) ? $data{count}{neg}++ : $data{count}{pos}++;
+	if ($want_bed){printf $bed_neg "%s\t%d\t%d\t",$seq_id,eval($start-1),$stop;}
+	if ($reverse == 0){
+	  $data{count}{neg}++;$eff_strand=$strand;
+	  if ($want_bed){printf $bed_neg "%s\n", "-";}
+	}
+	else {
+	  $data{count}{pos}++;$eff_strand=-1*$strand;
+	  if ($want_bed){printf $bed_neg "%s\n", "+";}
+	}
       }
       else {die "Strand neither + nor - ...exiting!\n";}
     }
@@ -206,9 +246,12 @@ sub split_bam {
     if ($verbose == 1) {print STDERR "\n";}
   } # end while
 
-  rename ($tmpname_pos, $bamname_pos);
-  rename ($tmpname_neg, $bamname_neg);
-  push (@processed_bam, ($bamname_pos,$bamname_neg));
+  rename ($tmp_bam_pos, $bamname_pos);
+  rename ($tmp_bam_neg, $bamname_neg);
+  push (@processed_files, ($bamname_pos,$bamname_neg));
+  if ($want_bed){
+    push (@processed_files, ($bedname_pos,$bedname_neg))
+  }
 
   # error checks
   unless ($data{count}{pe_alis} + $data{count}{se_alis} == $data{count}{cur}) {
@@ -255,7 +298,7 @@ sub split_bam {
   printf LOG "#-----------------------------------------------------------------\n";
   printf LOG "Dumper output:\n". Dumper(\%data);
   close(LOG);
-  return @processed_bam;
+  return @processed_files;
 }
 
 # bam2bw ( $bam,$chromsizes )
@@ -317,18 +360,33 @@ Bio::PrimarySeq::Fasta object, which obeys the Bio::PrimarySeqI
 conventions. To recover the entire raw DNA or protein sequence,
 call $object->seq(). $strand is 1 or -1.
 
-=head2 split_bam($bam,$reverse,$want_uniq,$log)
+=head2 split_bam($bam,$reverse,$want_uniq,$want_bed,$log)
 
-Splits BAM file $bam according to [+] and [-] strand. $reverse and
-$want_uniq are switches with values of 0 or 1, triggering forced
-reversion of strand mapping (due to RNA-seq protocol constraints) and
-filtering os unique mappers (identified via NH:i:1 SAM argument),
-respectively. NOTE: Filtering of unique mappers is only safe for
-single-end experiments; In paired-end experiments, read and mate are
-treated separately, thus allowing for scenarios where eg. one read is
-a multi-mapper, whereas its associate mate is a unique mapper,
-resulting in an ambiguous alignment of the entire fragment. $log hold
-the name (and path) of the log file.
+Splits BAM file $bam according to [+] and [-] strand. $reverse,
+$want_uniq and $want_bed are switches with values of 0 or 1,
+triggering forced reversion of strand mapping (due to RNA-seq protocol
+constraints), filtering of unique mappers (identified via NH:i:1 SAM
+argument), and forced output of a BED file corresponding to
+strand-specific mapping, respectively. $log holds name and path of the
+log file.
+
+Strand-splitting is done in a way that in paired-end alignments, FIRST
+and SECOND mates (reads) are treated as _one_ fragment, ie FIRST_MATE
+reads determine the strand, while SECOND_MATE reads are assigned the
+opposite strand per definitionem. (This also holds if the reads are
+not mapped in proper pairs and even if ther is no mapping partner at
+all)
+
+Sometimes the library preparation protocol causes inversion of the
+read assignment (with respect to the underlying annotation). In those
+cases, the natural mapping of the reads can be obtained by the
+$reverse flag.
+
+NOTE: Filtering of unique mappers is only safe for single-end
+experiments; In paired-end experiments, read and mate are treated
+separately, thus allowing for scenarios where eg. one read is a
+multi-mapper, whereas its associate mate is a unique mapper, resulting
+in an ambiguous alignment of the entire fragment.
 
 =head2 bam2bw($bam,$chromsizes)
 
