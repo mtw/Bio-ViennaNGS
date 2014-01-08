@@ -1,1 +1,6 @@
+Example calls to newUCSCdb.pl:
+------------------------------
+
 ~/Perl/ViennaNGS-AnnoC/scripts/newUCSCdb.pl -db eColiMC4100 -fa NC_012759.fna -tax 595496 -genome "Escherichia coli MC4100" -assembly "2013-09-09" -pos "NC_012759.1:230000-867000" -key 204 -sname "Escherichia coli BW2952 uid 59391" -source "based on RefSeq NC_012759.1" -clade "bacteria" -h
+
+~/Perl/ViennaNGS/scripts/newUCSCdb.pl -db stenMaltK279a -tax 522373 -genome "Stenotrophomonas maltophilia K279a" -assembly "2008-06-10" -pos "NC_010943.1: 100000-200000" -fa NC_010943.fna -sname "Stenotrophomonas maltophilia K279a uid 61647" -key 223 -source "based on RefSeq NC_010943.1" -clade "bacteria" -h
