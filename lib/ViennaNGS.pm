@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-12-09 16:59:07 mtw>
+# Last changed Time-stamp: <2014-04-03 12:55:16 mtw>
 #
 #
 # ***********************************************************************
 # *  Copyright notice
 # *
-# *  Copyright 2013 Michael Thomas Wolfinger <michael@wolfinger.eu>
+# *  Copyright 2014 Michael Thomas Wolfinger <michael@wolfinger.eu>
 # *  All rights reserved
 # *
 # * This library is free software; you can redistribute it and/or modify
@@ -31,8 +31,8 @@ use File::Basename qw(basename fileparse);
 use File::Temp qw(tempfile);
 
 our @ISA = qw(Exporter);
-our $VERSION = '0.04';
-our @EXPORT = qw(get_stranded_subsequence split_bam bam2bw);
+our $VERSION = '0.05';
+our @EXPORT = qw(get_stranded_subsequence split_bam bam2bw bed2bw);
 
 our @EXPORT_OK = ();
 
@@ -45,13 +45,13 @@ our @EXPORT_OK = ();
 #^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-# get_stranded_subsequence ($obj,$start,$stop,$path)
+# get_stranded_subsequence ($obj,$start,$stop,$strand)
 # retrieve RNA/DNA sequence from a Bio::PrimarySeqI /
 # Bio::PrimarySeq::Fasta object
 sub get_stranded_subsequence {
   my ($o,$start,$end,$strand) = @_;
   my $seq = $o->subseq($start => $end);
-  if ($strand == -1) {
+  if ($strand eq '-1' || $strand eq '-') {
     my $rc = revcom($seq);
     $seq = $rc->seq();
   }
@@ -59,7 +59,7 @@ sub get_stranded_subsequence {
   return $seq;
 }
 
-# split_bam ( $bam,$reverse,$want_uniq,$want_bed,$log )
+# split_bam ( $bam,$reverse,$want_uniq,$want_bed,$dest_dir,$log )
 # Splits BAM file $bam according to [+] and [-] strand
 # Returns array with newly splitted BAM files
 sub split_bam {
@@ -67,7 +67,7 @@ sub split_bam {
   my @NHval = ();
   my @processed_files = ();
   my $verbose = 0;
-  my ($bamfile,$reverse,$want_uniq,$want_bed,$log) = @_;
+  my ($bamfile,$reverse,$want_uniq,$want_bed,$dest_dir,$log) = @_;
   my ($bam,$sam,$bn,$path,$ext,$header,$flag,$NH,$eff_strand,$tmp);
   my ($bam_pos,$bam_neg,$tmp_bam_pos,$tmp_bam_neg,$bamname_pos,$bamname_neg);
   my ($bed_pos,$bed_neg,$bedname_pos,$bedname_neg);
@@ -87,6 +87,9 @@ sub split_bam {
   $data{count} = \%count_entries;
   $data{flag} = ();
 
+  die("ERROR: $bamfile does not exist\n") unless (-e $bamfile);
+  die("ERROR: $dest_dir does not exist\n") unless (-d $dest_dir);
+
   open(LOG, ">", $log) or die $!;
 
   (undef,$tmp_bam_pos) = tempfile('BAM_POS_XXXXXXX',UNLINK=>0);
@@ -97,14 +100,17 @@ sub split_bam {
   $target_names = $header->target_name;
 
   ($bn,$path,$ext) = fileparse($bamfile, qr /\..*/);
-  $bamname_pos = $bn.".pos".$ext; $bamname_neg = $bn.".neg".$ext;
+  unless ($dest_dir =~ /\/$/){$dest_dir .= "/";}
+  $bamname_pos = $dest_dir.$bn.".pos".$ext;
+  $bamname_neg = $dest_dir.$bn.".neg".$ext;
   $bam_pos = Bio::DB::Bam->open($tmp_bam_pos,'w')
     or die "Could not open bam_pos file for writing: $!";
   $bam_neg = Bio::DB::Bam->open($tmp_bam_neg,'w')
     or die "Could not open bam_neg file for writing: $!";
 
   if ($want_bed == 1){
-     $bedname_pos = $bn.".pos.bed"; $bedname_neg = $bn.".neg.bed";
+     $bedname_pos = $dest_dir.$bn.".pos.bed";
+     $bedname_neg = $dest_dir.$bn.".neg.bed";
      open($bed_pos, ">", $bedname_pos); open($bed_neg, ">", $bedname_neg);
   }
 
@@ -304,7 +310,7 @@ sub split_bam {
 }
 
 # bam2bw ( $bam,$chromsizes )
-# Generate BedGraph and BigWig coverage from BAM via two external tools:
+# Generate BedGraph and BigWig coverage from BAM via two third-party tools:
 # genomeCoverageBed from BEDtools
 # bedGraphToBigWig from UCSC Genome Browser tools
 sub bam2bw {
@@ -319,16 +325,55 @@ sub bam2bw {
     die "ERROR: Cannot find $bamfile\n";
   }
   unless (-e $chromsizes) {
-    die "ERROR: Cannot find $chromsizes ...BigWig cannot be generated\n"; 
+    die "ERROR: Cannot find $chromsizes ...BigWig cannot be generated\n";
   }
   mkdir $outfolder;
 
-$GCB_cmd = "$genomeCoverageBed -ibam $bamfile -bg -g $chromsizes > $outfolder/$bamfile.bg";
+  $GCB_cmd = "$genomeCoverageBed -bg -ibam $bamfile -g $chromsizes > $outfolder/$bamfile.bg";
   $BGTBW_cmd = "$bedGraphToBigWig $outfolder/$bamfile.bg $chromsizes $outfolder/$bamfile.bw";
 
   print STDERR ">> $GCB_cmd\n>> $BGTBW_cmd\n";
   system($GCB_cmd);
   system($BGTBW_cmd);
+}
+
+# bed2bw ($bed,$chromsies,$strand,$dest_dir)
+# Generate BedGraph and stranded BigWig coberage from BED via two third-party tools:
+# genomeCoverageBed from BEDtools
+# bedGraphToBigWig from UCSC Genome Browser tools
+sub bed2bw {
+  my ($bedfile,$chromsizes,$strand,$dest_dir) = @_;
+  my ($bn,$path,$ext,$cmd);
+  my $genomeCoverageBed = `which genomeCoverageBed`; chomp($genomeCoverageBed);
+  my $bedGraphToBigWig = `which bedGraphToBigWig`; chomp($bedGraphToBigWig);
+  my $awk = `which awk`; chomp($awk);
+
+  print STDERR "##\$bedfile: $bedfile\n##\$chromsizes: $chromsizes\n##\$dest_dir: $dest_dir\n";
+  unless (-e $bedfile) {
+    die "ERROR: Cannot find $bedfile\n";
+  }
+  unless (-e $chromsizes) {
+    die "ERROR: Cannot find $chromsizes ...BigWig cannot be generated\n";
+  }
+  unless (-d $dest_dir){
+    die "ERROR: $dest_dir does not exist\n";
+  }
+
+  ($bn,$path,$ext) = fileparse($bedfile, qr /\..*/);
+
+  if ($strand eq "+"){
+    $cmd = "$genomeCoverageBed -bg -i $bedfile -g $chromsizes -strand $strand > $dest_dir/$bn.pos.bg";
+    $cmd .= " && ";
+    $cmd .= "$bedGraphToBigWig $dest_dir/$bn.pos.bg $chromsizes $dest_dir/$bn.pos.bw";
+  }
+  else{
+    $cmd = "$genomeCoverageBed -bg -i $bedfile -g $chromsizes -strand $strand > $dest_dir/$bn.neg.bg.1";
+    $cmd .= " && cat $dest_dir/$bn.neg.bg.1 | $awk \'{ \$4 = - \$4 ; print \$0 }\' > $dest_dir/$bn.neg.bg";
+    $cmd .= " && $bedGraphToBigWig $dest_dir/$bn.neg.bg $chromsizes  $dest_dir/$bn.neg.bw";
+    unlink("$dest_dir/$bn.neg.bg.1");
+  }
+  print STDERR ">>$cmd\n";
+  system($cmd);
 }
 
 1;
@@ -351,7 +396,9 @@ ViennaNGS is a collection of subroutines often used for NGS data analysis.
 =head1 EXPORT
 
 Routines: get_stranded_subsequence($obj,$start,$stop,$path)
-          split_bam($bam,$reverse,$want_uniq,$log)
+          split_bam($bam,$reverse,$want_uniq,$dest_dir,$log)
+          bam2bw($bam,$chromsizes)
+          bed2bw($bed,$chromsizes,$strand,$dest_dir)
 
 Variables: none
 
@@ -362,7 +409,7 @@ Bio::PrimarySeq::Fasta object, which obeys the Bio::PrimarySeqI
 conventions. To recover the entire raw DNA or protein sequence,
 call $object->seq(). $strand is 1 or -1.
 
-=head2 split_bam($bam,$reverse,$want_uniq,$want_bed,$log)
+=head2 split_bam($bam,$reverse,$want_uniq,$dest_dir,$log)
 
 Splits BAM file $bam according to [+] and [-] strand. $reverse,
 $want_uniq and $want_bed are switches with values of 0 or 1,
@@ -401,6 +448,19 @@ http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html)
 and bedGraphToBigWig (from the UCSC Genome Browser, see
 http://hgdownload.cse.ucsc.edu/admin/exe/).
 
+=head2 bed2bw($bed,$chromsizes,$strand,$dest_dir)
+
+Creates BedGraph and stranded BigWig coverage profiles from BED
+files. $chromsizes is the chromosome.sizes files, $strand is either
+"+" or "-", and $dest_dir contains the output path for results.
+
+Stranded BigWigs can easily be visualized via TrackHubs in the
+UCSC Genome Browser. Internally, the conversion is accomplished by two
+third-party applications: genomeCoverageBed (from BEDtools, see
+http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html)
+and bedGraphToBigWig (from the UCSC Genome Browser, see
+http://hgdownload.cse.ucsc.edu/admin/exe/).
+
 =head1 SEE ALSO
 
 perldoc ViennaNGS::AnnoC
@@ -411,7 +471,7 @@ Michael Thomas Wolfinger, E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2013 by Michael Thomas Wolfinger
+Copyright (C) 2014 by Michael Thomas Wolfinger
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.12.4 or,

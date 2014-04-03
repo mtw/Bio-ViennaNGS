@@ -1,4 +1,4 @@
-ViennaNGS v0.04
+ViennaNGS v0.05
 ======================
 
 ViennaNGS is a collection of Perl Modules for Next-Generation Sequencng
@@ -64,7 +64,7 @@ bedGraphToBigWig) are available on your system.
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2013 by Michael Thomas Wolfinger <michael@wolfinger.eu>
+Copyright (C) 2014 Michael Thomas Wolfinger <michael@wolfinger.eu>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.12.4 or,

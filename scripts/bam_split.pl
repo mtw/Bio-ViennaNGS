@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-12-09 14:05:50 mtw>
+# Last changed Time-stamp: <2014-04-03 12:42:46 mtw>
 #
 # Split BAM files according to their strands, optionally filter unique mappers
 #
@@ -30,23 +30,26 @@ use strict;
 use warnings;
 use Getopt::Long;
 use Data::Dumper;
+use File::Basename;
 use ViennaNGS;
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
-my ($bam_p,$bam_n,$bed_p,$bed_n);
+my ($bam_p,$bam_n,$bed_p,$bed_n,$basename,$bamdir,$bamext,$cmd);
 my ($rev,$wantuniq,$wantbed,$bw) = (0)x4;
 my $logfile = "bam_split.log";
 my $chromsi = undef;
-my $bam     = undef;
+my $fullbam = undef;
+my $destdir = "./";
 my @result = ();
 
 Getopt::Long::config('no_ignore_case');
-&usage() unless GetOptions("bam=s"           => \$bam,
+&usage() unless GetOptions("bam=s"           => \$fullbam,
 			   "bed"             => sub{$wantbed = 1},
 			   "bw"              => sub{$bw = 1},
 			   "c=s"             => \$chromsi,
+			   "o=s"             => \$destdir,
 			   "r"               => sub{$rev = 1},
 			   "u"               => sub{$wantuniq = 1},
 			   "log=s"           => \$logfile,
@@ -57,7 +60,7 @@ Getopt::Long::config('no_ignore_case');
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-die "ERROR: no BAM file provided" unless (defined $bam);
+die "ERROR: no BAM file provided" unless (defined $fullbam);
 if ($bw == 1) {
   die "ERROR: chrom_sizes file needed for generating BigWig coverage profiles\n"
     unless (defined $chromsi);
@@ -66,17 +69,23 @@ if ($bw == 1) {
     $wantbed = 1;
   }
 }
+unless ($destdir =~ /\/$/){$destdir .= "/";}
+unless (-d $destdir){$cmd = "mkdir -p $destdir"; system($cmd);}
+unless ($fullbam =~ /^\//){$fullbam = "./".$fullbam;}
+($basename,$bamdir,$bamext) = fileparse($fullbam,qr/\.[^.]*/);
 
-$logfile = $bam . ".bam_split.log";
-@result = split_bam($bam,$rev,$wantuniq,$wantbed,$logfile);
+$logfile = $destdir.$basename.".bam_split.log";
+@result = split_bam($fullbam,$rev,$wantuniq,$wantbed,$destdir,$logfile);
 $bam_p = $result[0]; # BAM file containing fragments of [+] strand
 $bam_n = $result[1]; # BAM file containing fragments of [-] strand
 $bed_p = $result[2]; # BED file containing fragments of [+] strand
 $bed_n = $result[3]; # BED file containing fragments of [-] strand
 
 if ($bw == 1) {
-  bam2bw($bam_p,$chromsi);
-  bam2bw($bam_n,$chromsi);
+  $destdir = $destdir."vis";
+  $cmd = "mkdir -p $destdir"; system($cmd);
+  bed2bw($bed_p,$chromsi,"+",$destdir);
+  bed2bw($bed_n,$chromsi,"-",$destdir);
 }
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -89,19 +98,20 @@ sub usage {
 bam_split.pl:  Split a BAM file according to strands.
 
 Optionally filter unique alignments by inspecting NH:i SAM attribute
-Optionally create BedGraph and BigWig coverage for UCSC visualization
+Optionally create BedGraph and stranded BigWig coverage for UCSC visualization
 
 usage: $0 -bam <BAMFILE> [options]
 program specific options:                                   default:
- -bam      <string> specify BAM file                        ($bam)
- -bed               create BED file for each split BAM      ($wantbed)
- -bw                create BedGraph and BigWig files        ($bw)
- -c                 chrom_sizes for generating BigWigs      ($chromsi)
- -r                 reverse +/- strand mapping (due to      ($rev)
-                    RNA-seq configuration)
- -u                 filter unique alignemnts                ($wantuniq)
- -log      <file>   log file                                ($logfile)
- -help               print this information
+ -bam   <file>   specify BAM file                           ($fullbam)
+ -bed            create BED file for each split BAM         ($wantbed)
+ -bw             create BedGraph and BigWig files           ($bw)
+ -c     <file>   chrom_sizes for generating BigWigs         ($chromsi)
+ -o     <path>   output directory                           ($destdir)
+ -r              reverse +/- strand mapping (according      ($rev)
+                 to RNA-seq library preparation protocol)
+ -u              filter unique alignemnts                   ($wantuniq)
+ -log   <file>   log file                                   ($logfile)
+ -help           print this information
 
 EOF
 exit;
