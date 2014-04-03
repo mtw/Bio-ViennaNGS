@@ -16,3 +16,8 @@ Revision history for Perl extension ViennaNGS.
 0.04  Tue Nov 26 2013
 	- added scripts/DEXSeq_gff2bed.pl
 	- updated README
+
+0.05  Thu Apr 03 2014
+	- added bed2bw()
+	- updated and extended bam_split()
+	- updated scripts/bam_split.pl
