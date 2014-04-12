@@ -1,10 +1,12 @@
 #!/usr/bin/env perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-04-11 18:36:56 mtw>
+# Last changed Time-stamp: <2014-04-12 12:49:09 mtw>
 #
-# Normalize (raw) read counts in multicov format to TPM / RPKM
+# Compute normalized expression data in TPM/RPKM from (raw) read
+# counts in multicov.
+# TPM reference: Wagner et al, Theory Biosci. 131(4), pp 281-85 (2012)
 #
-# usage: normalize_multicov.pl
+# usage: normalize_multicov.pl -i file.multicov -rl 50 -o /output/path
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -27,7 +29,6 @@
 # *
 # *  This copyright notice MUST APPEAR in all copies of the script!
 # ***********************************************************************
-#
 
 use strict;
 use warnings;
