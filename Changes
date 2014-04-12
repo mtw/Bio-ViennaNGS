@@ -24,3 +24,8 @@ Revision history for Perl extension ViennaNGS.
 
 0.06
 	- adjusted perl shebang in /scripts
+	- added normalize_multicov.pl in /scripts. For that purpose:
+	- added computeTPM()
+	- added parse_multicov()
+	- added write_multicov()
+	- added featCount_data() accessor for @featCount AoHoH 
