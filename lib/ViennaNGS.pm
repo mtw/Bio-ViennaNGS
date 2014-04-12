@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-04-03 12:55:16 mtw>
+# Last changed Time-stamp: <2014-04-12 12:30:02 mtw>
 #
 #
 # ***********************************************************************
@@ -22,6 +22,7 @@
 package ViennaNGS;
 
 use Exporter;
+use version; our $VERSION = qv('0.06_1');
 use strict;
 use warnings;
 use Bio::Perl;
@@ -30,20 +31,24 @@ use Data::Dumper;
 use File::Basename qw(basename fileparse);
 use File::Temp qw(tempfile);
 
-our @ISA = qw(Exporter);
-our $VERSION = '0.05';
-our @EXPORT = qw(get_stranded_subsequence split_bam bam2bw bed2bw);
-
-our @EXPORT_OK = ();
+our @ISA       = qw(Exporter);
+our @EXPORT    = qw(get_stranded_subsequence split_bam bam2bw bed2bw totalreads
+		    computeTPM computeRPKM);
+our @EXPORT_OK = qw(featCount_data parse_multicov write_multicov);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
+our @featCount = ();
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
+
+sub featCount_data {
+  return \@featCount;
+}
 
 # get_stranded_subsequence ($obj,$start,$stop,$strand)
 # retrieve RNA/DNA sequence from a Bio::PrimarySeqI /
@@ -350,13 +355,13 @@ sub bed2bw {
 
   print STDERR "##\$bedfile: $bedfile\n##\$chromsizes: $chromsizes\n##\$dest_dir: $dest_dir\n";
   unless (-e $bedfile) {
-    die "ERROR: Cannot find $bedfile\n";
+    die "ERROR [ViennaNGS::bed2bw]: Cannot find $bedfile\n";
   }
   unless (-e $chromsizes) {
-    die "ERROR: Cannot find $chromsizes ...BigWig cannot be generated\n";
+    die "ERROR [ViennaNGS::bed2bw]: Cannot find $chromsizes ...BigWig cannot be generated\n";
   }
   unless (-d $dest_dir){
-    die "ERROR: $dest_dir does not exist\n";
+    die "ERROR [ViennaNGS::bed2bw]: $dest_dir does not exist\n";
   }
 
   ($bn,$path,$ext) = fileparse($bedfile, qr /\..*/);
@@ -376,14 +381,127 @@ sub bed2bw {
   system($cmd);
 }
 
+# computeTPM($featCount_sample,$readlength)
+# compute TPM values for a HoH data structure (eg. a single multicov
+# or HTSeq-count column)
+sub computeTPM {
+  my ($featCount_sample,$rl) = @_;
+  my ($TPM,$T,$totalTPM) = (0)x3;
+  my ($i,$features,$meanTPM);
+
+  $features = keys %$featCount_sample; # of of features in hash
+
+  # iterate through $featCount_sample twice:
+  # 1. for computing T (denominator in TPM formula)
+  foreach $i (keys %$featCount_sample){
+    $T += ($$featCount_sample{$i}{count} * $rl)/($$featCount_sample{$i}{len});
+  }
+  # 2. for computng actual TPM values
+  foreach $i (keys %$featCount_sample){
+    $TPM = 1000000 * $$featCount_sample{$i}{count} * $rl/($$featCount_sample{$i}{len} * $T);
+    $$featCount_sample{$i}{TPM} = $TPM;
+    $totalTPM += $TPM;
+  }
+  $meanTPM = $totalTPM/$features;
+  # print "totalTPM=$totalTPM | meanTPM=$meanTPM\n";
+  return $meanTPM;
+}
+
+# parse_multicov ($multicov)
+# Parse bedtools multicov (extended BED6) into an Array of Hash of
+# Hashes
+sub parse_multicov {
+  my ($file) = @_;
+  my @mcData = ();
+  my ($mcSamples,$i);
+
+  unless (-e $file){die "ERROR: multicov file $file not available\n";}
+  open (MULTICOV_IN, "< $file") or die $!;
+
+  while (<MULTICOV_IN>){
+    chomp;
+    @mcData = split(/\t/); # 0:chr|1:start|2:end|3:name|4:score|5:strand
+    $mcSamples = (scalar @mcData)-6; # multicov extends BED6
+    #print "$_\n";
+    for ($i=0;$i<$mcSamples;$i++){
+      $featCount[$i]{$mcData[3]} = {
+				    chr    => $mcData[0],
+				    start  => $mcData[1],
+				    end    => $mcData[2],
+				    name   => $mcData[3],
+				    score  => $mcData[4],
+				    strand => $mcData[5],
+				    len    => eval($mcData[2]-$mcData[1]),
+				    count  => $mcData[eval(6+$i)],
+				   }
+    }
+    #print Dumper(@mcData);
+  }
+  close(MULTICOV_IN);
+  return $mcSamples;
+}
+
+# write_multicov($item,$dest_dir,$base_name)
+# Write a bedtools multicov (extended BED6) file based from data from @featCount
+sub write_multicov {
+  my ($item,$dest_dir,$base_name) = @_;
+  my ($outfile,$mcSamples,$nrFeatures,$feat,$i);
+
+  unless (-d $dest_dir){die "ERROR [ViennaNGS::write_multicov]: $dest_dir does not exist\n";}
+  $outfile = $dest_dir.$base_name.".".$item.".multicov.csv";
+  open (MULTICOV_OUT, "> $outfile") or die $!;
+
+  $mcSamples = scalar @featCount; # of samples in %{$featCount}
+  $nrFeatures = scalar keys %{$featCount[1]}; # of keys in %{$featCount}[1]
+  #print "=====> write_multicov: writing multicov file $outfile with $nrFeatures lines and $mcSamples conditions\n";
+
+  # check whether each column in %$featCount has the same number of entries
+  for($i=0;$i<$mcSamples;$i++){
+    my $fc = scalar keys %{$featCount[$i]}; # of keys in %{$featCount}
+    #print "condition $i => $fc keys\n";
+    unless($nrFeatures == $fc){
+      die "ERROR [ViennaNGS::write_multicov]: unequal element count in \%\$featCount\nExpected $nrFeatures have $fc in condition $i\n";
+    }
+  }
+
+  foreach $feat (keys  %{$featCount[1]}){
+    my @mcLine = ();
+    # process standard BED6 fields first
+    push @mcLine, (${$featCount[1]}{$feat}->{chr},
+		   ${$featCount[1]}{$feat}->{start},
+		   ${$featCount[1]}{$feat}->{end},
+		   ${$featCount[1]}{$feat}->{name},
+		   ${$featCount[1]}{$feat}->{score},
+		   ${$featCount[1]}{$feat}->{strand});
+    # process multicov values for all samples
+
+    for($i=0;$i<$mcSamples;$i++){
+     # print "------------>  ";  print "processing $i th condition ";  print "<-----------\n";
+      unless (defined ${$featCount[$i]}{$feat}){die "Could not find item $feat in mcSample $i\n";}
+      push @mcLine, ${$featCount[$i]}{$feat}->{$item};
+
+    }
+    #print Dumper(\@mcLine);
+    print MULTICOV_OUT join("\t",@mcLine)."\n";
+  }
+  close(MULTICOV_OUT);
+}
+
+sub totalreads {
+  return 1;
+}
+
+sub computeRPKM {
+  return 1;
+}
+
 1;
 __END__
 
 
 =head1 NAME
 
-ViennaNGS - Perl extension for analysis of Next-Generation Sequencing
-(NGS) data.
+ViennaNGS - Perl extension for Next-Generation Sequencing analysis.
 
 =head1 SYNOPSIS
 
@@ -391,7 +509,8 @@ ViennaNGS - Perl extension for analysis of Next-Generation Sequencing
 
 =head1 DESCRIPTION
 
-ViennaNGS is a collection of subroutines often used for NGS data analysis.
+ViennaNGS is a collection of subroutines often used for
+Next-Generation Sequencing (NGS) data analysis.
 
 =head1 EXPORT
 
@@ -439,9 +558,9 @@ in an ambiguous alignment of the entire fragment.
 
 =head2 bam2bw($bam,$chromsizes)
 
-Creates BedGraph and BigWig coverage files from BAM. These can easily
-be visualized as TrackHubs within the UCSC Genome Browser (see
-http://genome.ucsc.edu/goldenPath/help/hgTrackHubHelp.html). Internally,
+Creates BedGraph and BigWig coverage profiles from BAM files. These
+can easily be visualized as TrackHubs within the UCSC Genome Browser
+(http://genome.ucsc.edu/goldenPath/help/hgTrackHubHelp.html). Internally,
 the conversion is accomplished by two third-party applications:
 genomeCoverageBed (from BEDtools, see
 http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html)
@@ -460,6 +579,37 @@ third-party applications: genomeCoverageBed (from BEDtools, see
 http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html)
 and bedGraphToBigWig (from the UCSC Genome Browser, see
 http://hgdownload.cse.ucsc.edu/admin/exe/).
+
+=head2 computeTPM($featCount_sample,$rl)
+
+Computes expression in Transcript per Million (TPM) [Wagner
+et.al. Theory Biosci. (2012)]. $featCount_sample is a reference to a
+HoH data straucture where keys are feature names and values hold a
+hash that must at least contain length and raw read
+counts. Practically, $featCount_sample is represented by _one_ element
+of @featCount, which is populated from a multicov file by
+parse_multicov(). $rl is the read length of the sequencing run.
+
+Returns the mean TPM of the processed sample, which is invariant among
+samples. (TPM models relative molar concentration and thus fulfills
+the invariant average criterion.)
+
+=head2 parse_multicov($file)
+
+Parse a bedtools multicov (multiBamCov) file, i.e. an extended BED6
+file, into an Array of Hash of Hashes data structure
+(@featCount). $file is the input file. Returns the number of samples
+present in the multicov file, ie. the numner of columns extending the
+canonical BED6 columns in the input multicov file.
+
+=head write_multicov($item,$dest_dir,$base_name)
+
+Write @featCount data to a bedtools multicov (multiBamCov)-type
+file. $item specifies the type of information from @featCount HoH
+entries, e.g. TPM or RPKM. These values must have been computed and
+inserted into @featCount beforehand by e.g. computeTPM(). $dest_dir
+gives the absolute path and $base_name the basename (will be extended by
+$item.csv) of the output file.
 
 =head1 SEE ALSO
 
