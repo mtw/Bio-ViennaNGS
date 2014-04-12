@@ -33,6 +33,10 @@ DEXSeq_gff2bed.pl:
 Convert flat GFF file produced by DEXSeq's dexseq_prepare_annotation.py to
 BED6 for easy UCSC integration.
 
+rormalize_multicov.pl:
+Compute normalized expression data in TPM/RPKM from (raw) read counts in
+bedtools multicov format. 
+TPM reference: Wagner et al, Theory Biosci. 131(4), pp 281-85 (2012)
 
 INSTALLATION
 
