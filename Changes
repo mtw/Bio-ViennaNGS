@@ -23,7 +23,7 @@ Revision history for Perl extension ViennaNGS.
 	- updated scripts/bam_split.pl
 	- adjusted perl shebang in /scripts
 
-0.06
+0.06_1
 	- adjusted perl shebang in /scripts
 	- added normalize_multicov.pl in /scripts. For that purpose:
 	- added computeTPM()
