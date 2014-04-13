@@ -21,6 +21,7 @@ Revision history for Perl extension ViennaNGS.
 	- added bed2bw()
 	- updated and extended bam_split()
 	- updated scripts/bam_split.pl
+	- adjusted perl shebang in /scripts
 
 0.06
 	- adjusted perl shebang in /scripts

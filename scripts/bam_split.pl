@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-04-03 12:42:46 mtw>
+# Last changed Time-stamp: <2014-04-04 10:10:39 mtw>
 #
 # Split BAM files according to their strands, optionally filter unique mappers
 #
@@ -71,7 +71,7 @@ if ($bw == 1) {
 }
 unless ($destdir =~ /\/$/){$destdir .= "/";}
 unless (-d $destdir){$cmd = "mkdir -p $destdir"; system($cmd);}
-unless ($fullbam =~ /^\//){$fullbam = "./".$fullbam;}
+unless ($fullbam =~ /^\// || $fullbam =~ /\.\//){$fullbam = "./".$fullbam;}
 ($basename,$bamdir,$bamext) = fileparse($fullbam,qr/\.[^.]*/);
 
 $logfile = $destdir.$basename.".bam_split.log";
