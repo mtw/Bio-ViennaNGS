@@ -9,9 +9,9 @@ reside within the 'scripts' folder:
 
 bam_split.pl: 
 Split (paired-end and single-end) BAM alignment files by strand and compute
-statistics. Optionally creates BED, BedGraph and BigWig files for coverage
-visualization in Genome browsers (see dependencies on third-patry tools
-below).
+statistics. Optionally create BED output, as well as normalized bedGraph
+and bigWig files for coverage visualization in genome browsers (see
+dependencies on third-patry tools below).
 
 gff2bed.pl:
 Convert RefSeq GFF3 annotation files to BED12 format. Individual BED12
