@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-04-17 23:54:40 mtw>
+# Last changed Time-stamp: <2014-04-18 00:01:03 mtw>
 #
 #
 # ***********************************************************************
@@ -355,7 +355,7 @@ sub bed2bw {
   my $bedGraphToBigWig = `which bedGraphToBigWig`; chomp($bedGraphToBigWig);
   my $awk = `which awk`; chomp($awk);
 
-  open(LOG, ">", $log) or die $!;
+  open(LOG, ">>", $log) or die $!;
   print LOG "LOG [ViennaNGS::bed2bw()] \$bedfile: $bedfile -- \$chromsizes: $chromsizes --\$dest_dir: $dest_dir\n";
 
   die ("ERROR [ViennaNGS::bed2bw()] Cannot find $bedfile\n") unless (-e $bedfile);
@@ -378,7 +378,7 @@ sub bed2bw {
     $cmd .= " && cat $dest_dir/$bn.neg.bg.1 | $awk \'{ \$4 = - \$4 ; print \$0 }\' > $dest_dir/$bn.neg.bg";
     $cmd .= " && $bedGraphToBigWig $dest_dir/$bn.neg.bg $chromsizes  $dest_dir/$bn.neg.bw";
   }
-  print LOG ">>$cmd\n";
+  print LOG "LOG [ViennaNGS::bed2bw()] $cmd\n";
   system($cmd);
   if ($strand eq "+"){unlink ("$dest_dir/$bn.pos.bg");} # rm intermediate bedGraph files
   else{ unlink("$dest_dir/$bn.neg.bg"); unlink("$dest_dir/$bn.neg.bg.1");}
