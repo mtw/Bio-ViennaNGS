@@ -30,3 +30,5 @@ Revision history for Perl extension ViennaNGS.
 	- added parse_multicov()
 	- added write_multicov()
 	- added featCount_data() accessor for @featCount AoHoH 
+	- added normalization support for bigWigs generated from scripts/bam_split.pl
+	- refactored bam_split()

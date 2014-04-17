@@ -1,13 +1,13 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-04-04 10:10:39 mtw>
+# Last changed Time-stamp: <2014-04-17 22:52:58 mtw>
 #
 # Split BAM files according to their strands, optionally filter unique mappers
 #
 # ***********************************************************************
 # *  Copyright notice
 # *
-# *  Copyright 2013 Michael Thomas Wolfinger <michael@wolfinger.eu>
+# *  Copyright 2014 Michael Thomas Wolfinger <michael@wolfinger.eu>
 # *  All rights reserved
 # *
 # *  This program is free software: you can redistribute it and/or modify
@@ -36,21 +36,24 @@ use ViennaNGS;
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
-my ($bam_p,$bam_n,$bed_p,$bed_n,$basename,$bamdir,$bamext,$cmd);
-my ($rev,$wantuniq,$wantbed,$bw) = (0)x4;
+my ($bam_p,$bam_n,$bed_p,$bed_n,$size_p,$size_n,$basename,$bamdir,$bamext,$cmd);
+my ($rev,$wantuniq,$wantbed,$wantnorm,$bw) = (0)x5;
 my $logfile = "bam_split.log";
 my $chromsi = undef;
 my $fullbam = undef;
 my $destdir = "./";
-my @result = ();
+my $scale   = 1000000;
+my @result  = ();
 
 Getopt::Long::config('no_ignore_case');
 &usage() unless GetOptions("bam=s"           => \$fullbam,
 			   "bed"             => sub{$wantbed = 1},
 			   "bw"              => sub{$bw = 1},
 			   "c=s"             => \$chromsi,
+			   "norm"            => sub{$wantnorm = 1},
 			   "o=s"             => \$destdir,
 			   "r"               => sub{$rev = 1},
+			   "s=s"             => \$scale,
 			   "u"               => sub{$wantuniq = 1},
 			   "log=s"           => \$logfile,
                            "-help"           => \&usage,
@@ -76,16 +79,20 @@ unless ($fullbam =~ /^\// || $fullbam =~ /\.\//){$fullbam = "./".$fullbam;}
 
 $logfile = $destdir.$basename.".bam_split.log";
 @result = split_bam($fullbam,$rev,$wantuniq,$wantbed,$destdir,$logfile);
-$bam_p = $result[0]; # BAM file containing fragments of [+] strand
-$bam_n = $result[1]; # BAM file containing fragments of [-] strand
-$bed_p = $result[2]; # BED file containing fragments of [+] strand
-$bed_n = $result[3]; # BED file containing fragments of [-] strand
+$bam_p  = $result[0]; # BAM file containing fragments of [+] strand
+$bam_n  = $result[1]; # BAM file containing fragments of [-] strand
+$size_p = $result[2]; # of alignments on [+] strand
+$size_n = $result[3]; # of alignments on [-] srand
+$bed_p  = $result[4]; # BED file containing fragments of [+] strand
+$bed_n  = $result[5]; # BED file containing fragments of [-] strand
+
+print Dumper(\@result);
 
 if ($bw == 1) {
   $destdir = $destdir."vis";
   $cmd = "mkdir -p $destdir"; system($cmd);
-  bed2bw($bed_p,$chromsi,"+",$destdir);
-  bed2bw($bed_n,$chromsi,"-",$destdir);
+  bed2bw($bed_p,$chromsi,"+",$destdir,$wantnorm,$size_p,$scale,$logfile);
+  bed2bw($bed_n,$chromsi,"-",$destdir,$wantnorm,$size_n,$scale,$logfile);
 }
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -98,17 +105,20 @@ sub usage {
 bam_split.pl:  Split a BAM file according to strands.
 
 Optionally filter unique alignments by inspecting NH:i SAM attribute
-Optionally create BedGraph and stranded BigWig coverage for UCSC visualization
+Optionally create bedGraph and (stranded |normalized) bigWig coverage
+for UCSC visualization
 
 usage: $0 -bam <BAMFILE> [options]
 program specific options:                                   default:
  -bam   <file>   specify BAM file                           ($fullbam)
  -bed            create BED file for each split BAM         ($wantbed)
- -bw             create BedGraph and BigWig files           ($bw)
- -c     <file>   chrom_sizes for generating BigWigs         ($chromsi)
+ -bw             create BedGraph and bigWig files           ($bw)
+ -c     <file>   chrom_sizes for generating bigWig files    ($chromsi)
+ -norm           normalize resulting bigWig files           ($wantnorm)
  -o     <path>   output directory                           ($destdir)
  -r              reverse +/- strand mapping (according      ($rev)
                  to RNA-seq library preparation protocol)
+ -s     <int>    scale bigWig files to this number          ($scale)
  -u              filter unique alignemnts                   ($wantuniq)
  -log   <file>   log file                                   ($logfile)
  -help           print this information
