@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-04-17 23:07:22 mtw>
+# Last changed Time-stamp: <2014-04-17 23:54:40 mtw>
 #
 #
 # ***********************************************************************
@@ -344,7 +344,7 @@ sub bam2bw {
 }
 
 # bed2bw ($bed,$chromsizes,$strand,$dest_dir,$size,$norm)
-# Generate BedGraph and stranded BigWig coverage from BED via two third-party tools:
+# Generate stranded BigWig coverage profiles from BED via two third-party tools:
 # genomeCoverageBed from BEDtools
 # bedGraphToBigWig from UCSC Genome Browser tools
 sub bed2bw {
@@ -356,7 +356,7 @@ sub bed2bw {
   my $awk = `which awk`; chomp($awk);
 
   open(LOG, ">", $log) or die $!;
-  print LOG "LOG [ViennaNGS::bed2bw()] \$bedfile: $bedfile\n -- \$chromsizes: $chromsizes\n --\$dest_dir: $dest_dir\n";
+  print LOG "LOG [ViennaNGS::bed2bw()] \$bedfile: $bedfile -- \$chromsizes: $chromsizes --\$dest_dir: $dest_dir\n";
 
   die ("ERROR [ViennaNGS::bed2bw()] Cannot find $bedfile\n") unless (-e $bedfile);
   die ("ERROR [ViennaNGS::bed2bw()] Cannot find $chromsizes ...bigWig cannot be generated\n")  unless (-e $chromsizes);
@@ -380,7 +380,8 @@ sub bed2bw {
   }
   print LOG ">>$cmd\n";
   system($cmd);
-  if ($strand eq "+"){ unlink("$dest_dir/$bn.neg.bg.1"); }
+  if ($strand eq "+"){unlink ("$dest_dir/$bn.pos.bg");} # rm intermediate bedGraph files
+  else{ unlink("$dest_dir/$bn.neg.bg"); unlink("$dest_dir/$bn.neg.bg.1");}
   close (LOG);
 }
 
@@ -572,22 +573,23 @@ http://hgdownload.cse.ucsc.edu/admin/exe/).
 
 =head2 bed2bw($bed,$chromsizes,$strand,$dest_dir,$want_norm,$size,$scale,$log)
 
-Creates BedGraph and stranded BigWig coverage profiles from BED
+Creates stranded, normalized BigWig coverage profiles from BED
 files. $chromsizes is the chromosome.sizes files, $strand is either
 "+" or "-" and $dest_dir contains the output path for results. For
 normlization of bigWig profiles, additional attributes are required:
-$want_norm triggers computation of normalized profiles with values 0
-or 1. $size is the number of elements (features) in the BED file and
-$scale gives the number to which data is normalized (ie. every
-bedGraph entry is multiplied by a factor ($scale/$size). $log holds
-path and name of log file.
+$want_norm triggers normalization with values 0 or 1. $size is the
+number of elements (features) in the BED file and $scale gives the
+number to which data is normalized (ie. every bedGraph entry is
+multiplied by a factor ($scale/$size). $log holds path and name of log
+file.
 
-Stranded BigWigs can easily be visualized via TrackHubs in the
-UCSC Genome Browser. Internally, the conversion is accomplished by two
+Stranded BigWigs can easily be visualized via TrackHubs in the UCSC
+Genome Browser. Internally, the conversion is accomplished by two
 third-party applications: genomeCoverageBed (from BEDtools, see
 http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html)
 and bedGraphToBigWig (from the UCSC Genome Browser, see
-http://hgdownload.cse.ucsc.edu/admin/exe/).
+http://hgdownload.cse.ucsc.edu/admin/exe/). Intermediate bedGraph
+files are removed automatically.
 
 =head2 computeTPM($featCount_sample,$rl)
 

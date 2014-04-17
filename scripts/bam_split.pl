@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-04-17 22:52:58 mtw>
+# Last changed Time-stamp: <2014-04-17 23:42:29 mtw>
 #
 # Split BAM files according to their strands, optionally filter unique mappers
 #
@@ -67,10 +67,7 @@ die "ERROR: no BAM file provided" unless (defined $fullbam);
 if ($bw == 1) {
   die "ERROR: chrom_sizes file needed for generating BigWig coverage profiles\n"
     unless (defined $chromsi);
-  unless ($wantbed == 1){
-    warn "setting -bed option; BED files required for BigWig conversion will be created\n";
-    $wantbed = 1;
-  }
+  unless ($wantbed == 1){$wantbed = 1;}
 }
 unless ($destdir =~ /\/$/){$destdir .= "/";}
 unless (-d $destdir){$cmd = "mkdir -p $destdir"; system($cmd);}
@@ -85,8 +82,6 @@ $size_p = $result[2]; # of alignments on [+] strand
 $size_n = $result[3]; # of alignments on [-] srand
 $bed_p  = $result[4]; # BED file containing fragments of [+] strand
 $bed_n  = $result[5]; # BED file containing fragments of [-] strand
-
-print Dumper(\@result);
 
 if ($bw == 1) {
   $destdir = $destdir."vis";
