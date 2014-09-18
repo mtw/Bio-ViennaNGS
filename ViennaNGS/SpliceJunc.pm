@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-18 16:16:22 mtw>
+# Last changed Time-stamp: <2014-09-19 00:24:39 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -20,7 +20,7 @@
 package ViennaNGS::SpliceJunc;
 
 use Exporter;
-use version; our $VERSION = qv('0.01_1');
+use version; our $VERSION = qv('0.01_01');
 use strict;
 use warnings;
 use File::Spec; # TODO: perform file name operations with File::Spec
@@ -288,7 +288,8 @@ ViennaNGS::SpliceJunc - Perl extension for Alternative Splicing Analysis
   use ViennaNGS::SpliceJunc;
 
   bed6_ss_from_bed1($bed12,$dest_dir,$window)
-  bed6_ss_from_segemehl_splits(($segesplitbed,$dest_dir,$window,$mcov)
+  bed6_ss_from_segemehl_splits($segesplitbed,$dest_dir,$window,$mcov)
+  novel_sj_from_intersect_annot_segesplit($p_annot,$p_segesplit,$p_out,$prefix)
 
 =head1 DESCRIPTION
 
@@ -308,6 +309,52 @@ Routines:
 
 Variables:
    none
+
+=head3 bed6_ss_from_bed1($bed12,$dest_dir,$window)
+
+Extracts splice junctions from an BED12 file (provided via argument
+$bed12), writes a BED6 file for each transcript to $dest_dir,
+containing all its splice junctions. Output splice junctions can be
+flanked by a window of +/- $window nt. Each splice junction is
+represented as two bed lines in the output BED6.
+
+=head3 bed6_ss_from_segemehl_splits($segesplitbed,$dest_dir,$window,$mcov)
+
+Extracts splice junctions from segemehl's haarz / testrealign -n BED6
+output and writes a BED6 file for each splice junction given in the
+input to $dest_dir. Output splice junctions can be flanked by a window
+of +/- $window nt. Each splice junction is represented as two bed
+lines in the output BED6.
+
+=head3 novel_sj_from_intersect_annot_segesplit($p_annot,$p_segesplit,$p_out,$prefix)
+
+Intersects all splice junctions identified in an RNA-seq experiment
+with annotated splice junctions. Identifies and characterized novel
+and existing splice junctions. Each BED6 file in $p_segesplit is
+intersected with those transcript splice junction BED6 files in
+$P_annot, whose genomic location spans the query splice junction. This
+is just to prevent the tool from intersecting each splice site found
+in the mapping data with all annotated transcripts.
+
+The intersection operations are performed with intersectBed from the
+BEDtools suite (https://github.com/arq5x/bedtools2). BED sorting
+operations are performed with sortBed.
+
+Writes two BEd6 files to $p_out (optionally prefixed by $prefix),
+which contain novel and existing splice junctions respectively.
+
+=head1 DEPENDENCIES
+
+ViennaNGS::SpliceJunc uses third-party tools for computing intersections of
+BED files. Specifically, the intersectBed utility from the BEDtools suite
+(http://bedtools.readthedocs.org/en/latest/content/tools/intersect.html) is
+used to compute overlaps and sortBed is used to sort BED output files
+(http://bedtools.readthedocs.org/en/latest/content/tools/sort.html). Make
+sure that those third-party utilities are available on your system, and
+that hey can be found by the perl interpreter. We recommend installing the
+latest version of BEDtools (https://github.com/arq5x/bedtools2) on your
+system.
+
 
 =head1 SEE ALSO
 
