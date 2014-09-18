@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-19 00:24:39 mtw>
+# Last changed Time-stamp: <2014-09-19 00:26:26 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -20,7 +20,7 @@
 package ViennaNGS::SpliceJunc;
 
 use Exporter;
-use version; our $VERSION = qv('0.01_01');
+use version; our $VERSION = qv('0.01');
 use strict;
 use warnings;
 use File::Spec; # TODO: perform file name operations with File::Spec
