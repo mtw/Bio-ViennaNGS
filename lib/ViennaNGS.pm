@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-04-18 00:01:03 mtw>
+# Last changed Time-stamp: <2014-09-19 10:33:34 mtw>
 #
 #
 # ***********************************************************************
@@ -22,7 +22,7 @@
 package ViennaNGS;
 
 use Exporter;
-use version; our $VERSION = qv('0.06_1');
+use version; our $VERSION = qv('0.06');
 use strict;
 use warnings;
 use Bio::Perl;
