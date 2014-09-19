@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -w
+#!/usr/bin/env perl
 # -*-CPerl-*-
 # Last changed Time-stamp: <2013-09-04 17:02:56 mtw>
 #
