@@ -1,6 +1,6 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-09-09 17:15:04 mtw>
+# Last changed Time-stamp: <2014-09-19 10:32:28 mtw>
 #
 # Create a new genome database for the UCSC genome browser. Based on
 # http://genomewiki.ucsc.edu/index.php/Building_a_new_genome_database
