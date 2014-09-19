@@ -1,6 +1,6 @@
-#!/usr/bin/env perl -w
+#!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-04-12 12:49:09 mtw>
+# Last changed Time-stamp: <2014-09-19 10:32:55 mtw>
 #
 # Compute normalized expression data in TPM/RPKM from (raw) read
 # counts in multicov.
