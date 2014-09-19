@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-19 00:26:26 mtw>
+# Last changed Time-stamp: <2014-09-19 17:59:37 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -16,11 +16,16 @@
 # *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # *
 # ***********************************************************************
+#
+#
+# TODO: - update POD (new arguments)
+#       - extract canonical splice junctions
+#       - create bigBed output for novel/exist splice junctions
 
 package ViennaNGS::SpliceJunc;
 
 use Exporter;
-use version; our $VERSION = qv('0.01');
+use version; our $VERSION = qv('0.02_01');
 use strict;
 use warnings;
 use File::Spec; # TODO: perform file name operations with File::Spec
@@ -129,6 +134,7 @@ sub bed6_ss_from_segemehl_splits{
   while(<SEGESPLITS>){
     chomp;
     my ($chr, $start, $end, $info, $score, $strand) = split("\t");
+    $end = $end-1; # required for segemehl/testrealign -n BED6 files
 
     if ($info =~ /^splits\:(\d+)\:(\d+)\:(\d+):(\w):(\w)/){
       $reads = $1;
@@ -164,7 +170,7 @@ sub bed6_ss_from_segemehl_splits{
 #
 # Writes bed6 files for existing and novel splice junctions to $p_out.
 sub novel_sj_from_intersect_annot_segesplit{
-  my ($p_annot,$p_segesplit,$p_out,$prefix) = @_;
+  my ($p_annot,$p_segesplit,$p_out,$prefix,$window,$mil,$want_canonical) = @_;
   my ($processed_segesplit_junctions) = 0x1;
   my @segesplit_junctions = ();
   my @transcript_beds = ();
@@ -216,7 +222,7 @@ sub novel_sj_from_intersect_annot_segesplit{
     foreach my $i (@annotated_beds){
       my $a = $p_segesplit.$file;
       my $b = $p_annot.$i;
-      my $intersect_cmd = "$bedtools intersect -a $a -b $b -c";
+      my $intersect_cmd = "$bedtools intersect -a $a -b $b -c -nobuf";
       open(INTERSECT, $intersect_cmd."|");
       while(<INTERSECT>){
 	chomp;
@@ -251,14 +257,25 @@ sub novel_sj_from_intersect_annot_segesplit{
        my $pattern = $1;
        my $fn = $p_segesplit.$file;
        open (SJ, "< $fn") or die "Cannot open $fn $!";
-       if (exists $asj{$pattern}){ # annotated splice junction
-	 while(<SJ>){ print EXISTOUT "$_";}
-       }
-       else { # novel splice junction
-	 while(<SJ>){ print NOVELOUT "$_";}
-       }
+       while(<SJ>){
+	 chomp;
+	 $_ = m/^(chr\w+)\s(\d+)\s(\d+)\s(splits:\d+:\d+:\d+:\w:\w)\s(\d+)\s([+-01])/;
+	 my $chr = $1;
+	 my $start = $2;
+	 my $end = $3;
+	 my $name = $4;
+	 my $score = $5;
+	 my $strand = $6;
+	 my @bedline = join("\t",$chr,eval($start+$window-1),eval($end-$window+1),$name,$score,$strand);
+	 if (exists $asj{$pattern}){ # annotated splice junction
+	   print EXISTOUT "@bedline\n";
+	 }
+	 else {  # novel splice junction
+	   print NOVELOUT "@bedline\n";
+	 }
+       } # end while
        close(SJ);
-     }
+     } # end if
     else{ warn "Error with parsing segesplit junction file names\n";}
   }
   close(EXISTOUT);
@@ -326,7 +343,7 @@ input to $dest_dir. Output splice junctions can be flanked by a window
 of +/- $window nt. Each splice junction is represented as two bed
 lines in the output BED6.
 
-=head3 novel_sj_from_intersect_annot_segesplit($p_annot,$p_segesplit,$p_out,$prefix)
+=head3 novel_sj_from_intersect_annot_segesplit($p_annot,$p_segesplit,$p_out,$prefix,$mil)
 
 Intersects all splice junctions identified in an RNA-seq experiment
 with annotated splice junctions. Identifies and characterized novel
@@ -334,7 +351,8 @@ and existing splice junctions. Each BED6 file in $p_segesplit is
 intersected with those transcript splice junction BED6 files in
 $P_annot, whose genomic location spans the query splice junction. This
 is just to prevent the tool from intersecting each splice site found
-in the mapping data with all annotated transcripts.
+in the mapping data with all annotated transcripts. $mil specifies a
+maximum intron length.
 
 The intersection operations are performed with intersectBed from the
 BEDtools suite (https://github.com/arq5x/bedtools2). BED sorting
