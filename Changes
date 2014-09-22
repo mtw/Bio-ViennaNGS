@@ -33,3 +33,6 @@ Revision history for Perl extension ViennaNGS.
 	- added normalization support for bigWigs generated from scripts/bam_split.pl
 	- refactored split_bam()
 	- intermediate bedGraph files are now removed in bed2bw()
+
+0.07_01
+	- moved newUCSCdb.pl to ViennaNGS::UCSC

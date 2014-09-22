@@ -1,28 +1,10 @@
-#!/usr/bin/perl -w
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-19 10:33:34 mtw>
-#
-#
-# ***********************************************************************
-# *  Copyright notice
-# *
-# *  Copyright 2014 Michael Thomas Wolfinger <michael@wolfinger.eu>
-# *  All rights reserved
-# *
-# * This library is free software; you can redistribute it and/or modify
-# * it under the same terms as Perl itself, either Perl version 5.12.4 or,
-# * at your option, any later version of Perl 5 you may have available.
-# *
-# *  This program is distributed in the hope that it will be useful,
-# *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-# *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# *
-# ***********************************************************************
+# Last changed Time-stamp: <2014-09-22 17:00:20 mtw>
 
 package ViennaNGS;
 
 use Exporter;
-use version; our $VERSION = qv('0.06');
+use version; our $VERSION = qv('0.07_01');
 use strict;
 use warnings;
 use Bio::Perl;
@@ -625,18 +607,22 @@ $item.csv) of the output file.
 =head1 SEE ALSO
 
 perldoc ViennaNGS::AnnoC
+perldoc ViennaNGS::UCSC
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Michael Thomas Wolfinger, E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 by Michael Thomas Wolfinger
+Copyright (C) 2014
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.12.4 or,
 at your option, any later version of Perl 5 you may have available.
 
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 =cut
