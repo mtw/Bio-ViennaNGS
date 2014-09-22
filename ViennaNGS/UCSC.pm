@@ -15,6 +15,9 @@ our @EXPORT = qw( make_assembly_hub  );
 
 our @EXPORT_OK = ();
 
+sub make_assembly_hub{
+  my ($foo,$bar,$moo) = @_;
+}
 
 
 
