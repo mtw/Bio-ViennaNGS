@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-23 09:47:30 mtw>
+# Last changed Time-stamp: <2014-09-23 09:56:20 mtw>
 
 package ViennaNGS::AnnoC;
 
 use Exporter;
-use version; our $VERSION = qv('0.04_01');
+use version; our $VERSION = qv('0.04');
 use strict;
 use strict;
 use warnings;
