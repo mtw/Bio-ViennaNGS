@@ -8,6 +8,7 @@ use version; our $VERSION = qv('0.01');
 use strict;
 use warnings;
 use Template;
+use File::Which qw(which where);
 
 our @ISA = qw(Exporter);
 
@@ -16,10 +17,33 @@ our @EXPORT = qw( make_assembly_hub  );
 our @EXPORT_OK = ();
 
 sub make_assembly_hub{
-  my ($foo,$bar,$moo) = @_;
+  my ($fasta_file_path,$assembly_hub_destination_path,$base_URL,$log_path) = @_;
+  #check arguments
+  die("ERROR [ViennaNGS::UCSC] $fasta_file_path does not exist\n") unless (-e $fasta_file_path);
+  die("ERROR [ViennaNGS::UCSC] $assembly_hub_destination_path does not exist\n") unless (-d $assembly_hub_destination_path);
+  die("ERROR [ViennaNGS::UCSC] $base_URL is not set\n") if ($base_URL == "");
+  die("ERROR [ViennaNGS::UCSC] $log_path does not exist\n") unless (-e $log_path);
+
+  #check program dependencies
+  my $faToTwoBit_path = which('faToTwoBit');
+  die("ERROR [ViennaNGS::UCSC] faToTwoBit does not exist in $PATH\n") unless (-e $faToTwoBit_path);
+  my $gff2bed_path = which('gff2bed');
+  die("ERROR [ViennaNGS::UCSC] gff2bed does not exist in $PATH\n") unless (-e $gff2bed);
+
+  #create assembly hub directory structure
+  my $assembly_hub_name = "Test";
+  my $assembly_hub_directory = $assembly_hub_destination_path . $assembly_hub_name;
+  my $genome_assembly_name = "genomeAssembly";
+  my $genome_assembly_directory = $assembly_hub_directory ."/" . $genome_assembly_name;
+  mkdir $assembly_hub_directory;
+  mkdir $genome_assembly_directory;
+
+  #2-bit fasta file conversion
+  my $2bit_fasta_file_path = $genome_assembly_directory ."/" . "genomeAssembly" . ".2bit"
+  my $fastaToTwobit_cmd =  $faToTwoBit_path . " " . $fasta_file_path . " " . $2bit_fasta_file_path;
+  print STDERR ">> " . $fastaToTwobit_cmd . "\n";
+  system($fastaToTwobit_cmd);
 }
-
-
 
 1;
 __END__
