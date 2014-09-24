@@ -1,7 +1,7 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-24 16:27:02 mtw>
+# Last changed Time-stamp: <2014-09-25 00:16:59 mtw>
 #
-# TODO: - update POD (new arguments)
+# TODO:
 #       - extract canonical splice junctions
 #       - create bigBed output for novel/exist splice junctions
 
@@ -26,7 +26,7 @@ our @EXPORT_OK = qw( );
 #
 # Extracts splice junctions from bed12.
 #
-# Writes a bed6 file for each transcript found in the bed12, listing
+# Writes a BED6 file for each transcript found in the BED12, listing
 # all splice sites of this transcript, optionally flanking it with a
 # window of +/-$window nt.
 sub bed6_ss_from_bed12{
@@ -91,33 +91,33 @@ sub bed6_ss_from_bed12{
   close(BED12IN);
 }
 
-# bed6_ss_from_rnaseq ( $segesplitbed,$dest_dir,$window,$mincov )
+# bed6_ss_from_rnaseq ( $inbed,$dest_dir,$window,$mincov )
 #
 # Extracts splice junctions from mapped RNA-seq data
 #
-# Writes a bed6 file for each splice junction found in the
-# segemehl/testrealign -n input, optionally flanking it with a window
-# of +/-$window nt. Only splice junctions supported by at least $mcov
-# reads are considered.
+# Writes a BED6 file for each splice junction present in the input,
+# optionally flanking it with a window of +/-$window nt. Only splice
+# junctions supported by at least $mcov reads are considered.
 sub bed6_ss_from_rnaseq{
-  my ($segesplitbed,$dest_dir,$window,$mcov) = @_;
+  my ($inbed,$dest_dir,$window,$mcov) = @_;
   my ($reads,$proper,$passed);
   my $too_low_coverage = 0;
   my @bedline = ();
+  my $this_function = (caller(0))[3];
 
-  die("ERROR [ViennaNGS::SpliceJunc::bed6_ss_from_segemehl_splits()]
-  $segesplitbed does not exist\n") unless (-e $segesplitbed);
+  die("ERROR [$this_function] $inbed does not exist\n") unless (-e
+  $inbed);
 
-  die("ERROR [ViennaNGS::SpliceJunc::bed6_ss_from_segemehl_splits()]
-  $dest_dir does not exist") unless (-d $dest_dir);
+  die("ERROR [$this_function] $dest_dir does not exist") unless (-d
+  $dest_dir);
 
   unless ($dest_dir =~ /\/$/){$dest_dir .= "/";}
 
-  open(SEGESPLITS, "< $segesplitbed") or die $!;
-  while(<SEGESPLITS>){
+  open(INBED, "< $inbed") or die $!;
+  while(<INBED>){
     chomp;
     my ($chr, $start, $end, $info, $score, $strand) = split("\t");
-    $end = $end-1; # required for segemehl/testrealign -n BED6 files
+    #$end = $end-1; # required for segemehl/testrealign -n BED6 files
 
     if ($info =~ /^splits\:(\d+)\:(\d+)\:(\d+):(\w):(\w)/){
       $reads = $1;
@@ -134,7 +134,7 @@ sub bed6_ss_from_rnaseq{
       die "unsupported INFO filed in input BED:\n$info\n";
     }
 
-    my $fn = sprintf("%s_%d-%d.segemehlSS.bed6",$chr,$start,$end);
+    my $fn = sprintf("%s_%d-%d.mappedSS.bed6",$chr,$start,$end);
     my $bed6_fn =  $dest_dir.$fn;
     open(BED6OUT, "> $bed6_fn");
     @bedline = join("\t",$chr,eval($start-$window),eval($start+$window),$info,$score,$strand);
@@ -143,55 +143,52 @@ sub bed6_ss_from_rnaseq{
     print BED6OUT "@bedline\n";
     close(BED6OUT);
   }
-  close(SEGESPLITS);
+  close(INBED);
 }
 
-# intersect_sj( $p_annot,$p_segesplit,$p_out )
+# intersect_sj($p_annot,$p_mapped,$p_out,$prefix,$window,$mil,$can)
 #
-# Intersect splice junctions determined by segemehl with annotated
+# Intersect splice junctions determined by RNA-seq with annotated
 # splice junctions. Determine novel and existing splice junctions.
 #
-# Writes bed6 files for existing and novel splice junctions to $p_out.
+# Writes BED6 files for existing and novel splice junctions to $p_out.
 sub intersect_sj{
-  my ($p_annot,$p_segesplit,$p_out,$prefix,$window,$mil,$want_canonical) = @_;
-  my ($processed_segesplit_junctions) = 0x1;
-  my @segesplit_junctions = ();
+  my ($p_annot,$p_mapped,$p_out,$prefix,$window,$mil,$can) = @_;
+  my ($dha,$dhm);
+  my $processed = 0;
+  my @junctions = ();
   my @transcript_beds = ();
   my %asj = (); # annotated splice junctions hash
   my $bedtools = `which bedtools`; chomp($bedtools);
   my $sortBed  = `which sortBed`; chomp($sortBed);
+  my $this_function = (caller(0))[3];
 
-  die("ERROR
-  [ViennaNGS::SpliceJunc::novel_sj_from_intersect_annot_segesplit()]
-  $p_annot does not exist\n") unless (-d $p_annot);
+  die("ERROR [$this_function] $p_annot does not exist\n") unless (-d $p_annot);
   unless ($p_annot =~ /\/$/){$p_annot .= "/";}
 
-  die("ERROR
-  [ViennaNGS::SpliceJunc::novel_sj_from_intersect_annot_segesplit()]
-  $p_segesplit does not exist\n") unless (-d $p_segesplit);
-  unless ($p_segesplit =~ /\/$/){$p_segesplit .= "/";}
+  die("ERROR [$this_function] $p_mapped does not exist\n") unless (-d
+  $p_mapped);
+  unless ($p_mapped =~ /\/$/){$p_mapped .= "/";}
 
-  die("ERROR
-  [ViennaNGS::SpliceJunc::novel_sj_from_intersect_annot_segesplit()]
-  $p_out does not exist\n") unless (-d $p_out);
+  die("ERROR [$this_function] $p_out does not exist\n") unless (-d
+  $p_out);
   unless ($p_out =~ /\/$/){$p_out .= "/";}
 
   # get a list of all files in $p_annot
-  opendir(my $dh_annotated_tr, $p_annot)  or die "Can't opendir $p_annot: $!";
-  while(readdir $dh_annotated_tr) {
+  opendir($dha, $p_annot)  or die "Can't opendir $p_annot: $!";
+  while(readdir $dha) {
     push @transcript_beds, $_;
   }
-  closedir($dh_annotated_tr);
-  #print Dumper(\@transcript_beds);
+  closedir($dha);
 
-  # get list of all segemehl splice junctions
-  opendir(my $dh_segesplit, $p_segesplit) or die "Can't opendir $p_segesplit: $!";
-  @segesplit_junctions = grep { /^(chr\d+)\_(\d+)-(\d+)\.segemehlSS\.bed6/ } readdir($dh_segesplit);
+  # get a list of all splice junctions seen in RNA-seq data
+  opendir(my $dhm, $p_mapped) or die "Can't opendir $p_mapped: $!";
+  @junctions = grep { /^(chr\d+)\_(\d+)-(\d+)\.mappedSS\.bed6/ } readdir($dhm);
 
-  # process segemehl splice junctions files
-  foreach my $file (@segesplit_junctions){
-    $processed_segesplit_junctions++;
-   # print "processing $file ... ";
+  # process splice junctions seen in RNA-seq data
+  foreach my $file (@junctions){
+    $processed++;
+    # print "processing $file ... ";
     die "Unexpected file name pattern\n" unless ($file =~ /(chr\d+)\_(\d+)-(\d+)/);
     my $sc = $1;
     my $s5 = $2;
@@ -201,9 +198,9 @@ sub intersect_sj{
     my @annotated_beds = grep { /^(chr\d+)\_(\d+)-(\d+)/ && $2<=$s5 && $3>=$s3 && $sc eq $1} @transcript_beds;
     #print"\t intersecting against ".(eval $#annotated_beds+1)." transcripts: @annotated_beds \n";
 
-    # intersect current segemehl SJ against all transcripts in @annotated_beds
+    # intersect currently opened SJ against all transcripts in @annotated_beds
     foreach my $i (@annotated_beds){
-      my $a = $p_segesplit.$file;
+      my $a = $p_mapped.$file;
       my $b = $p_annot.$i;
       my $intersect_cmd = "$bedtools intersect -a $a -b $b -c -nobuf";
       open(INTERSECT, $intersect_cmd."|");
@@ -218,14 +215,14 @@ sub intersect_sj{
       }
       close(INTERSECT);
     }
-    if ( $processed_segesplit_junctions % 1000 == 0){
-      print "processed $processed_segesplit_junctions segesplit junctions\n";
+    if ( $processed % 1000 == 0){
+      print "processed $processed splice junctions\n";
     }
   }
-  closedir($dh_segesplit);
+  closedir($dhm);
 
-  # go through the segemehl splice junctions files once more and discriminate
-  # novel from existing splice junctions
+  # go through the mapped splice junctions files once more and
+  # separate novel from existing splice junctions
   if (length($prefix)>0){$prefix .= ".";}
   my $outname_exist = $p_out.$prefix."exist.SS.bed";
   my $outname_exist_u = $p_out.$prefix."exist.SS.u.bed";
@@ -235,10 +232,10 @@ sub intersect_sj{
   open (NOVELOUT, "> $outname_novel_u");
 
   # write new ones to NOVELOUT; existing ones to EXISTOUT
-  foreach my $file (@segesplit_junctions){
+  foreach my $file (@junctions){
     if ($file =~ m/^(chr\d+\_\d+-\d+)/){
        my $pattern = $1;
-       my $fn = $p_segesplit.$file;
+       my $fn = $p_mapped.$file;
        open (SJ, "< $fn") or die "Cannot open $fn $!";
        while(<SJ>){
 	 chomp;
@@ -259,7 +256,7 @@ sub intersect_sj{
        } # end while
        close(SJ);
      } # end if
-    else{ warn "Error with parsing segesplit junction file names\n";}
+    else{ warn "Error with parsing BED6 junction file names __FILE__ __LINE__\n";}
   }
   close(EXISTOUT);
   close(NOVELOUT);
@@ -273,7 +270,7 @@ sub intersect_sj{
   unlink($outname_novel_u);
 
   # TODO: Test for canonical / non-canonical motif (write routine for that)
-  printf STDERR "processed $processed_segesplit_junctions segemehl junctions\n";
+  printf STDERR "processed $processed splice junctions\n";
 }
 
 1;
@@ -281,19 +278,19 @@ __END__
 
 =head1 NAME
 
-ViennaNGS::SpliceJunc - Perl extension for Alternative Splicing Analysis
+ViennaNGS::SpliceJunc - Perl extension for alternative splicing analysis
 
 =head1 SYNOPSIS
 
   use ViennaNGS::SpliceJunc;
 
-  bed6_ss_from_bed1($bed12,$dest_dir,$window)
-  bed6_ss_from_segemehl_splits($segesplitbed,$dest_dir,$window,$mcov)
-  novel_sj_from_intersect_annot_segesplit($p_annot,$p_segesplit,$p_out,$prefix)
+  bed6_ss_from_bed12($bed12,$dest_dir,$window)
+  bed6_ss_from_rnaseq($inbed,$dest_dir,$window,$mcov)
+  intersect_sj($p_annot,$p_mapped,$p_out,$prefix,$window,$mil,$can)
 
 =head1 DESCRIPTION
 
-ViennaNGS::SpliceJunc is a Perl module for Alternative Splicing (AS)
+ViennaNGS::SpliceJunc is a Perl module for alternative splicing (AS)
 analysis. It provides routines for identification and characterization of
 novel and existing (annotated) splice junctions from RNA-seq data.
 
@@ -303,16 +300,16 @@ novel splice junctions from RNA-seq data with annotated splice junctions.
 =head2 EXPORT
 
 Routines:
-  bed6_ss_from_bed1($bed12,$dest_dir,$window)
-  bed6_ss_from_segemehl_splits(($segesplitbed,$dest_dir,$window,$mcov)
-  novel_sj_from_intersect_annot_segesplit($p_annot,$p_segesplit,$p_out,$prefix)
+  bed6_ss_from_bed12($bed12,$dest_dir,$window)
+  bed6_ss_from_rnaseq($inbed,$dest_dir,$window,$mcov)
+  intersect_sj($p_annot,$p_mapped,$p_out,$prefix,$window,$mil,$can)
 
 Variables:
    none
 
-=head1 SUBROUTINES 
+=head1 SUBROUTINES
 
-=head2 bed6_ss_from_bed1($bed12,$dest_dir,$window)
+=head2 bed6_ss_from_bed12($bed12,$dest_dir,$window)
 
 Extracts splice junctions from an BED12 file (provided via argument
 $bed12), writes a BED6 file for each transcript to $dest_dir,
@@ -320,24 +317,45 @@ containing all its splice junctions. Output splice junctions can be
 flanked by a window of +/- $window nt. Each splice junction is
 represented as two bed lines in the output BED6.
 
-=head2 bed6_ss_from_rnaseq($segesplitbed,$dest_dir,$window,$mcov)
+=head2 bed6_ss_from_rnaseq($inbed,$dest_dir,$window,$mcov)
 
-Extracts splice junctions from segemehl's haarz / testrealign -n BED6
-output and writes a BED6 file for each splice junction given in the
-input to $dest_dir. Output splice junctions can be flanked by a window
-of +/- $window nt. Each splice junction is represented as two bed
-lines in the output BED6.
+Extracts splice junctions from mapped RNA-seq data. The input BED6
+file should contain coordinates of introns in the following syntax:
 
-=head2 intersect_sj($p_annot,$p_segesplit,$p_out,$prefix,$mil)
+chr1    3913    3996    splits:97:97:97:N:P     0       +
+
+The fourth column in this BED file (correponding to the 'name' field)
+should be a colon-separated string of six elements, where the first
+element should be 'splits' and the second element is assumed to hold
+the number of reads supporting this splice junction. The fifth element
+indicates the splice junction type: A capital 'N' determines a normal
+splice junction, whereas 'C' indicates circular and 'T' indicates
+trans-splice junctions, respectively. Only normal splice junctions
+('N') are considered, the rest is skipped. Elements 3, 4 and 6 are not
+further processed.
+
+We recommend using I<segemehl> for generating this type of BED6
+files. This routine is, however, not limited to segemehl output. BED6
+files containing splice junction information from other short read
+mappers or third-party sources will be processed if hey are formatted
+as described above.
+
+This routine writes a BED6 file for each splice junction provided in
+the input to $dest_dir. Output splice junctions can be flanked by a
+window of +/- $window nt. Each splice junction is represented as two
+bed lines in the output BED6.
+
+=head2 intersect_sj($p_annot,$p_mapped,$p_out,$prefix,$window,$mil,$can)
 
 Intersects all splice junctions identified in an RNA-seq experiment
 with annotated splice junctions. Identifies and characterized novel
-and existing splice junctions. Each BED6 file in $p_segesplit is
+and existing splice junctions. Each BED6 file in $p_mapped is
 intersected with those transcript splice junction BED6 files in
-$P_annot, whose genomic location spans the query splice junction. This
+$p_annot, whose genomic location spans the query splice junction. This
 is just to prevent the tool from intersecting each splice site found
-in the mapping data with all annotated transcripts. $mil specifies a
-maximum intron length.
+in the mapped RNA-seq data with all annotated transcripts. $mil
+specifies a maximum intron length. $can is a switch for filtering
+canonical splice junctions.
 
 The intersection operations are performed with intersectBed from the
 BEDtools suite (https://github.com/arq5x/bedtools2). BED sorting
@@ -357,7 +375,6 @@ sure that those third-party utilities are available on your system, and
 that hey can be found by the perl interpreter. We recommend installing the
 latest version of BEDtools (https://github.com/arq5x/bedtools2) on your
 system.
-
 
 =head1 SEE ALSO
 
