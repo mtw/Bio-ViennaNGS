@@ -1,22 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-19 17:59:37 mtw>
-#
-# ***********************************************************************
-# *  Copyright notice
-# *
-# *  Copyright 2014 Michael Thomas Wolfinger <michael@wolfinger.eu>
-# *  All rights reserved
-# *
-# * This library is free software; you can redistribute it and/or modify
-# * it under the same terms as Perl itself, either Perl version 5.12.4 or,
-# * at your option, any later version of Perl 5 you may have available.
-# *
-# *  This program is distributed in the hope that it will be useful,
-# *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-# *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# *
-# ***********************************************************************
-#
+# Last changed Time-stamp: <2014-09-24 16:27:02 mtw>
 #
 # TODO: - update POD (new arguments)
 #       - extract canonical splice junctions
@@ -33,8 +16,8 @@ use Data::Dumper;
 
 our @ISA = qw(Exporter);
 
-our @EXPORT = qw(bed6_ss_from_bed12 bed6_ss_from_segemehl_splits
-		 novel_sj_from_intersect_annot_segesplit );
+our @EXPORT = qw(bed6_ss_from_bed12 bed6_ss_from_rnaseq
+		 intersect_sj );
 
 our @EXPORT_OK = qw( );
 
@@ -108,15 +91,15 @@ sub bed6_ss_from_bed12{
   close(BED12IN);
 }
 
-# bed6_ss_from_segemehl_splits ( $segesplitbed,$dest_dir,$window,$mincov )
+# bed6_ss_from_rnaseq ( $segesplitbed,$dest_dir,$window,$mincov )
 #
-# Extracts splice junctions from segemehl/testrealign -n bed6
+# Extracts splice junctions from mapped RNA-seq data
 #
 # Writes a bed6 file for each splice junction found in the
 # segemehl/testrealign -n input, optionally flanking it with a window
 # of +/-$window nt. Only splice junctions supported by at least $mcov
 # reads are considered.
-sub bed6_ss_from_segemehl_splits{
+sub bed6_ss_from_rnaseq{
   my ($segesplitbed,$dest_dir,$window,$mcov) = @_;
   my ($reads,$proper,$passed);
   my $too_low_coverage = 0;
@@ -163,13 +146,13 @@ sub bed6_ss_from_segemehl_splits{
   close(SEGESPLITS);
 }
 
-# novel_sj_from_intersect_annot_segesplit ( $p_annot,$p_segesplit,$p_out )
+# intersect_sj( $p_annot,$p_segesplit,$p_out )
 #
 # Intersect splice junctions determined by segemehl with annotated
 # splice junctions. Determine novel and existing splice junctions.
 #
 # Writes bed6 files for existing and novel splice junctions to $p_out.
-sub novel_sj_from_intersect_annot_segesplit{
+sub intersect_sj{
   my ($p_annot,$p_segesplit,$p_out,$prefix,$window,$mil,$want_canonical) = @_;
   my ($processed_segesplit_junctions) = 0x1;
   my @segesplit_junctions = ();
@@ -266,7 +249,7 @@ sub novel_sj_from_intersect_annot_segesplit{
 	 my $name = $4;
 	 my $score = $5;
 	 my $strand = $6;
-	 my @bedline = join("\t",$chr,eval($start+$window-1),eval($end-$window+1),$name,$score,$strand);
+	 my @bedline = join("\t",$chr,eval($start+$window),eval($start+$window+1),$name,$score,$strand);
 	 if (exists $asj{$pattern}){ # annotated splice junction
 	   print EXISTOUT "@bedline\n";
 	 }
@@ -327,7 +310,9 @@ Routines:
 Variables:
    none
 
-=head3 bed6_ss_from_bed1($bed12,$dest_dir,$window)
+=head1 SUBROUTINES 
+
+=head2 bed6_ss_from_bed1($bed12,$dest_dir,$window)
 
 Extracts splice junctions from an BED12 file (provided via argument
 $bed12), writes a BED6 file for each transcript to $dest_dir,
@@ -335,7 +320,7 @@ containing all its splice junctions. Output splice junctions can be
 flanked by a window of +/- $window nt. Each splice junction is
 represented as two bed lines in the output BED6.
 
-=head3 bed6_ss_from_segemehl_splits($segesplitbed,$dest_dir,$window,$mcov)
+=head2 bed6_ss_from_rnaseq($segesplitbed,$dest_dir,$window,$mcov)
 
 Extracts splice junctions from segemehl's haarz / testrealign -n BED6
 output and writes a BED6 file for each splice junction given in the
@@ -343,7 +328,7 @@ input to $dest_dir. Output splice junctions can be flanked by a window
 of +/- $window nt. Each splice junction is represented as two bed
 lines in the output BED6.
 
-=head3 novel_sj_from_intersect_annot_segesplit($p_annot,$p_segesplit,$p_out,$prefix,$mil)
+=head2 intersect_sj($p_annot,$p_segesplit,$p_out,$prefix,$mil)
 
 Intersects all splice junctions identified in an RNA-seq experiment
 with annotated splice junctions. Identifies and characterized novel
@@ -379,13 +364,13 @@ system.
   perldoc ViennaNGS
   perldoc ViennaNGS::AnnoC
 
-=head1 AUTHOR
+=head1 AUTHORS
 
-Michael Thomas Wolfinger, E<lt>michael@wolfinger.euE<gt>
+Michael Thomas Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 by Michael Thomas Wolfinger
+Copyright (C) 2014
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.16.3 or,
