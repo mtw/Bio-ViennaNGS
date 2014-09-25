@@ -1,8 +1,8 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-25 00:16:59 mtw>
+# Last changed Time-stamp: <2014-09-25 17:02:12 mtw>
 #
 # TODO:
-#       - extract canonical splice junctions
+#       - extractfilter canonical splice junctions in intersect_sj()
 #       - create bigBed output for novel/exist splice junctions
 
 package ViennaNGS::SpliceJunc;
@@ -13,6 +13,7 @@ use strict;
 use warnings;
 use File::Spec; # TODO: perform file name operations with File::Spec
 use Data::Dumper;
+use ViennaNGS;
 
 our @ISA = qw(Exporter);
 
@@ -22,33 +23,34 @@ our @EXPORT = qw(bed6_ss_from_bed12 bed6_ss_from_rnaseq
 our @EXPORT_OK = qw( );
 
 
-# bed6_ss_from_bed12( $bed12,$dest_dir,$window )
+# bed6_ss_from_bed12( $bed12,$dest_dir,$window,$fastaobjR )
 #
 # Extracts splice junctions from bed12.
 #
 # Writes a BED6 file for each transcript found in the BED12, listing
 # all splice sites of this transcript, optionally flanking it with a
 # window of +/-$window nt.
+#
 sub bed6_ss_from_bed12{
-  my ($bed12,$dest_dir,$window) = @_;
-  my ($pos5,$pos3);
+  my ($bed12,$dest_dir,$window,$fastaobjR) = @_;
+  my ($i,$c,$tr_name,$pos5,$pos3);
   my $splicesites = 0;
   my @bedline = ();
+  my $this_function = (caller(0))[3];
 
-  die("ERROR [ViennaNGS::SpliceJunc::bed6_ss_from_bed12()] $bed12 does
-  not exists\n") unless (-e $bed12);
+  die("ERROR [$this_function] $bed12 does not exists\n")
+    unless (-e $bed12);
 
-  die("ERROR [ViennaNGS::SpliceJunc::bed6_ss_from_bed12()] $dest_dir
-  does not exist") unless (-d $dest_dir);
+  die("ERROR [$this_function] $dest_dir does not exist")
+    unless (-d $dest_dir);
 
   unless ($dest_dir =~ /\/$/){$dest_dir .= "/";}
 
-  #print ">> bed12 -> $bed12\n";
-  #print ">> dest_dir -> $dest_dir\n";
   open(BED12IN, "< $bed12") or die $!;
   while(<BED12IN>){
     chomp;
-    my ($chr,$chromStart,$chromEnd,$name,$score,$strand,$thickStart,$thickEnd,$itemRgb,$blockCount,$blockSizes,$blockStarts) = split("\t");
+    my ($chr,$chromStart,$chromEnd,$name,$score,$strand,$thickStart,
+	$thickEnd,$itemRgb,$blockCount,$blockSizes,$blockStarts) = split("\t");
     my @blockSize  = split(/,/,$blockSizes);
     my @blockStart = split(/,/,$blockStarts);
     unless (scalar @blockSize == scalar @blockStart){
@@ -60,34 +62,24 @@ sub bed6_ss_from_bed12{
 
     if ($blockCount >1){ # only transcripts with 2 or more exons (!!!)
 
-      open(BED6OUT, "> $bed6_fn") or die
-      "[ViennaNGS::SpliceJunc::bed6_ss_from_bed12() Cannot open
-      BED6OUT $!";
+      open(BED6OUT, "> $bed6_fn") or die "cannot open BED6OUT $!";
 
-      for (my $i=0;$i<$blockCount-1;$i++){
+      for ($i=0;$i<$blockCount-1;$i++){
 	$pos5 = $chromStart+$blockStart[$i]+$blockSize[$i];
 	$pos3 = $chromStart+$blockStart[$i+1];
-	#$seqPOS = get_stranded_subsequence($fastaobj{$chr},$pos5+1,$pos5+$ss_motif_length,"+");
-	#$seqNEG = get_stranded_subsequence($fastaobj{$chr},$pos3-$ss_motif_length+1,$pos3,"+");
-	$splicesites++;
-	#if (($seqPOS eq "GT" && $seqNEG eq "AG") ||
-	#	  ($seqPOS eq "CT" && $seqNEG eq "AC")) {
-	# $cansplicesites++;
-	#	#$cansplits += $reads;
-	#	$is_canonical="c";
-	#}
-	#$splicemotif = join("|",$seqPOS,$seqNEG);
-	my $tr_name = sprintf("%s.%02d",$name,$tr_count++);
-	@bedline = join("\t",$chr,eval($pos5-$window),eval($pos5+$window),$tr_name,$score,$strand);
+	$c = ss_isCanonical($chr,$pos5,$pos3,$fastaobjR);
+	$tr_name = sprintf("%s.%02d",$name,$tr_count++);
+	@bedline = join("\t",$chr,eval($pos5-$window),
+			eval($pos5+$window),$tr_name,$c,$strand);
 	print BED6OUT "@bedline\n";
-	@bedline = join("\t",$chr,eval($pos3-$window),eval($pos3+$window),$tr_name,$score,$strand);
+	@bedline = join("\t",$chr,eval($pos3-$window),
+			eval($pos3+$window),$tr_name,$c,$strand);
 	print BED6OUT "@bedline\n";
-	#print "i=$i\t$pos5\t$pos3\t($seqPOS|$seqNEG)\n";
-	#print "@bedline\n";
       } # end for
+
       close(BED6OUT);
     } # end if
-  }
+  } # end while
   close(BED12IN);
 }
 
@@ -99,17 +91,17 @@ sub bed6_ss_from_bed12{
 # optionally flanking it with a window of +/-$window nt. Only splice
 # junctions supported by at least $mcov reads are considered.
 sub bed6_ss_from_rnaseq{
-  my ($inbed,$dest_dir,$window,$mcov) = @_;
-  my ($reads,$proper,$passed);
+  my ($inbed,$dest_dir,$window,$mcov,$fastaobjR) = @_;
+  my ($reads,$proper,$passed,$c,$pos5,$pos3);
   my $too_low_coverage = 0;
   my @bedline = ();
   my $this_function = (caller(0))[3];
 
-  die("ERROR [$this_function] $inbed does not exist\n") unless (-e
-  $inbed);
+  die("ERROR [$this_function] $inbed does not exist\n")
+    unless (-e $inbed);
 
-  die("ERROR [$this_function] $dest_dir does not exist") unless (-d
-  $dest_dir);
+  die("ERROR [$this_function] $dest_dir does not exist")
+    unless (-d $dest_dir);
 
   unless ($dest_dir =~ /\/$/){$dest_dir .= "/";}
 
@@ -117,7 +109,7 @@ sub bed6_ss_from_rnaseq{
   while(<INBED>){
     chomp;
     my ($chr, $start, $end, $info, $score, $strand) = split("\t");
-    #$end = $end-1; # required for segemehl/testrealign -n BED6 files
+    $end = $end-2; # required for segemehl/testrealign BED6 files
 
     if ($info =~ /^splits\:(\d+)\:(\d+)\:(\d+):(\w):(\w)/){
       $reads = $1;
@@ -133,13 +125,18 @@ sub bed6_ss_from_rnaseq{
     else {
       die "unsupported INFO filed in input BED:\n$info\n";
     }
+    $pos5 = $start;
+    $pos3 = $end;
+    $c = ss_isCanonical($chr,$pos5,$pos3,$fastaobjR);
 
     my $fn = sprintf("%s_%d-%d.mappedSS.bed6",$chr,$start,$end);
     my $bed6_fn =  $dest_dir.$fn;
     open(BED6OUT, "> $bed6_fn");
-    @bedline = join("\t",$chr,eval($start-$window),eval($start+$window),$info,$score,$strand);
+    @bedline = join("\t",$chr,eval($start-$window),
+		    eval($start+$window),$info,$c,$strand);
     print BED6OUT "@bedline\n";
-    @bedline = join("\t",$chr,eval($end-$window),eval($end+$window),$info,$score,$strand);
+    @bedline = join("\t",$chr,eval($end-$window),
+		    eval($end+$window),$info,$c,$strand);
     print BED6OUT "@bedline\n";
     close(BED6OUT);
   }
@@ -176,13 +173,11 @@ sub intersect_sj{
 
   # get a list of all files in $p_annot
   opendir($dha, $p_annot)  or die "Can't opendir $p_annot: $!";
-  while(readdir $dha) {
-    push @transcript_beds, $_;
-  }
+  while(readdir $dha) { push @transcript_beds, $_; }
   closedir($dha);
 
   # get a list of all splice junctions seen in RNA-seq data
-  opendir(my $dhm, $p_mapped) or die "Can't opendir $p_mapped: $!";
+  opendir($dhm, $p_mapped) or die "Can't opendir $p_mapped: $!";
   @junctions = grep { /^(chr\d+)\_(\d+)-(\d+)\.mappedSS\.bed6/ } readdir($dhm);
 
   # process splice junctions seen in RNA-seq data
@@ -273,6 +268,46 @@ sub intersect_sj{
   printf STDERR "processed $processed splice junctions\n";
 }
 
+# ss_isCanonical ( $chr,$p5,$p3,$fastaobjR )
+#
+# Possible scenarios for canonical splice junction (option 1 shown
+# here)
+#   ------------------>
+# 5'===]GU..........AG[====3'
+#
+#   <-----------------
+# 3'===]GA..........UG[====5'
+#
+# in terms of the underlying reference sequence this boils down to the following combinations
+# 5'===]GT|CT....AG|AC[====3' ie GT->AG or CT->AC
+# 5'===]GC|CT....AG|GC[====3' ie GC->AG or CT->GC
+# 5'===]AT|GT....AC|AT[====3' ie AT->AC or GT->AT
+sub ss_isCanonical{
+  my ($chr,$p5,$p3,$fastaobjR) = @_;
+  my ($seqL,$seqR,$pattern);
+  my %fastaO = %$fastaobjR;
+  my $ss_motif_length = 2;
+  my $this_function = (caller(0))[3];
+  my $c = -1;
+
+  # am besten hier die nt Kombinatioinen irgendwie definieren, damit wir die length dann unten haben
+  $seqL = get_stranded_subsequence($fastaO{$chr},$p5+1,$p5+$ss_motif_length,"+");
+  $seqR = get_stranded_subsequence($fastaO{$chr},$p3-$ss_motif_length+1,$p3,"+");
+
+  $pattern = sprintf("%s|%s",$seqL,$seqR);
+  #print STDERR "[$this_function] p5->p3 ($p5 -- $p3) $seqL -- $seqR\n";
+
+  if ($pattern =~ /^GT|AG$/) { $c = 1000;}
+  elsif ($pattern =~ /^CT|AC$/) { $c = 1000; }
+  elsif ($pattern =~ /^GC|AG$/) { $c = 1000; }
+  elsif ($pattern =~ /^CT|GC$/) { $c = 1000; }
+  elsif ($pattern =~ /^AT|AC$/) { $c = 1000; }
+  elsif ($pattern =~ /^GT|AT$/) { $c = 1000; }
+  else { $c = 0;}
+
+  return $c;
+}
+
 1;
 __END__
 
@@ -284,7 +319,7 @@ ViennaNGS::SpliceJunc - Perl extension for alternative splicing analysis
 
   use ViennaNGS::SpliceJunc;
 
-  bed6_ss_from_bed12($bed12,$dest_dir,$window)
+  bed6_ss_from_bed12($bed12,$dest_dir,$window,$fastaobjR)
   bed6_ss_from_rnaseq($inbed,$dest_dir,$window,$mcov)
   intersect_sj($p_annot,$p_mapped,$p_out,$prefix,$window,$mil,$can)
 
@@ -300,7 +335,7 @@ novel splice junctions from RNA-seq data with annotated splice junctions.
 =head2 EXPORT
 
 Routines:
-  bed6_ss_from_bed12($bed12,$dest_dir,$window)
+  bed6_ss_from_bed12($bed12,$dest_dir,$window,$fastaobjR)
   bed6_ss_from_rnaseq($inbed,$dest_dir,$window,$mcov)
   intersect_sj($p_annot,$p_mapped,$p_out,$prefix,$window,$mil,$can)
 
@@ -309,13 +344,15 @@ Variables:
 
 =head1 SUBROUTINES
 
-=head2 bed6_ss_from_bed12($bed12,$dest_dir,$window)
+=head2 bed6_ss_from_bed12($bed12,$dest_dir,$window,$fastaobjR)
 
 Extracts splice junctions from an BED12 file (provided via argument
 $bed12), writes a BED6 file for each transcript to $dest_dir,
 containing all its splice junctions. Output splice junctions can be
-flanked by a window of +/- $window nt. Each splice junction is
-represented as two bed lines in the output BED6.
+flanked by a window of +/- $window nt. $fastaobjR is a reference to a
+Bio::PrimarySeq::Fasta object holding the underlying reference
+genome. Each splice junction is represented as two bed lines in the
+output BED6.
 
 =head2 bed6_ss_from_rnaseq($inbed,$dest_dir,$window,$mcov)
 
