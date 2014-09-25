@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-25 17:02:12 mtw>
+# Last changed Time-stamp: <2014-09-25 23:59:18 mtw>
 #
 # TODO:
 #       - extractfilter canonical splice junctions in intersect_sj()
@@ -278,7 +278,8 @@ sub intersect_sj{
 #   <-----------------
 # 3'===]GA..........UG[====5'
 #
-# in terms of the underlying reference sequence this boils down to the following combinations
+# in terms of the underlying reference sequence this boils down to the
+# following combinations:
 # 5'===]GT|CT....AG|AC[====3' ie GT->AG or CT->AC
 # 5'===]GC|CT....AG|GC[====3' ie GC->AG or CT->GC
 # 5'===]AT|GT....AC|AT[====3' ie AT->AC or GT->AT
@@ -401,7 +402,32 @@ operations are performed with sortBed.
 Writes two BEd6 files to $p_out (optionally prefixed by $prefix),
 which contain novel and existing splice junctions respectively.
 
+=head2 ss_isCanonical($chr,$p5,$p3,$fastaobjR)
+
+Checks whether a given splice junction is canonical, ie. whether the
+first and last two nucleotides of the enclosed intron correspond to a
+certain nucleotide motif. $chr is the chromosome name, $p5 and $p3 the
+5' and 3' ends of the splice junction and $fastaobjR is a
+Bio::PrimarySeq::Fasta object holding the underlying reference genome
+
+This routine does not explicitly consider standedness in the sense
+that splice junction motifs are evaluated in terms of the forward
+strand of the underlying reference sequence. This is best explained by
+an example: Consider the splice junction motif GU->G on the reverse
+strand. In 5' to 3' direction of the forward strandm this junction
+reads CT->AC. A splice junction is canonical if its motif corresponds
+to one of the following cases:
+
+5'===]GT|CT....AG|AC[====3' ie GT->AG or CT->AC
+5'===]GC|CT....AG|GC[====3' ie GC->AG or CT->GC
+5'===]AT|GT....AC|AT[====3' ie AT->AC or GT->AT
+
+
 =head1 DEPENDENCIES
+
+This modules depends on the following Perl modules:
+  - ViennaNGS
+  - File::Spec
 
 ViennaNGS::SpliceJunc uses third-party tools for computing intersections of
 BED files. Specifically, the intersectBed utility from the BEDtools suite
@@ -416,7 +442,6 @@ system.
 =head1 SEE ALSO
 
   perldoc ViennaNGS
-  perldoc ViennaNGS::AnnoC
 
 =head1 AUTHORS
 
