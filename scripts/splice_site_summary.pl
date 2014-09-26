@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-25 16:04:37 mtw>
+# Last changed Time-stamp: <2014-09-26 11:59:04 mtw>
 #
 # ***********************************************************************
 # *  This program is free software: you can redistribute it and/or modify
@@ -76,10 +76,12 @@ unless (-f $s_in){
   pod2usage(-verbose => 0);
 }
 
-unless ($fa_in =~ /^\//) {$fa_in = "./".$fa_in;}
-unless (-f $fa_in){
-  warn "Could not find input file $fa_in given via -f option";
-  pod2usage(-verbose => 0);
+if ($want_canonical){
+  unless ($fa_in =~ /^\//) {$fa_in = "./".$fa_in;}
+  unless (-f $fa_in){
+    warn "Could not find input file $fa_in given via -f option";
+    pod2usage(-verbose => 0);
+  }
 }
 
 unless ($outdir =~ /\/$/){$outdir .= "/";}
@@ -90,7 +92,9 @@ $path_ss = $outdir.$dirname_ss;
 unless (-d $path_ss){my $cmd = "mkdir -p $path_ss"; system($cmd);}
 
 # Parse Fasta file, populate @fastaids
-get_fasta_ids($fa_in);
+if($want_canonical){
+  get_fasta_ids($fa_in);
+}
 
 # Get genomic sequences
 foreach my $id (@fastaids) {
@@ -98,16 +102,15 @@ foreach my $id (@fastaids) {
 }
 
 # Extract annotated splice sites from a BED12 file
-bed6_ss_from_bed12($bed12_in,$path_annot,$window,\%fastaobj);
+bed6_ss_from_bed12($bed12_in,$path_annot,$window,$want_canonical,\%fastaobj);
 
 # Extract mapped splice junctions and create a BED6 file for each
 # of them
-bed6_ss_from_rnaseq($s_in,$path_ss,$window,$mincov,\%fastaobj);
+bed6_ss_from_rnaseq($s_in,$path_ss,$window,$mincov,$want_canonical,\%fastaobj);
 
 # Check for each splice junction seen in RNA-seq if it overlaps with
 # any annotated splice junction
-intersect_sj($path_annot,$path_ss,$outdir,$prefix,$window,$max_intron_length,
-	$want_canonical);
+intersect_sj($path_annot,$path_ss,$outdir,$prefix,$window,$max_intron_length);
 
 
 __END__
