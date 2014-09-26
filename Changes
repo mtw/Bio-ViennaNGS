@@ -35,4 +35,5 @@ Revision history for Perl extension ViennaNGS.
 	- intermediate bedGraph files are now removed in bed2bw()
 
 0.07_01
-	- moved newUCSCdb.pl to ViennaNGS::UCSC
+	- refactored bam2bw()
+	- refactored bed2bw()

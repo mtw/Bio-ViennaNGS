@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-22 17:00:20 mtw>
+# Last changed Time-stamp: <2014-09-26 14:31:06 mtw>
 
 package ViennaNGS;
 
@@ -309,12 +309,10 @@ sub bam2bw {
   my $outfolder = $outpath."vis";
   my ($GCB_cmd,$BGTBW_cmd);
 
-  unless (-e $bamfile) {
-    die "ERROR: Cannot find $bamfile\n";
-  }
-  unless (-e $chromsizes) {
-    die "ERROR: Cannot find $chromsizes ...BigWig cannot be generated\n";
-  }
+  die "ERROR: Cannot find $bamfile\n" unless (-e $bamfile);
+  die "ERROR: Cannot find $chromsizes ...BigWig cannot be generated\n"
+    unless (-e $chromsizes)
+
   mkdir $outfolder;
 
   $GCB_cmd = "$genomeCoverageBed -bg -ibam $bamfile -g $chromsizes > $outfolder/$bamfile.bg";
@@ -333,20 +331,24 @@ sub bed2bw {
   my ($bedfile,$chromsizes,$strand,$dest_dir,$want_norm,$size,$scale,$log) = @_;
   my ($bn,$path,$ext,$cmd);
   my $factor = 1.;
+  my $this_function = (caller(0))[3];
   my $genomeCoverageBed = `which genomeCoverageBed`; chomp($genomeCoverageBed);
   my $bedGraphToBigWig = `which bedGraphToBigWig`; chomp($bedGraphToBigWig);
   my $awk = `which awk`; chomp($awk);
 
   open(LOG, ">>", $log) or die $!;
-  print LOG "LOG [ViennaNGS::bed2bw()] \$bedfile: $bedfile -- \$chromsizes: $chromsizes --\$dest_dir: $dest_dir\n";
+  print LOG "LOG [$this_function] \$bedfile: $bedfile -- \$chromsizes: $chromsizes --\$dest_dir: $dest_dir\n";
 
-  die ("ERROR [ViennaNGS::bed2bw()] Cannot find $bedfile\n") unless (-e $bedfile);
-  die ("ERROR [ViennaNGS::bed2bw()] Cannot find $chromsizes ...bigWig cannot be generated\n")  unless (-e $chromsizes);
-  die ("ERROR [ViennaNGS::bed2bw()] $dest_dir does not exist\n") unless (-d $dest_dir);
+  die ("ERROR [$this_function] Cannot find $bedfile\n")
+    unless (-e $bedfile);
+  die ("ERROR [$this_function] Cannot find $chromsizes ...bigWig cannot be generated\n")
+    unless (-e $chromsizes);
+  die ("ERROR [$this_function] $dest_dir does not exist\n")
+    unless (-d $dest_dir);
 
   if ($want_norm == 1){
     $factor = $scale/$size;
-    print LOG "LOG [ViennaNGS::bed2bw()] normalization: $factor = ($scale/$size)\n";
+    print LOG "LOG [$this_function] normalization: $factor = ($scale/$size)\n";
   }
 
   ($bn,$path,$ext) = fileparse($bedfile, qr /\..*/);
