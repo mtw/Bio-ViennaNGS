@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-26 14:31:06 mtw>
+# Last changed Time-stamp: <2014-09-27 12:45:34 mtw>
 
 package ViennaNGS;
 
@@ -12,10 +12,14 @@ use Bio::DB::Sam;
 use Data::Dumper;
 use File::Basename qw(basename fileparse);
 use File::Temp qw(tempfile);
+use File::Which;
+use Path::Class;
 
-our @ISA       = qw(Exporter);
-our @EXPORT    = qw(get_stranded_subsequence split_bam bam2bw bed2bw totalreads
-		    computeTPM computeRPKM);
+our @ISA = qw(Exporter);
+
+our @EXPORT = qw(get_stranded_subsequence split_bam bam2bw bed2bw
+		    bed2bigBed totalreads computeTPM computeRPKM);
+
 our @EXPORT_OK = qw(featCount_data parse_multicov write_multicov);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -59,6 +63,7 @@ sub split_bam {
   my ($bam_pos,$bam_neg,$tmp_bam_pos,$tmp_bam_neg,$bamname_pos,$bamname_neg);
   my ($bed_pos,$bed_neg,$bedname_pos,$bedname_neg);
   my ($seq_id,$start,$stop,$strand,$target_names,$id,$score);
+  my $this_function = (caller(0))[3];
   my %count_entries = (
 		       total     => 0,
 		       uniq      => 0,
@@ -74,8 +79,10 @@ sub split_bam {
   $data{count} = \%count_entries;
   $data{flag} = ();
 
-  die("ERROR [ViennaNGS::split_bam()] $bamfile does not exist\n") unless (-e $bamfile);
-  die("ERROR [ViennaNGS::split_bam()] $dest_dir does not exist\n") unless (-d $dest_dir);
+  die("ERROR [$this_function] $bamfile does not exist\n")
+    unless (-e $bamfile);
+  die("ERROR [$this_function] $dest_dir does not exist\n")
+    unless (-d $dest_dir);
 
   open(LOG, ">", $log) or die $!;
 
@@ -91,9 +98,9 @@ sub split_bam {
   $bamname_pos = $dest_dir.$bn.".pos".$ext;
   $bamname_neg = $dest_dir.$bn.".neg".$ext;
   $bam_pos = Bio::DB::Bam->open($tmp_bam_pos,'w')
-    or die "ERROR [ViennaNGS::split_bam()] Could not open bam_pos file for writing: $!";
+    or die "ERROR [$this_function] Could not open bam_pos file for writing: $!";
   $bam_neg = Bio::DB::Bam->open($tmp_bam_neg,'w')
-    or die "ERROR [ViennaNGS::split_bam()] Could not open bam_neg file for writing: $!";
+    or die "ERROR [$this_function] Could not open bam_neg file for writing: $!";
 
   if ($want_bed == 1){
      $bedname_pos = $dest_dir.$bn.".pos.bed";
@@ -130,7 +137,7 @@ sub split_bam {
       }
       $data{count}{cur}++;
     }
-    else{ warn "WARN [ViennaNGS::split_bam()] Read ".$read->query->name." does not have NH attribute\n";}
+    else{ warn "WARN [$this_function] Read ".$read->query->name." does not have NH attribute\n";}
 
   #  print Dumper ($read->query);
     $strand = $read->strand;
@@ -308,10 +315,12 @@ sub bam2bw {
   my $outpath = "./";
   my $outfolder = $outpath."vis";
   my ($GCB_cmd,$BGTBW_cmd);
+  my $this_function = (caller(0))[3];
 
-  die "ERROR: Cannot find $bamfile\n" unless (-e $bamfile);
-  die "ERROR: Cannot find $chromsizes ...BigWig cannot be generated\n"
-    unless (-e $chromsizes)
+  die "ERROR [$this_function] Cannot find $bamfile\n"
+    unless (-e $bamfile);
+  die "ERROR [$this_function] Cannot find $chromsizes ...BigWig cannot be generated\n"
+    unless (-e $chromsizes);
 
   mkdir $outfolder;
 
@@ -323,50 +332,82 @@ sub bam2bw {
   system($BGTBW_cmd);
 }
 
-# bed2bw ($bed,$chromsizes,$strand,$dest_dir,$size,$norm)
+# bed2bw ($infile,$chromsizes,$strand,$dest,$size,$norm)
 # Generate stranded BigWig coverage profiles from BED via two third-party tools:
 # genomeCoverageBed from BEDtools
 # bedGraphToBigWig from UCSC Genome Browser tools
 sub bed2bw {
-  my ($bedfile,$chromsizes,$strand,$dest_dir,$want_norm,$size,$scale,$log) = @_;
+  my ($infile,$chromsizes,$strand,$dest,$want_norm,$size,$scale,$log) = @_;
   my ($bn,$path,$ext,$cmd);
   my $factor = 1.;
   my $this_function = (caller(0))[3];
-  my $genomeCoverageBed = `which genomeCoverageBed`; chomp($genomeCoverageBed);
-  my $bedGraphToBigWig = `which bedGraphToBigWig`; chomp($bedGraphToBigWig);
-  my $awk = `which awk`; chomp($awk);
+  my $genomeCoverageBed = `which genomeCoverageBed`;
+  chomp($genomeCoverageBed);
+  my $bedGraphToBigWig = `which bedGraphToBigWig`;
+  chomp($bedGraphToBigWig);
+  my $awk = `which awk`; 
+  chomp($awk);
 
   open(LOG, ">>", $log) or die $!;
-  print LOG "LOG [$this_function] \$bedfile: $bedfile -- \$chromsizes: $chromsizes --\$dest_dir: $dest_dir\n";
+  print LOG "LOG [$this_function] \$infile: $infile -- \$chromsizes: $chromsizes --\$dest: $dest\n";
 
-  die ("ERROR [$this_function] Cannot find $bedfile\n")
-    unless (-e $bedfile);
-  die ("ERROR [$this_function] Cannot find $chromsizes ...bigWig cannot be generated\n")
+  die ("ERROR [$this_function] Cannot find $infile\n")
+    unless (-e $infile);
+  die ("ERROR [$this_function] Cannot find $chromsizes\n")
     unless (-e $chromsizes);
-  die ("ERROR [$this_function] $dest_dir does not exist\n")
-    unless (-d $dest_dir);
+  die ("ERROR [$this_function] $dest does not exist\n")
+    unless (-d $dest);
 
   if ($want_norm == 1){
     $factor = $scale/$size;
     print LOG "LOG [$this_function] normalization: $factor = ($scale/$size)\n";
   }
 
-  ($bn,$path,$ext) = fileparse($bedfile, qr /\..*/);
+  ($bn,$path,$ext) = fileparse($infile, qr /\..*/);
 
   if ($strand eq "+"){
-    $cmd = "$genomeCoverageBed -bg -i $bedfile -g $chromsizes -strand $strand -scale $factor > $dest_dir/$bn.pos.bg";
-    $cmd .= " && $bedGraphToBigWig $dest_dir/$bn.pos.bg $chromsizes $dest_dir/$bn.pos.bw";
+    $cmd = "$genomeCoverageBed -bg -i $infile -g $chromsizes -strand $strand -scale $factor > $dest/$bn.pos.bg";
+    $cmd .= " && $bedGraphToBigWig $dest/$bn.pos.bg $chromsizes $dest/$bn.pos.bw";
   }
   else{
-    $cmd = "$genomeCoverageBed -bg -i $bedfile -g $chromsizes -strand $strand -scale $factor > $dest_dir/$bn.neg.bg.1";
-    $cmd .= " && cat $dest_dir/$bn.neg.bg.1 | $awk \'{ \$4 = - \$4 ; print \$0 }\' > $dest_dir/$bn.neg.bg";
-    $cmd .= " && $bedGraphToBigWig $dest_dir/$bn.neg.bg $chromsizes  $dest_dir/$bn.neg.bw";
+    $cmd = "$genomeCoverageBed -bg -i $infile -g $chromsizes -strand $strand -scale $factor > $dest/$bn.neg.bg.1";
+    $cmd .= " && cat $dest/$bn.neg.bg.1 | $awk \'{ \$4 = - \$4 ; print \$0 }\' > $dest/$bn.neg.bg";
+    $cmd .= " && $bedGraphToBigWig $dest/$bn.neg.bg $chromsizes  $dest/$bn.neg.bw";
   }
   print LOG "LOG [ViennaNGS::bed2bw()] $cmd\n";
   system($cmd);
-  if ($strand eq "+"){unlink ("$dest_dir/$bn.pos.bg");} # rm intermediate bedGraph files
-  else{ unlink("$dest_dir/$bn.neg.bg"); unlink("$dest_dir/$bn.neg.bg.1");}
+  if ($strand eq "+"){unlink ("$dest/$bn.pos.bg");} # rm intermediate bedGraph files
+  else{ unlink("$dest/$bn.neg.bg"); unlink("$dest/$bn.neg.bg.1");}
   close (LOG);
+}
+
+# bed2bigBed($bed,$chromsizes,$dest,$log)
+sub bed2bigBed {
+  my ($infile,$chromsizes,$dest,$log) = @_;
+  my ($bn,$path,$ext,$cmd,$outfile);
+  my $this_function = (caller(0))[3];
+  my $bed2bigBed = which('bed2bigBed');
+
+  if (defined $log){  open(LOG, ">>", $log) or die $!;}
+
+  die ("ERROR [$this_function] bed2bigBed utility not found")
+    unless (defined $bed2bigBed);
+  die ("ERROR [$this_function] Cannot find $infile")
+    unless (-e $infile);
+  die ("ERROR [$this_function] Cannot find $chromsizes")
+    unless (-e $chromsizes);
+  die ("ERROR [$this_function] $dest does not exist")
+    unless (-d $dest);
+
+  ($bn,$path,$ext) = fileparse($infile, qr /\..*/);
+  $outfile = file($dest, "$bn.bb");
+
+  $cmd = "$bed2bigBed $infile -extraIndex=name -tab $chromsizes $outfile";
+  if (defined $log){ print LOG "LOG [ViennaNGS::bed2bw()] $cmd\n"; }
+  system($cmd);
+  if (defined $log){ close(LOG); }
+
+  return $outfile;
 }
 
 # computeTPM($featCount_sample,$readlength)
@@ -555,11 +596,11 @@ http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html)
 and bedGraphToBigWig (from the UCSC Genome Browser, see
 http://hgdownload.cse.ucsc.edu/admin/exe/).
 
-=head2 bed2bw($bed,$chromsizes,$strand,$dest_dir,$want_norm,$size,$scale,$log)
+=head2 bed2bw($infile,$chromsizes,$strand,$dest,$want_norm,$size,$scale,$log)
 
 Creates stranded, normalized BigWig coverage profiles from BED
 files. $chromsizes is the chromosome.sizes files, $strand is either
-"+" or "-" and $dest_dir contains the output path for results. For
+"+" or "-" and $dest contains the output path for results. For
 normlization of bigWig profiles, additional attributes are required:
 $want_norm triggers normalization with values 0 or 1. $size is the
 number of elements (features) in the BED file and $scale gives the
@@ -574,6 +615,13 @@ http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html)
 and bedGraphToBigWig (from the UCSC Genome Browser, see
 http://hgdownload.cse.ucsc.edu/admin/exe/). Intermediate bedGraph
 files are removed automatically.
+
+=head2 bed2bigBed($bed,$chromsizes,$dest,$log)
+
+Created an indexed bigBed file from a BED file. C<$bed> is the BED
+file to be transformed, C<$chromsizes> is the chromosome.sizes file
+and $dest contains the output path for results. $log is the name of a
+log file, or undef if no logging is reuqired.
 
 =head2 computeTPM($featCount_sample,$rl)
 
@@ -605,6 +653,14 @@ entries, e.g. TPM or RPKM. These values must have been computed and
 inserted into @featCount beforehand by e.g. computeTPM(). $dest_dir
 gives the absolute path and $base_name the basename (will be extended by
 $item.csv) of the output file.
+
+=head1 DEPENDENCIES
+
+  L<Bio::Perl>
+  L<BIO::DB::Sam>
+  L<File::Basename>
+  L<File::Temp>
+  L<Path::Class>
 
 =head1 SEE ALSO
 
