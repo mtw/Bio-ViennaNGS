@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-23 09:56:20 mtw>
+# Last changed Time-stamp: <2014-09-27 23:57:52 mtw>
 
 package ViennaNGS::AnnoC;
 
