@@ -36,7 +36,7 @@ Revision history for Perl extension ViennaNGS.
 
 0.07_01
 	- added scripts/splice_site_summary.pl
+	- added scripts/assembly_hub_constructer.pl
 	- added bed2bigBed()
 	- refactored bam2bw()
 	- refactored bed2bw()
-	
