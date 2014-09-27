@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-26 11:59:04 mtw>
+# Last changed Time-stamp: <2014-09-27 23:30:59 mtw>
 #
 # ***********************************************************************
 # *  This program is free software: you can redistribute it and/or modify
@@ -41,10 +41,13 @@ my $prefix = "";
 my $dirname_annot = "annotated";
 my $dirname_ss = "mapped";
 my $want_canonical = 0;
+my $want_bigbed = 0;
 my $s_in = '-';
 my $bed12_in = '-';
 my $fa_in = '-';
+my $cs_in = '-';
 my %fastaobj = ();
+my @result = ();
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
@@ -54,7 +57,9 @@ Getopt::Long::config('no_ignore_case');
 pod2usage(-verbose => 1) unless GetOptions("s=s"     => \$s_in,
 					   "a=s"     => \$bed12_in,
 					   "f=s"     => \$fa_in,
-					   "c"       => sub{$want_canonical=1},
+					   "c=s"     => \$cs_in,
+					   "n"       => sub{$want_canonical=1},
+					   "b"       => sub{$want_bigbed=1},
 					   "o=s"     => \$outdir,
 					   "r=s"     => \$mincov,
 					   "i=s"     => \$max_intron_length,
@@ -76,7 +81,7 @@ unless (-f $s_in){
   pod2usage(-verbose => 0);
 }
 
-if ($want_canonical){
+if ($want_canonical==1){
   unless ($fa_in =~ /^\//) {$fa_in = "./".$fa_in;}
   unless (-f $fa_in){
     warn "Could not find input file $fa_in given via -f option";
@@ -84,6 +89,16 @@ if ($want_canonical){
   }
 }
 
+if($want_bigbed==1){
+  unless ($cs_in =~ /^\//) {$cs_in = "./".$cs_in;}
+  unless (-f $cs_in){
+    warn "Could not find input file $cs_in given via -c option";
+    pod2usage(-verbose => 0);
+  }
+
+}
+
+#TODO check if we are allowed to write to $outdir
 unless ($outdir =~ /\/$/){$outdir .= "/";}
 unless (-d $outdir){my $cmd = "mkdir -p $outdir"; system($cmd);}
 $path_annot = $outdir.$dirname_annot;
@@ -110,8 +125,14 @@ bed6_ss_from_rnaseq($s_in,$path_ss,$window,$mincov,$want_canonical,\%fastaobj);
 
 # Check for each splice junction seen in RNA-seq if it overlaps with
 # any annotated splice junction
-intersect_sj($path_annot,$path_ss,$outdir,$prefix,$window,$max_intron_length);
+@result = intersect_sj($path_annot,$path_ss,$outdir,$prefix,$window,$max_intron_length);
+my ($exist,$novel) = @result;
 
+if($want_bigbed){
+  # TODO chromsizes vis cmdl
+  my $bbe = bed2bigBed($exist,$cs_in,$outdir,undef);
+  my $bbn = bed2bigBed($novel,$cs_in,$outdir,undef);
+}
 
 __END__
 
@@ -142,6 +163,14 @@ Splice junctions from mapped RNA-seq data in BED6 format
 Reference genome in Fasta format
 
 =item B<-c>
+
+Chromosome sizes files
+
+=item B<-b>
+
+Convert resuting BED6 files to bigBed format
+
+=item B<-n>
 
 Filter I<canonical> splice junctions
 
