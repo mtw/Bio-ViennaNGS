@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-27 23:30:59 mtw>
+# Last changed Time-stamp: <2014-09-28 11:07:34 mtw>
 #
 # ***********************************************************************
 # *  This program is free software: you can redistribute it and/or modify
@@ -25,6 +25,8 @@ use Getopt::Long qw( :config posix_default bundling no_ignore_case );
 use Pod::Usage;
 use Data::Dumper;
 use local::lib;
+use IPC::Cmd qw(can_run);
+use ViennaNGS;
 use ViennaNGS::AnnoC;
 use ViennaNGS::SpliceJunc;
 
@@ -95,7 +97,8 @@ if($want_bigbed==1){
     warn "Could not find input file $cs_in given via -c option";
     pod2usage(-verbose => 0);
   }
-
+  my $bedTobigBed = can_run('bedTobigBed') or
+    die 'bedTobigBed utility not found!';
 }
 
 #TODO check if we are allowed to write to $outdir
