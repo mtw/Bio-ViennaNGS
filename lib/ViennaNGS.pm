@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-27 12:45:34 mtw>
+# Last changed Time-stamp: <2014-09-28 12:50:21 mtw>
 
 package ViennaNGS;
 
@@ -12,7 +12,7 @@ use Bio::DB::Sam;
 use Data::Dumper;
 use File::Basename qw(basename fileparse);
 use File::Temp qw(tempfile);
-use File::Which;
+use IPC::Cmd qw(can_run run);
 use Path::Class;
 
 our @ISA = qw(Exporter);
@@ -381,16 +381,21 @@ sub bed2bw {
   close (LOG);
 }
 
-# bed2bigBed($bed,$chromsizes,$dest,$log)
+# bed2bigBed($infile,$chromsizes,$dest,$log)
+#
+# Use 'bedToBigBed' to make bigBed from BED. A '.bed', '.bed6' or
+# '.bed12' extension of the input file will be replaced by '.bb' in
+# the output.
+
 sub bed2bigBed {
   my ($infile,$chromsizes,$dest,$log) = @_;
   my ($bn,$path,$ext,$cmd,$outfile);
   my $this_function = (caller(0))[3];
-  my $bed2bigBed = which('bed2bigBed');
+  my $bed2bigBed = can_run('bedToBigBed');
 
   if (defined $log){  open(LOG, ">>", $log) or die $!;}
 
-  die ("ERROR [$this_function] bed2bigBed utility not found")
+  die ("ERROR [$this_function] bedToBigBed utility not found")
     unless (defined $bed2bigBed);
   die ("ERROR [$this_function] Cannot find $infile")
     unless (-e $infile);
@@ -399,12 +404,22 @@ sub bed2bigBed {
   die ("ERROR [$this_function] $dest does not exist")
     unless (-d $dest);
 
-  ($bn,$path,$ext) = fileparse($infile, qr /\..*/);
+  # .bed6 .bed12 extensions are replaced by .bb
+  ($bn,$path,$ext) = fileparse($infile, qr /\.bed[126]?/);
   $outfile = file($dest, "$bn.bb");
 
   $cmd = "$bed2bigBed $infile -extraIndex=name -tab $chromsizes $outfile";
-  if (defined $log){ print LOG "LOG [ViennaNGS::bed2bw()] $cmd\n"; }
-  system($cmd);
+  if (defined $log){ print LOG "LOG [$this_function] $cmd\n"; }
+  my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) =
+    run( command => $cmd, verbose => 0 );
+
+  if( !$success ) {
+    print STDERR "ERROR [$this_function] Call to $bed2bigBed  unsuccessful\n";
+    print STDERR "ERROR: this is what the command printed:\n";
+    print join "", @$full_buf;
+    die;
+  }
+
   if (defined $log){ close(LOG); }
 
   return $outfile;
@@ -616,12 +631,18 @@ and bedGraphToBigWig (from the UCSC Genome Browser, see
 http://hgdownload.cse.ucsc.edu/admin/exe/). Intermediate bedGraph
 files are removed automatically.
 
-=head2 bed2bigBed($bed,$chromsizes,$dest,$log)
+=head2 bed2bigBed($infile,$chromsizes,$dest,$log)
 
-Created an indexed bigBed file from a BED file. C<$bed> is the BED
+Creates an indexed bigBed file from a BED file. C<$infile> is the BED
 file to be transformed, C<$chromsizes> is the chromosome.sizes file
 and $dest contains the output path for results. $log is the name of a
-log file, or undef if no logging is reuqired.
+log file, or undef if no logging is reuqired. A '.bed', '.bed6' or
+'.bed12' suffix in C<$infile> will be replace by '.bb' in the
+output. Else, the name of the output bigBed file will be the value of
+C<$infile> plus '.bb' appended.
+
+The conversion from BED to bigBed is done by a third-party utility
+(bedToBigBed), which is executed by IPC::Cmd.
 
 =head2 computeTPM($featCount_sample,$rl)
 
@@ -661,6 +682,7 @@ $item.csv) of the output file.
   L<File::Basename>
   L<File::Temp>
   L<Path::Class>
+  L<IPC::Cmd>
 
 =head1 SEE ALSO
 
