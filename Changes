@@ -38,5 +38,6 @@ Revision history for Perl extension ViennaNGS.
 	- added scripts/splice_site_summary.pl
 	- added scripts/assembly_hub_constructer.pl
 	- added bed2bigBed()
+	- use IPC::Cmd for running external tools in bed2bigBed()
 	- refactored bam2bw()
 	- refactored bed2bw()
