@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-28 11:07:34 mtw>
+# Last changed Time-stamp: <2014-09-28 12:53:57 mtw>
 #
 # ***********************************************************************
 # *  This program is free software: you can redistribute it and/or modify
@@ -97,8 +97,8 @@ if($want_bigbed==1){
     warn "Could not find input file $cs_in given via -c option";
     pod2usage(-verbose => 0);
   }
-  my $bedTobigBed = can_run('bedTobigBed') or
-    die 'bedTobigBed utility not found!';
+  my $bedTobigBed = can_run('bedToBigBed') or
+    die 'bedToBigBed utility not found!';
 }
 
 #TODO check if we are allowed to write to $outdir
