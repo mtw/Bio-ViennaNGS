@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-28 12:53:57 mtw>
+# Last changed Time-stamp: <2014-09-29 17:17:53 mtw>
 #
 # ***********************************************************************
 # *  This program is free software: you can redistribute it and/or modify
@@ -24,9 +24,8 @@ use warnings;
 use Getopt::Long qw( :config posix_default bundling no_ignore_case );
 use Pod::Usage;
 use Data::Dumper;
-use local::lib;
 use IPC::Cmd qw(can_run);
-use ViennaNGS;
+use ViennaNGS v0.07;
 use ViennaNGS::AnnoC;
 use ViennaNGS::SpliceJunc;
 
@@ -103,21 +102,22 @@ if($want_bigbed==1){
 
 #TODO check if we are allowed to write to $outdir
 unless ($outdir =~ /\/$/){$outdir .= "/";}
-unless (-d $outdir){my $cmd = "mkdir -p $outdir"; system($cmd);}
+unless (-d $outdir){mkdir $outdir or die $!;}
 $path_annot = $outdir.$dirname_annot;
-unless (-d $path_annot){my $cmd = "mkdir -p $path_annot"; system($cmd);}
+unless (-d $path_annot){mkdir $path_annot or die $!;}
 $path_ss = $outdir.$dirname_ss;
-unless (-d $path_ss){my $cmd = "mkdir -p $path_ss"; system($cmd);}
+unless (-d $path_ss){mkdir $path_ss or die $!;}
 
-# Parse Fasta file, populate @fastaids
+
 if($want_canonical){
-  get_fasta_ids($fa_in);
+  # Parse Fasta file, populate @fastaids
+  my @fo = get_fasta_ids($fa_in);
+  # Get genomic sequences
+  foreach my $id (@fo) {
+    $fastaobj{$id} = $fastadb->get_Seq_by_id($id); # Bio::PrimarySeq::Fasta object
+  }
 }
 
-# Get genomic sequences
-foreach my $id (@fastaids) {
-  $fastaobj{$id} = $fastadb->get_Seq_by_id($id); # Bio::PrimarySeq::Fasta object
-}
 
 # Extract annotated splice sites from a BED12 file
 bed6_ss_from_bed12($bed12_in,$path_annot,$window,$want_canonical,\%fastaobj);
@@ -132,7 +132,6 @@ bed6_ss_from_rnaseq($s_in,$path_ss,$window,$mincov,$want_canonical,\%fastaobj);
 my ($exist,$novel) = @result;
 
 if($want_bigbed){
-  # TODO chromsizes vis cmdl
   my $bbe = bed2bigBed($exist,$cs_in,$outdir,undef);
   my $bbn = bed2bigBed($novel,$cs_in,$outdir,undef);
 }
@@ -214,7 +213,7 @@ Prints the manual page and exits
 This program identifies and characterizes splice sites from mapped
 RNA-seq data against annotated splice junctions.
 
-=head1 AUTHORS
+=head1 AUTHOR
 
 Michael Thomas Wolfinger E<lt>michael@wolfinger.euE<gt>
 
