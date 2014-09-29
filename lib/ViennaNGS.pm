@@ -1,19 +1,20 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-28 12:50:21 mtw>
+# Last changed Time-stamp: <2014-09-29 17:19:23 mtw>
 
 package ViennaNGS;
 
 use Exporter;
-use version; our $VERSION = qv('0.07_01');
+use version; our $VERSION = qv('0.07');
 use strict;
 use warnings;
-use Bio::Perl;
-use Bio::DB::Sam;
+use Bio::Perl 1.006924;
+use Bio::DB::Sam 1.39;
 use Data::Dumper;
 use File::Basename qw(basename fileparse);
 use File::Temp qw(tempfile);
 use IPC::Cmd qw(can_run run);
 use Path::Class;
+use Carp;
 
 our @ISA = qw(Exporter);
 
@@ -41,6 +42,9 @@ sub featCount_data {
 # Bio::PrimarySeq::Fasta object
 sub get_stranded_subsequence {
   my ($o,$start,$end,$strand) = @_;
+  unless (defined $o){
+    confess "Fasta object not available"
+  }
   my $seq = $o->subseq($start => $end);
   if ($strand eq '-1' || $strand eq '-') {
     my $rc = revcom($seq);
@@ -683,6 +687,7 @@ $item.csv) of the output file.
   L<File::Temp>
   L<Path::Class>
   L<IPC::Cmd>
+  L<Carp> 
 
 =head1 SEE ALSO
 
