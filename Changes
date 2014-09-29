@@ -44,3 +44,4 @@ Revision history for Perl extension ViennaNGS.
 	- use Carp for error handling
 	- refactored bam2bw()
 	- refactored bed2bw()
+	- removed scripts/ensembl_fa2bed.pl
