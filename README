@@ -18,9 +18,6 @@ Convert RefSeq GFF3 annotation files to BED12 format. Individual BED12
 files are created for each feature type (CDS/tRNA/rRNA/etc.). Tested with
 RefSeq bacterial GFF3 annotation.  
 
-ensembl_fa2bed.pl
-Extract annotation information from ENSEMBL FASTA and convert to BED format.
-
 motiffinda.pl:
 Find motifs in annotated sequences. The motif can be provied as regex.
 
