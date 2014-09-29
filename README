@@ -1,4 +1,4 @@
-ViennaNGS v0.07_01
+ViennaNGS v0.07
 ======================
 
 ViennaNGS is a collection of Perl Modules for Next-Generation Sequencng
@@ -33,6 +33,10 @@ Compute normalized expression data in TPM/RPKM from (raw) read counts in
 bedtools multicov format. 
 TPM reference: Wagner et al, Theory Biosci. 131(4), pp 281-85 (2012)
 
+splice_site_summary.pl:
+Identify and characterize splice junctions from RNA-seq data by
+intersecting them with annotated splice junctions.
+
 INSTALLATION
 
 To install this module type the following:
@@ -46,10 +50,16 @@ DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-  Bio::Perl
-  Bio::DB::Sam (requires samtools)
+  ViennaNGS::AnnoC
+  ViennaNGS::SpliceJunc
+  ViennaNGS::UCSC
+  Bio::Perl >= 1.006924
+  Bio::DB::Sam >= 1.39
   File::Basename
   File::Temp
+  IPC::Cmd
+  Pod::Usage
+  Carp
 
 Computation of BigWig files from BAM is accomplished via two calls to
 third-party tools internally. genomeCoverageBed from the BEDtools suite
