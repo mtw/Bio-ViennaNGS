@@ -34,10 +34,13 @@ Revision history for Perl extension ViennaNGS.
 	- refactored split_bam()
 	- intermediate bedGraph files are now removed in bed2bw()
 
-0.07_01
+0.07  Mon Sep 29 2014
+	- minimum version of Bio::Perl is 1.006924
+	- minimum version of Bio::DB::Sam is 1.39
 	- added scripts/splice_site_summary.pl
-	- added scripts/assembly_hub_constructer.pl
+	- added scripts/assembly_hub_constructer.pl prototype
 	- added bed2bigBed()
 	- use IPC::Cmd for running external tools in bed2bigBed()
+	- use Carp for error handling
 	- refactored bam2bw()
 	- refactored bed2bw()
