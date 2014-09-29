@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-29 17:17:53 mtw>
+# Last changed Time-stamp: <2014-09-30 00:50:33 mtw>
 #
 # ***********************************************************************
 # *  This program is free software: you can redistribute it and/or modify
@@ -25,9 +25,9 @@ use Getopt::Long qw( :config posix_default bundling no_ignore_case );
 use Pod::Usage;
 use Data::Dumper;
 use IPC::Cmd qw(can_run);
-use ViennaNGS v0.07;
+use ViennaNGS v0.07 qw(bed2bigBed);
 use ViennaNGS::AnnoC;
-use ViennaNGS::SpliceJunc;
+use ViennaNGS::SpliceJunc qw(bed6_ss_from_bed12 bed6_ss_from_rnaseq intersect_sj);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
