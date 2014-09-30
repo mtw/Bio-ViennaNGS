@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-30 15:46:54 mtw>
+# Last changed Time-stamp: <2014-09-30 15:50:28 mtw>
 
 package ViennaNGS::SpliceJunc;
 
@@ -441,7 +441,6 @@ This modules depends on the following Perl modules:
 =item L<Carp>
 
 =back
-
 
 L<ViennaNGS::SpliceJunc> uses third-party tools for computing
 intersections of BED files: The F<intersectBed> utility from the
