@@ -7,10 +7,17 @@
 
 use strict;
 use warnings;
+use IPC::Cmd qw(can_run);
 
-use Test::More tests => 1;
+use Test::More tests => 5;
 BEGIN { use_ok('ViennaNGS') };
 
+ok( defined(can_run('cat')), 'cat not found');
+ok( defined(can_run('awk')), 'awk not found');
+ok( defined(can_run('bedToBigBed')), 'bedToBigBed not found'); 
+ok( defined(can_run('genomeCoverageBed')), 'genomeCoverageBed not found');
+ok( defined(can_run('bedGraphToBigWig')), 'bedGraphToBigWig not found');
+ok( defined(can_run('bedtools')), 'bedtools not found');
 #########################
 
 # Insert your test code below, the Test::More module is use()ed here so read
