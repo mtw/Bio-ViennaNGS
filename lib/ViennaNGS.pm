@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-30 13:49:46 mtw>
+# Last changed Time-stamp: <2014-09-30 14:57:50 mtw>
 
 package ViennaNGS;
 
 use Exporter;
-use version; our $VERSION = qv('0.08_01');
+use version; our $VERSION = qv('0.08');
 use strict;
 use warnings;
 use Bio::Perl 1.006924;
