@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-29 17:19:23 mtw>
+# Last changed Time-stamp: <2014-09-30 13:49:46 mtw>
 
 package ViennaNGS;
 
 use Exporter;
-use version; our $VERSION = qv('0.07');
+use version; our $VERSION = qv('0.08_01');
 use strict;
 use warnings;
 use Bio::Perl 1.006924;
@@ -19,9 +19,9 @@ use Carp;
 our @ISA = qw(Exporter);
 
 our @EXPORT = qw(get_stranded_subsequence split_bam bam2bw bed2bw
-		    bed2bigBed totalreads computeTPM computeRPKM);
+		    bed2bigBed computeTPM);
 
-our @EXPORT_OK = qw(featCount_data parse_multicov write_multicov);
+our @EXPORT_OK = qw(featCount_data parse_multicov write_multicov totalreads);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
@@ -83,12 +83,12 @@ sub split_bam {
   $data{count} = \%count_entries;
   $data{flag} = ();
 
-  die("ERROR [$this_function] $bamfile does not exist\n")
+  croak "ERROR [$this_function] $bamfile does not exist\n"
     unless (-e $bamfile);
-  die("ERROR [$this_function] $dest_dir does not exist\n")
+  croak "ERROR [$this_function] $dest_dir does not exist\n"
     unless (-d $dest_dir);
 
-  open(LOG, ">", $log) or die $!;
+  open(LOG, ">", $log) or croak $!;
 
   (undef,$tmp_bam_pos) = tempfile('BAM_POS_XXXXXXX',UNLINK=>0);
   (undef,$tmp_bam_neg) = tempfile('BAM_NEG_XXXXXXX',UNLINK=>0);
@@ -102,9 +102,9 @@ sub split_bam {
   $bamname_pos = $dest_dir.$bn.".pos".$ext;
   $bamname_neg = $dest_dir.$bn.".neg".$ext;
   $bam_pos = Bio::DB::Bam->open($tmp_bam_pos,'w')
-    or die "ERROR [$this_function] Could not open bam_pos file for writing: $!";
+    or croak "ERROR [$this_function] Could not open bam_pos file for writing: $!";
   $bam_neg = Bio::DB::Bam->open($tmp_bam_neg,'w')
-    or die "ERROR [$this_function] Could not open bam_neg file for writing: $!";
+    or croak "ERROR [$this_function] Could not open bam_neg file for writing: $!";
 
   if ($want_bed == 1){
      $bedname_pos = $dest_dir.$bn.".pos.bed";
@@ -141,7 +141,7 @@ sub split_bam {
       }
       $data{count}{cur}++;
     }
-    else{ warn "WARN [$this_function] Read ".$read->query->name." does not have NH attribute\n";}
+    else{ carp "WARN [$this_function] Read ".$read->query->name." does not have NH attribute\n";}
 
   #  print Dumper ($read->query);
     $strand = $read->strand;
@@ -180,7 +180,7 @@ sub split_bam {
 	    if ($want_bed){printf $bed_neg "%s\n", "+";}
 	  }
 	}
-	else {die "Strand neither + nor - ...exiting!\n";}
+	else {croak "Strand neither + nor - ...exiting!\n";}
       }
       else{ # 2nd mate; reverse strand since the fragment it belongs to is ALWAYS located
             # on the other strand
@@ -209,7 +209,7 @@ sub split_bam {
 	    if ($want_bed){printf $bed_pos "%s\n", "-";}
 	  }
 	}
-	else {die "Strand neither + nor - ...exiting!\n";}
+	else {croak "Strand neither + nor - ...exiting!\n";}
       }
     }
     else { # single-end
@@ -239,7 +239,7 @@ sub split_bam {
 	  if ($want_bed){printf $bed_neg "%s\n", "+";}
 	}
       }
-      else {die "Strand neither + nor - ...exiting!\n";}
+      else {croak "Strand neither + nor - ...exiting!\n";}
     }
     if($verbose == 1) {print STDERR "--> ".$eff_strand."\t";}
 
@@ -264,7 +264,7 @@ sub split_bam {
   unless ($data{count}{pe_alis} + $data{count}{se_alis} == $data{count}{cur}) {
     printf "ERROR:  paired-end + single-end alignments != total alignment count\n";
     print Dumper(\%data);
-    die;
+    croak $!;
   }
   unless ($data{count}{pos} + $data{count}{neg} == $data{count}{cur}) {
     printf STDERR "%20d fragments on [+] strand\n",$data{count}{pos};
@@ -273,7 +273,7 @@ sub split_bam {
     printf STDERR "%20d cur_count (should be)\n",$data{count}{cur};
     printf STDERR "ERROR: pos alignments + neg alignments != total alignments\n";
     print Dumper(\%data);
-    die;
+    croak $!;
   }
   foreach (keys %{$data{flag}}){
     $data{count}{flag} += $data{flag}{$_};
@@ -283,7 +283,7 @@ sub split_bam {
     printf STDERR "%20d alignments found in flag statistics\n",$data{count}{flag};
     printf STDERR "ERROR: #considered alignments != #alignments from flag stat\n";
     print Dumper(\%data);
-    die;
+    croak $!;
   }
 
   # logging output
@@ -321,9 +321,9 @@ sub bam2bw {
   my ($GCB_cmd,$BGTBW_cmd);
   my $this_function = (caller(0))[3];
 
-  die "ERROR [$this_function] Cannot find $bamfile\n"
+  croak "ERROR [$this_function] Cannot find $bamfile\n"
     unless (-e $bamfile);
-  die "ERROR [$this_function] Cannot find $chromsizes ...BigWig cannot be generated\n"
+  croak "ERROR [$this_function] Cannot find $chromsizes ...BigWig cannot be generated\n"
     unless (-e $chromsizes);
 
   mkdir $outfolder;
@@ -336,7 +336,7 @@ sub bam2bw {
   system($BGTBW_cmd);
 }
 
-# bed2bw ($infile,$chromsizes,$strand,$dest,$size,$norm)
+# bed2bw ($infile,$chromsizes,$strand,$dest,$want_norm,$size,$scale,$log)
 # Generate stranded BigWig coverage profiles from BED via two third-party tools:
 # genomeCoverageBed from BEDtools
 # bedGraphToBigWig from UCSC Genome Browser tools
@@ -349,17 +349,17 @@ sub bed2bw {
   chomp($genomeCoverageBed);
   my $bedGraphToBigWig = `which bedGraphToBigWig`;
   chomp($bedGraphToBigWig);
-  my $awk = `which awk`; 
+  my $awk = `which awk`;
   chomp($awk);
 
-  open(LOG, ">>", $log) or die $!;
+  open(LOG, ">>", $log) or croak $!;
   print LOG "LOG [$this_function] \$infile: $infile -- \$chromsizes: $chromsizes --\$dest: $dest\n";
 
-  die ("ERROR [$this_function] Cannot find $infile\n")
+  croak "ERROR [$this_function] Cannot find $infile\n"
     unless (-e $infile);
-  die ("ERROR [$this_function] Cannot find $chromsizes\n")
+  croak "ERROR [$this_function] Cannot find $chromsizes\n"
     unless (-e $chromsizes);
-  die ("ERROR [$this_function] $dest does not exist\n")
+  croak "ERROR [$this_function] $dest does not exist\n"
     unless (-d $dest);
 
   if ($want_norm == 1){
@@ -378,7 +378,7 @@ sub bed2bw {
     $cmd .= " && cat $dest/$bn.neg.bg.1 | $awk \'{ \$4 = - \$4 ; print \$0 }\' > $dest/$bn.neg.bg";
     $cmd .= " && $bedGraphToBigWig $dest/$bn.neg.bg $chromsizes  $dest/$bn.neg.bw";
   }
-  print LOG "LOG [ViennaNGS::bed2bw()] $cmd\n";
+  print LOG "LOG [$this_function] $cmd\n";
   system($cmd);
   if ($strand eq "+"){unlink ("$dest/$bn.pos.bg");} # rm intermediate bedGraph files
   else{ unlink("$dest/$bn.neg.bg"); unlink("$dest/$bn.neg.bg.1");}
@@ -390,22 +390,21 @@ sub bed2bw {
 # Use 'bedToBigBed' to make bigBed from BED. A '.bed', '.bed6' or
 # '.bed12' extension of the input file will be replaced by '.bb' in
 # the output.
-
 sub bed2bigBed {
   my ($infile,$chromsizes,$dest,$log) = @_;
   my ($bn,$path,$ext,$cmd,$outfile);
   my $this_function = (caller(0))[3];
   my $bed2bigBed = can_run('bedToBigBed');
 
-  if (defined $log){  open(LOG, ">>", $log) or die $!;}
+  if (defined $log){  open(LOG, ">>", $log) or croak $!;}
 
-  die ("ERROR [$this_function] bedToBigBed utility not found")
+  croak "ERROR [$this_function] bedToBigBed utility not found"
     unless (defined $bed2bigBed);
-  die ("ERROR [$this_function] Cannot find $infile")
+  croak "ERROR [$this_function] Cannot find $infile"
     unless (-e $infile);
-  die ("ERROR [$this_function] Cannot find $chromsizes")
+  croak "ERROR [$this_function] Cannot find $chromsizes"
     unless (-e $chromsizes);
-  die ("ERROR [$this_function] $dest does not exist")
+  croak "ERROR [$this_function] $dest does not exist"
     unless (-d $dest);
 
   # .bed6 .bed12 extensions are replaced by .bb
@@ -421,7 +420,7 @@ sub bed2bigBed {
     print STDERR "ERROR [$this_function] Call to $bed2bigBed  unsuccessful\n";
     print STDERR "ERROR: this is what the command printed:\n";
     print join "", @$full_buf;
-    die;
+    croak $!;
   }
 
   if (defined $log){ close(LOG); }
@@ -463,8 +462,8 @@ sub parse_multicov {
   my @mcData = ();
   my ($mcSamples,$i);
 
-  unless (-e $file){die "ERROR: multicov file $file not available\n";}
-  open (MULTICOV_IN, "< $file") or die $!;
+  croak "ERROR: multicov file $file not available\n" unless (-e $file);
+  open (MULTICOV_IN, "< $file") or croak $!;
 
   while (<MULTICOV_IN>){
     chomp;
@@ -494,10 +493,12 @@ sub parse_multicov {
 sub write_multicov {
   my ($item,$dest_dir,$base_name) = @_;
   my ($outfile,$mcSamples,$nrFeatures,$feat,$i);
+  my $this_function = (caller(0))[3];
 
-  unless (-d $dest_dir){die "ERROR [ViennaNGS::write_multicov]: $dest_dir does not exist\n";}
+  croak "ERROR [$this_function]: $dest_dir does not exist\n"
+    unless (-d $dest_dir);
   $outfile = $dest_dir.$base_name.".".$item.".multicov.csv";
-  open (MULTICOV_OUT, "> $outfile") or die $!;
+  open (MULTICOV_OUT, "> $outfile") or croak $!;
 
   $mcSamples = scalar @featCount; # of samples in %{$featCount}
   $nrFeatures = scalar keys %{$featCount[1]}; # of keys in %{$featCount}[1]
@@ -508,7 +509,7 @@ sub write_multicov {
     my $fc = scalar keys %{$featCount[$i]}; # of keys in %{$featCount}
     #print "condition $i => $fc keys\n";
     unless($nrFeatures == $fc){
-      die "ERROR [ViennaNGS::write_multicov]: unequal element count in \%\$featCount\nExpected $nrFeatures have $fc in condition $i\n";
+      croak "ERROR [$this_function]: unequal element count in \%\$featCount\nExpected $nrFeatures have $fc in condition $i\n";
     }
   }
 
@@ -525,7 +526,9 @@ sub write_multicov {
 
     for($i=0;$i<$mcSamples;$i++){
      # print "------------>  ";  print "processing $i th condition ";  print "<-----------\n";
-      unless (defined ${$featCount[$i]}{$feat}){die "Could not find item $feat in mcSample $i\n";}
+      unless (defined ${$featCount[$i]}{$feat}){
+	croak "Could not find item $feat in mcSample $i\n";
+      }
       push @mcLine, ${$featCount[$i]}{$feat}->{$item};
 
     }
@@ -536,10 +539,6 @@ sub write_multicov {
 }
 
 sub totalreads {
-  return 1;
-}
-
-sub computeRPKM {
   return 1;
 }
 
@@ -555,28 +554,52 @@ ViennaNGS - Perl extension for Next-Generation Sequencing analysis.
 
   use ViennaNGS;
 
+  # get Bio::PrimarySeq::Fasta object
+  my @fo = get_fasta_ids($fasta_in);
+  foreach my $id (@fo) {
+    $fastaobj{$id} = $fastadb->get_Seq_by_id($id);
+  }
+
+  # get strand-specific genomic sequence between $start and $end
+  $seq = get_stranded_subsequence($obj,$start,$stop,$fastaobj{$id});
+
+  # split a single-end  or paired-end BAM file by strands
+  @result = split_bam($bam_in,$rev,$want_uniq,$want_bed,$destdir,$logfile);
+
+  # make bigWig from BAM
+  bam2bw($bam_in,$chromsizes)
+
+  # make bigWig from BED
+  bed2bw($bed_in,$cs_in,"+",$destdir,$wantnorm,$size_p,$scale,$logfile);
+
+  # make bigBed from BED
+  my $bb = bed2bigBed($bed_in,$cs_in,$destdir,$logfile);
+
+  # compute transcript abundance in TPM
+  $meanTPM = computeTPM($sample,$readlength);
+
+  # parse a bedtools multicov compatible file
+  $conds = parse_multicov($infile);
+
+  # write bedtools multicov compatible file
+  write_multicov("TPM", $destdir, $basename);
+
 =head1 DESCRIPTION
 
-ViennaNGS is a collection of subroutines often used for
+ViennaNGS is a collection of utilities and subroutines often used for
 Next-Generation Sequencing (NGS) data analysis.
 
-=head1 EXPORT
+=over 5
 
-Routines: get_stranded_subsequence($obj,$start,$stop,$path)
-          split_bam($bam,$reverse,$want_uniq,$dest_dir,$log)
-          bam2bw($bam,$chromsizes)
-          bed2bw($bed,$chromsizes,$strand,$dest_dir)
+=item get_stranded_subsequence($object,$start,$stop,$strand)
 
-Variables: none
-
-=head2 get_stranded_subsequence($object,$start,$stop,$strand)
-
-Returns the actual DNA/RNA sequence from $start to $stop. $object is a
+Returns the actual DNA/RNA sequence from $start to $end. $object is a
 Bio::PrimarySeq::Fasta object, which obeys the Bio::PrimarySeqI
-conventions. To recover the entire raw DNA or protein sequence,
-call $object->seq(). $strand is 1 or -1.
+conventions. To recover the entire raw DNA or protein sequence, call
+$object->seq(). $strand is 1 or -1 for [+] or [-] strand,
+respectively.
 
-=head2 split_bam($bam,$reverse,$want_uniq,$dest_dir,$log)
+=item split_bam($bam,$reverse,$want_uniq,$want_bed,$dest_dir,$log)
 
 Splits BAM file $bam according to [+] and [-] strand. $reverse,
 $want_uniq and $want_bed are switches with values of 0 or 1,
@@ -604,7 +627,7 @@ separately, thus allowing for scenarios where eg. one read is a
 multi-mapper, whereas its associate mate is a unique mapper, resulting
 in an ambiguous alignment of the entire fragment.
 
-=head2 bam2bw($bam,$chromsizes)
+=item bam2bw($bam,$chromsizes)
 
 Creates BedGraph and BigWig coverage profiles from BAM files. These
 can easily be visualized as TrackHubs within the UCSC Genome Browser
@@ -615,7 +638,7 @@ http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html)
 and bedGraphToBigWig (from the UCSC Genome Browser, see
 http://hgdownload.cse.ucsc.edu/admin/exe/).
 
-=head2 bed2bw($infile,$chromsizes,$strand,$dest,$want_norm,$size,$scale,$log)
+=item bed2bw($infile,$chromsizes,$strand,$dest,$want_norm,$size,$scale,$log)
 
 Creates stranded, normalized BigWig coverage profiles from BED
 files. $chromsizes is the chromosome.sizes files, $strand is either
@@ -635,7 +658,7 @@ and bedGraphToBigWig (from the UCSC Genome Browser, see
 http://hgdownload.cse.ucsc.edu/admin/exe/). Intermediate bedGraph
 files are removed automatically.
 
-=head2 bed2bigBed($infile,$chromsizes,$dest,$log)
+=item bed2bigBed($infile,$chromsizes,$dest,$log)
 
 Creates an indexed bigBed file from a BED file. C<$infile> is the BED
 file to be transformed, C<$chromsizes> is the chromosome.sizes file
@@ -648,7 +671,7 @@ C<$infile> plus '.bb' appended.
 The conversion from BED to bigBed is done by a third-party utility
 (bedToBigBed), which is executed by IPC::Cmd.
 
-=head2 computeTPM($featCount_sample,$rl)
+=item  computeTPM($featCount_sample,$rl)
 
 Computes expression in Transcript per Million (TPM) [Wagner
 et.al. Theory Biosci. (2012)]. $featCount_sample is a reference to a
@@ -662,7 +685,7 @@ Returns the mean TPM of the processed sample, which is invariant among
 samples. (TPM models relative molar concentration and thus fulfills
 the invariant average criterion.)
 
-=head2 parse_multicov($file)
+=item parse_multicov($file)
 
 Parse a bedtools multicov (multiBamCov) file, i.e. an extended BED6
 file, into an Array of Hash of Hashes data structure
@@ -670,7 +693,7 @@ file, into an Array of Hash of Hashes data structure
 present in the multicov file, ie. the numner of columns extending the
 canonical BED6 columns in the input multicov file.
 
-=head write_multicov($item,$dest_dir,$base_name)
+=item write_multicov($item,$dest_dir,$base_name)
 
 Write @featCount data to a bedtools multicov (multiBamCov)-type
 file. $item specifies the type of information from @featCount HoH
@@ -679,35 +702,54 @@ inserted into @featCount beforehand by e.g. computeTPM(). $dest_dir
 gives the absolute path and $base_name the basename (will be extended by
 $item.csv) of the output file.
 
+=back
+
 =head1 DEPENDENCIES
 
-  L<Bio::Perl>
-  L<BIO::DB::Sam>
-  L<File::Basename>
-  L<File::Temp>
-  L<Path::Class>
-  L<IPC::Cmd>
-  L<Carp> 
+=over 7
+
+=item  L<Bio::Perl> >= 1.006924
+
+=item  L<BIO::DB::Sam> >= 1.39
+
+=item  L<File::Basename>
+
+=item  L<File::Temp>
+
+=item   L<Path::Class>
+
+=item  L<IPC::Cmd>
+
+=item  L<Carp>
+
+=back
 
 =head1 SEE ALSO
 
-perldoc ViennaNGS::AnnoC
-perldoc ViennaNGS::UCSC
+=over 3
 
-=head1 AUTHORS
+=item perldoc ViennaNGS::AnnoC
 
-Michael Thomas Wolfinger, E<lt>michael@wolfinger.euE<gt>
+=item perldoc ViennaNGS::UCSC
+
+=item perldoc ViennaNGS::SpliceJunc
+
+=back
+
+=head1 AUTHOR
+
+Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014
+Copyright (C) 2014 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.12.4 or,
 at your option, any later version of Perl 5 you may have available.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+This software is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 =cut
