@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-04-18 00:04:01 mtw>
+# Last changed Time-stamp: <2014-09-30 13:30:29 mtw>
 #
 # Split BAM files according to their strands, optionally filter unique mappers
 #
@@ -44,6 +44,7 @@ my $fullbam = undef;
 my $destdir = "./";
 my $scale   = 1000000;
 my @result  = ();
+my $this_function = (caller(0))[3];
 
 Getopt::Long::config('no_ignore_case');
 &usage() unless GetOptions("bam=s"           => \$fullbam,
@@ -63,9 +64,9 @@ Getopt::Long::config('no_ignore_case');
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-die "ERROR [ViennaNGS::bam_plit.pl] No BAM file provided" unless (defined $fullbam);
+die "ERROR [$this_function] No BAM file provided" unless (defined $fullbam);
 if ($bw == 1) {
-  die "ERROR [ViennaNGS::bam_plit.pl] chrom_sizes file needed for generating BigWig coverage profiles\n"
+  die "ERROR [$this_function] chrom_sizes file needed for generating BigWig coverage profiles\n"
     unless (defined $chromsi);
   unless ($wantbed == 1){$wantbed = 1;}
 }
