@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-30 00:40:26 mtw>
+# Last changed Time-stamp: <2014-09-30 15:46:54 mtw>
 
 package ViennaNGS::SpliceJunc;
 
@@ -348,20 +348,11 @@ Identification of novel splice junctions is based on intersecting
 potentially novel splice junctions from RNA-seq data with annotated
 splice junctions.
 
-=head2 EXPORT_OK
+=head2 SUBROUTINES
 
-Routines:
-  bed6_ss_from_bed12($bed12,$dest,$window,$fastaobjR)
-  bed6_ss_from_rnaseq($inbed,$dest,$window,$mcov,$can,$fastaobjR)
-  intersect_sj($p_annot,$p_mapped,$outdir,$prefix,$window,$mil)
-  ss_isCanonical($chr,$p5,$p3,$fastaobjR)
+=over 3
 
-Variables:
-   none
-
-=head1 SUBROUTINES
-
-=head2 bed6_ss_from_bed12($bed12,$dest,$window,$fastaobjR)
+=item bed6_ss_from_bed12($bed12,$dest,$window,$fastaobjR)
 
 Extracts splice junctions from an BED12 file (provided via argument
 $bed12), writes a BED6 file for each transcript to $dest,
@@ -371,7 +362,7 @@ Bio::PrimarySeq::Fasta object holding the underlying reference
 genome. Each splice junction is represented as two bed lines in the
 output BED6.
 
-=head2 bed6_ss_from_rnaseq($inbed,$dest,$window,$mcov)
+=item bed6_ss_from_rnaseq($inbed,$dest,$window,$mcov)
 
 Extracts splice junctions from mapped RNA-seq data. The input BED6
 file should contain coordinates of introns in the following syntax:
@@ -399,7 +390,7 @@ the input to $dest. Output splice junctions can be flanked by a
 window of +/- $window nt. Each splice junction is represented as two
 bed lines in the output BED6.
 
-=head2 intersect_sj($p_annot,$p_mapped,$p_out,$prefix,$window,$mil)
+=item intersect_sj($p_annot,$p_mapped,$p_out,$prefix,$window,$mil)
 
 Intersects all splice junctions identified in an RNA-seq experiment
 with annotated splice junctions. Identifies and characterizes novel
@@ -417,7 +408,7 @@ operations are performed with sortBed.
 Writes two BEd6 files to $p_out (optionally prefixed by $prefix),
 which contain novel and existing splice junctions, respectively.
 
-=head2 ss_isCanonical($chr,$p5,$p3,$fastaobjR)
+=item ss_isCanonical($chr,$p5,$p3,$fastaobjR)
 
 Checks whether a given splice junction is canonical, ie. whether the
 first and last two nucleotides of the enclosed intron correspond to a
@@ -437,12 +428,20 @@ to one of the following cases:
 5'===]GC|CT....AG|GC[====3' ie GC->AG or CT->GC
 5'===]AT|GT....AC|AT[====3' ie AT->AC or GT->AT
 
+=back
 
 =head1 DEPENDENCIES
 
 This modules depends on the following Perl modules:
-  - L<ViennaNGS>
-  - L<File::Spec>
+
+=over 2
+
+=item L<ViennaNGS>
+
+=item L<Carp>
+
+=back
+
 
 L<ViennaNGS::SpliceJunc> uses third-party tools for computing
 intersections of BED files: The F<intersectBed> utility from the
@@ -462,15 +461,19 @@ L<https://github.com/arq5x/bedtools2> on your system.
 
 =head1 AUTHORS
 
-Michael Thomas Wolfinger E<lt>michael@wolfinger.euE<gt>
+Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014
+Copyright (C) 2014 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.16.3 or,
 at your option, any later version of Perl 5 you may have available.
+
+This software is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 
 =cut
