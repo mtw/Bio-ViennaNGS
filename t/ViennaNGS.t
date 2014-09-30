@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use IPC::Cmd qw(can_run);
 
-use Test::More tests => 5;
+use Test::More tests => 7;
 BEGIN { use_ok('ViennaNGS') };
 
 ok( defined(can_run('cat')), 'cat not found');
