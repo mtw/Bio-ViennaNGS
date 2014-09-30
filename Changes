@@ -45,3 +45,8 @@ Revision history for Perl extension ViennaNGS.
 	- refactored bam2bw()
 	- refactored bed2bw()
 	- removed scripts/ensembl_fa2bed.pl
+
+0.08
+	- added tests for third-party utilities
+	- use Carp throughout the module
+	- updated documentation
