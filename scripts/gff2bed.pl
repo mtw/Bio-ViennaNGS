@@ -1,15 +1,16 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-09-04 17:02:56 mtw>
+# Last changed Time-stamp: <2014-10-01 18:01:54 mtw>
 #
-# Convert GFF3 to BED12; produce separate BED files for each gbkey (CDS/tRNA/etc)
+# Convert GFF3 to BED12; produce separate BED files for each gbkey
+# (CDS/tRNA/etc)
 #
 # usage: gff2bed.pl -i input.gff
 #
 # ***********************************************************************
 # *  Copyright notice
 # *
-# *  Copyright 2013 Michael Thomas Wolfinger <michael@wolfinger.eu>
+# *  Copyright 2014 Michael T. Wolfinger <michael@wolfinger.eu>
 # *  All rights reserved
 # *
 # *  This program is free software: you can redistribute it and/or modify
@@ -34,8 +35,7 @@ use warnings;
 use Getopt::Long;
 use Data::Dumper;
 use File::Basename;
-use local::lib;
-use ViennaNGS::AnnoC;
+use ViennaNGS::AnnoC qw(&parse_gff &feature_summary $fstat $feat);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#

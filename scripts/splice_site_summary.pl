@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-30 00:50:33 mtw>
+# Last changed Time-stamp: <2014-10-02 00:11:11 mtw>
 #
 # ***********************************************************************
 # *  This program is free software: you can redistribute it and/or modify
@@ -26,8 +26,8 @@ use Pod::Usage;
 use Data::Dumper;
 use IPC::Cmd qw(can_run);
 use ViennaNGS v0.07 qw(bed2bigBed);
-use ViennaNGS::AnnoC;
-use ViennaNGS::SpliceJunc qw(bed6_ss_from_bed12 bed6_ss_from_rnaseq intersect_sj);
+use Bio::ViennaNGS::AnnoC qw(&get_fasta_ids $fastadb);
+use Bio::ViennaNGS::SpliceJunc qw(bed6_ss_from_bed12 bed6_ss_from_rnaseq intersect_sj);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
