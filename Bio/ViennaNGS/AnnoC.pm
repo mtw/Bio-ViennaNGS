@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-01 18:19:29 mtw>
+# Last changed Time-stamp: <2014-10-01 18:35:17 mtw>
 
-package ViennaNGS::AnnoC;
+package Bio::ViennaNGS::AnnoC;
 
 use Exporter;
-use version; our $VERSION = qv('0.05');
+use version; our $VERSION = qv('0.06_01');
 use strict;
 use strict;
 use warnings;
@@ -169,12 +169,12 @@ __END__
 
 =head1 NAME
 
-ViennaNGS::AnnoC - Perl extension for converting sequence annotation
-formats
+Bio::ViennaNGS::AnnoC - Perl extension for converting sequence
+annotation formats
 
 =head1 SYNOPSIS
 
-  use ViennaNGS::AnnoC;
+  use Bio::ViennaNGS::AnnoC;
 
   parse_gff($gff3_file);
   feature_summary($fstat,$dest);
