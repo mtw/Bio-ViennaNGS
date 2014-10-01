@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-01 23:50:49 mtw>
+# Last changed Time-stamp: <2014-10-02 00:23:29 mtw>
 
 package Bio::ViennaNGS::SpliceJunc;
 
@@ -107,7 +107,7 @@ sub bed6_ss_from_rnaseq{
       $proper = $4;
       $passed = $5;
       next unless ($proper eq 'N');
-      next unless ($passed eq 'P');
+      next unless ($passed =~ /[PFM]$/);
       next if($reads < $mcov);
     }
     else {
