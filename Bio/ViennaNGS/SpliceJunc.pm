@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-01 15:39:51 mtw>
+# Last changed Time-stamp: <2014-10-01 23:50:49 mtw>
 
-package ViennaNGS::SpliceJunc;
+package Bio::ViennaNGS::SpliceJunc;
 
 use Exporter;
-use version; our $VERSION = qv('0.02');
+use version; our $VERSION = qv('0.03_01');
 use strict;
 use warnings;
 use Data::Dumper;
@@ -314,11 +314,11 @@ __END__
 
 =head1 NAME
 
-ViennaNGS::SpliceJunc - Perl extension for alternative splicing analysis
+Bio::ViennaNGS::SpliceJunc - Perl extension for alternative splicing analysis
 
 =head1 SYNOPSIS
 
-  use ViennaNGS::SpliceJunc;
+  use Bio::ViennaNGS::SpliceJunc;
 
   my $c;
   my %fastaobj;
