@@ -2,5 +2,5 @@ Changes
 Makefile.PL
 MANIFEST
 README
-t/ViennaNGS.t
-lib/ViennaNGS.pm
+t/Bio-ViennaNGS.t
+lib/Bio/ViennaNGS.pm
