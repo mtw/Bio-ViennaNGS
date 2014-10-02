@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-02 23:44:36 mtw>
+# Last changed Time-stamp: <2014-10-03 00:09:06 mtw>
 
 package Bio::ViennaNGS::SpliceJunc;
 
 use Exporter;
-use version; our $VERSION = qv('0.03');
+use version; our $VERSION = qv('0.04');
 use strict;
 use warnings;
 use Data::Dumper;
