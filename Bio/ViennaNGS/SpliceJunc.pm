@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-02 00:23:29 mtw>
+# Last changed Time-stamp: <2014-10-02 15:05:37 mtw>
 
 package Bio::ViennaNGS::SpliceJunc;
 
@@ -8,7 +8,7 @@ use version; our $VERSION = qv('0.03_01');
 use strict;
 use warnings;
 use Data::Dumper;
-use ViennaNGS;
+use Bio::ViennaNGS;
 use IPC::Cmd qw(can_run run);
 use Path::Class;
 use Carp;
@@ -445,11 +445,11 @@ This modules depends on the following Perl modules:
 
 =over 4
 
-=item L<ViennaNGS>
+=item L<Bio::ViennaNGS>
 
-=item IPC::Cmd
+=item L<IPC::Cmd>
 
-=item Path::Class
+=item L<Path::Class>
 
 =item L<Carp>
 
