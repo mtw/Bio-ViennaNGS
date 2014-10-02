@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-02 14:24:21 mtw>
+# Last changed Time-stamp: <2014-10-02 17:08:01 mtw>
 
 package Bio::ViennaNGS;
 
@@ -550,7 +550,7 @@ analysis
 
 =head1 SYNOPSIS
 
-  use ViennaNGS;
+  use Bio::ViennaNGS;
 
   # get Bio::PrimarySeq::Fasta object
   my @fo = get_fasta_ids($fasta_in);
