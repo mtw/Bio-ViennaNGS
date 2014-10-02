@@ -50,3 +50,9 @@ Revision history for Perl extension ViennaNGS.
 	- added tests for third-party utilities
 	- use Carp for error handling throughout the module
 	- updated documentation
+
+0.09  Thu Oct 2 2014
+	- changed namespace to Bio::ViennaNGS
+	- adjusted utilities to use new namespace
+	- everything is exported via @EXPORT_OK now
+	- updated README
