@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-02 15:05:37 mtw>
+# Last changed Time-stamp: <2014-10-02 23:44:36 mtw>
 
 package Bio::ViennaNGS::SpliceJunc;
 
 use Exporter;
-use version; our $VERSION = qv('0.03_01');
+use version; our $VERSION = qv('0.03');
 use strict;
 use warnings;
 use Data::Dumper;
@@ -14,11 +14,9 @@ use Path::Class;
 use Carp;
 
 our @ISA = qw(Exporter);
-
+our @EXPORT = ();
 our @EXPORT_OK = qw(bed6_ss_from_bed12 bed6_ss_from_rnaseq
 		 intersect_sj ss_isCanonical);
-
-our @EXPORT = qw( );
 
 # bed6_ss_from_bed12( $bed12,$dest,$window,$can,$fastaobjR )
 #
@@ -314,7 +312,8 @@ __END__
 
 =head1 NAME
 
-Bio::ViennaNGS::SpliceJunc - Perl extension for alternative splicing analysis
+Bio::ViennaNGS::SpliceJunc - Perl extension for alternative splicing
+analysis
 
 =head1 SYNOPSIS
 
@@ -345,8 +344,8 @@ Bio::ViennaNGS::SpliceJunc - Perl extension for alternative splicing analysis
 
 =head1 DESCRIPTION
 
-L<ViennaNGS::SpliceJunc> is a Perl module for alternative splicing
-(AS) analysis. It provides routines for identification and
+L<Bio::ViennaNGS::SpliceJunc> is a Perl module for alternative
+splicing (AS) analysis. It provides routines for identification and
 characterization of novel and existing (annotated) splice junctions
 from RNA-seq data.
 
@@ -363,8 +362,8 @@ splice junctions.
 Extracts splice junctions from an BED12 file (provided via argument
 C<$bed12>), writes a BED6 file for each transcript to C<$dest>,
 containing all its splice junctions. Output splice junctions can be
-flanked by a window of +/- $window nt. C<$fastaobjR> is a reference to
-a L<Bio::PrimarySeq::Fasta> object holding the underlying reference
+flanked by a window of +/- C<$window> nt. C<$fastaobjR> is a reference
+to a L<Bio::PrimarySeq::Fasta> object holding the underlying reference
 genome. Each splice junction is represented as two bed lines in the
 output BED6.
 
@@ -377,7 +376,7 @@ chr1    3913    3996    splits:97:97:97:N:P     0       +
 
 The fourth column in this BED file (correponding to the 'name' field
 according to the L<BED
-specification|http://genome.cibiv.univie.ac.at/FAQ/FAQformat.html#format1>)
+specification|http://genome.ucsc.edu/FAQ/FAQformat.html#format1>)
 should be a colon-separated string of six elements, where the first
 element should be 'splits' and the second element is assumed to hold
 the number of reads supporting this splice junction. The fifth element
@@ -387,11 +386,12 @@ trans-splice junctions, respectively. Only normal splice junctions
 ('N') are considered, the rest is skipped. Elements 3, 4 and 6 are not
 further processed.
 
-We recommend using F<segemehl> for generating this type of BED6
-files. This routine is, however, not limited to F<segemehl>
-output. BED6 files containing splice junction information from other
-short read mappers or third-party sources will be processed if hey are
-formatted as described above.
+We recommend using
+F<segemehl|http://www.bioinf.uni-leipzig.de/Software/segemehl/> for
+generating this type of BED6 files. This routine is, however, not
+limited to F<segemehl> output. BED6 files containing splice junction
+information from other short read mappers or third-party sources will
+be processed if hey are formatted as described above.
 
 This routine writes a BED6 file for each splice junction provided in
 the input to C<$dest>. Output splice junctions can be flanked by a
@@ -455,7 +455,7 @@ This modules depends on the following Perl modules:
 
 =back
 
-L<ViennaNGS::SpliceJunc> uses third-party tools for computing
+L<Bio::ViennaNGS::SpliceJunc> uses third-party tools for computing
 intersections of BED files: F<bedtools intersect> from the
 L<BEDtools|http://bedtools.readthedocs.org/en/latest/content/tools/intersect.html>
 suite is used to compute overlaps and F<bedtools sort> is used to sort
@@ -466,7 +466,7 @@ L<BEDtools|https://github.com/arq5x/bedtools2> on your system.
 
 =head1 SEE ALSO
 
-  perldoc ViennaNGS
+L<Bio::ViennaNGS>
 
 =head1 AUTHOR
 
@@ -477,12 +477,13 @@ Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 Copyright (C) 2014 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.16.3 or,
+it under the same terms as Perl itself, either Perl version 5.12.4 or,
 at your option, any later version of Perl 5 you may have available.
 
 This software is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License for more details.
 
 
 =cut
