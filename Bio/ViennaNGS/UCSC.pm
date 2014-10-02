@@ -50,12 +50,12 @@ __END__
 
 =head1 NAME
 
-ViennaNGS::UCSC - Perl extension for easy UCSC Genome Browser
+Bio::ViennaNGS::UCSC - Perl extension for easy UCSC Genome Browser
 integration.
 
 =head1 SYNOPSIS
 
-  use ViennaNGS::UCSC;
+  use Bio::ViennaNGS::UCSC;
 
 =head1 DESCRIPTION
 
