@@ -1,13 +1,14 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-30 13:30:29 mtw>
+# Last changed Time-stamp: <2014-10-02 14:42:38 mtw>
 #
-# Split BAM files according to their strands, optionally filter unique mappers
+# Split BAM files according to their strands, optionally filter unique
+# mappers
 #
 # ***********************************************************************
 # *  Copyright notice
 # *
-# *  Copyright 2014 Michael Thomas Wolfinger <michael@wolfinger.eu>
+# *  Copyright 2014 Michael T. Wolfinger <michael@wolfinger.eu>
 # *  All rights reserved
 # *
 # *  This program is free software: you can redistribute it and/or modify
@@ -31,7 +32,7 @@ use warnings;
 use Getopt::Long;
 use Data::Dumper;
 use File::Basename;
-use ViennaNGS;
+use Bio::ViennaNGS qw(split_bam bed2bw);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#

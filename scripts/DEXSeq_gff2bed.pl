@@ -1,13 +1,14 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-11-26 21:33:11 mtw>
+# Last changed Time-stamp: <2014-10-02 14:43:50 mtw>
 #
-# Convert DEXSeq flattened GFF file into BED (for easy UCSC browser integration)
+# Convert DEXSeq flattened GFF file into BED (for easy UCSC browser
+# integration)
 #
 # ***********************************************************************
 # *  Copyright notice
 # *
-# *  Copyright 2013 Michael Thomas Wolfinger <michael@wolfinger.eu>
+# *  Copyright 2013 Michael T. Wolfinger <michael@wolfinger.eu>
 # *  All rights reserved
 # *
 # *  This program is free software: you can redistribute it and/or modify

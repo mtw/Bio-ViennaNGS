@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-19 10:32:55 mtw>
+# Last changed Time-stamp: <2014-10-02 15:01:25 mtw>
 #
 # Compute normalized expression data in TPM/RPKM from (raw) read
 # counts in multicov.
@@ -11,7 +11,7 @@
 # ***********************************************************************
 # *  Copyright notice
 # *
-# *  Copyright 2014 Michael Thomas Wolfinger <michael@wolfinger.eu>
+# *  Copyright 2014 Michael T. Wolfinger <michael@wolfinger.eu>
 # *  All rights reserved
 # *
 # *  This program is free software: you can redistribute it and/or modify
@@ -35,8 +35,7 @@ use warnings;
 use Getopt::Long;
 use Data::Dumper;
 use File::Basename;
-use local::lib;
-use ViennaNGS qw( parse_multicov write_multicov featCount_data computeTPM);
+use Bio::ViennaNGS qw( parse_multicov write_multicov featCount_data computeTPM);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#

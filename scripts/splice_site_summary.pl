@@ -1,8 +1,13 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-02 00:11:11 mtw>
+# Last changed Time-stamp: <2014-10-02 15:06:57 mtw>
 #
 # ***********************************************************************
+# *  Copyright notice
+# *
+# *  Copyright 2014 Michael T. Wolfinger <michael@wolfinger.eu>
+# *  All rights reserved
+# *
 # *  This program is free software: you can redistribute it and/or modify
 # *  it under the terms of the GNU General Public License as published by
 # *  the Free Software Foundation, either version 3 of the License, or
@@ -25,7 +30,7 @@ use Getopt::Long qw( :config posix_default bundling no_ignore_case );
 use Pod::Usage;
 use Data::Dumper;
 use IPC::Cmd qw(can_run);
-use ViennaNGS v0.07 qw(bed2bigBed);
+use Bio::ViennaNGS  qw(bed2bigBed);
 use Bio::ViennaNGS::AnnoC qw(&get_fasta_ids $fastadb);
 use Bio::ViennaNGS::SpliceJunc qw(bed6_ss_from_bed12 bed6_ss_from_rnaseq intersect_sj);
 
@@ -215,7 +220,7 @@ RNA-seq data against annotated splice junctions.
 
 =head1 AUTHOR
 
-Michael Thomas Wolfinger E<lt>michael@wolfinger.euE<gt>
+Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 =cut
 

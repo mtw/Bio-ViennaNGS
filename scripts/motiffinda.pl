@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2013-09-16 13:29:31 mtw>
+# Last changed Time-stamp: <2014-10-02 14:49:54 mtw>
 #
 # Find motifs in annotated sequences. The motif is provided as regex
 # via the command line
@@ -17,7 +17,7 @@
 # ***********************************************************************
 # *  Copyright notice
 # *
-# *  Copyright 2013 Michael Thomas Wolfinger <michael@wolfinger.eu>
+# *  Copyright 2013 Michael T. Wolfinger <michael@wolfinger.eu>
 # *  All rights reserved
 # *
 # *  This program is free software: you can redistribute it and/or modify
@@ -42,9 +42,8 @@ use warnings;
 use Getopt::Long;
 use Data::Dumper;
 use POSIX qw(strftime);
-use local::lib;
-use ViennaNGS;
-use ViennaNGS::AnnoC;
+use Bio::ViennaNGS qw(&get_stranded_subsequence);
+use Bio::ViennaNGS::AnnoC qw(&parse_gff &get_fasta_ids @fastaids $feat $fastadb);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#

@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-19 10:32:28 mtw>
+# Last changed Time-stamp: <2014-10-02 14:52:21 mtw>
 #
 # Create a new genome database for the UCSC genome browser. Based on
 # http://genomewiki.ucsc.edu/index.php/Building_a_new_genome_database
@@ -12,7 +12,7 @@
 # ***********************************************************************
 # *  Copyright notice
 # *
-# *  Copyright 2013 Michael Thomas Wolfinger <michael@wolfinger.eu>
+# *  Copyright 2013 Michael T. Wolfinger <michael@wolfinger.eu>
 # *  All rights reserved
 # *
 # *  This program is free software: you can redistribute it and/or modify
@@ -38,7 +38,6 @@ use Getopt::Long;
 use Data::Dumper;
 use File::Basename;
 use POSIX qw(strftime);
-use local::lib;
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#

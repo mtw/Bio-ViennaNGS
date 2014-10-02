@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-01 18:01:54 mtw>
+# Last changed Time-stamp: <2014-10-02 14:44:36 mtw>
 #
 # Convert GFF3 to BED12; produce separate BED files for each gbkey
 # (CDS/tRNA/etc)
@@ -35,7 +35,7 @@ use warnings;
 use Getopt::Long;
 use Data::Dumper;
 use File::Basename;
-use ViennaNGS::AnnoC qw(&parse_gff &feature_summary $fstat $feat);
+use Bio::ViennaNGS::AnnoC qw(&parse_gff &feature_summary $fstat $feat);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
