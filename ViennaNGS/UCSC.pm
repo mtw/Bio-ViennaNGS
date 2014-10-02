@@ -1,7 +1,7 @@
 # -*-CPerl-*-
 # Last changed Time-stamp: <2014-09-22 17:01:47 mtw>
 
-package ViennaNGS::UCSC;
+package Bio::ViennaNGS::UCSC;
 
 use Exporter;
 use version; our $VERSION = qv('0.01');
@@ -12,9 +12,9 @@ use File::Which qw(which where);
 
 our @ISA = qw(Exporter);
 
-our @EXPORT = qw( make_assembly_hub  );
+our @EXPORT_OK = qw( make_assembly_hub  );
 
-our @EXPORT_OK = ();
+our @EXPORT = ();
 
 sub make_assembly_hub{
   my ($fasta_file_path,$assembly_hub_destination_path,$base_URL,$log_path) = @_;
