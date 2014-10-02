@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-01 18:35:17 mtw>
+# Last changed Time-stamp: <2014-10-02 19:17:12 mtw>
 
 package Bio::ViennaNGS::AnnoC;
 
 use Exporter;
-use version; our $VERSION = qv('0.06_01');
+use version; our $VERSION = qv('0.06');
 use strict;
 use strict;
 use warnings;
