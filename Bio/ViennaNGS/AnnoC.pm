@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-02 19:17:12 mtw>
+# Last changed Time-stamp: <2014-10-03 22:42:26 mtw>
 
 package Bio::ViennaNGS::AnnoC;
 
 use Exporter;
-use version; our $VERSION = qv('0.06');
+use version; our $VERSION = qv('0.07_01');
 use strict;
 use strict;
 use warnings;
@@ -38,14 +38,14 @@ our @fastaids  = ();
 
 sub parse_gff {
   my $in_file = shift;
-  my ($i,$gffio,$feature,$gbkey);
+  my ($i,$gffio,$header,$feature,$gbkey);
   my $this_function = (caller(0))[3];
 
   $gffio = Bio::Tools::GFF->new(-file        => $in_file,
 				-gff_version  => 3,
 			       );
   $gffio->ignore_sequence(1);
-  if (my $header = $gffio->next_segment() ){
+  if ($header = $gffio->next_segment() ){
     $featstat{accession}= $header->display_id();
   }
   else{
@@ -120,7 +120,8 @@ sub parse_gff {
     $featstat{$key} += 1;
   }
   $gffio->close();
- # print Dumper (\%features);
+  #print Dumper (\%features);
+  #die;
 }
 
 # feature_summary($fsR,$dest)
