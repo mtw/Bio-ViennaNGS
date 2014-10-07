@@ -1,7 +1,7 @@
 package Bio::ViennaNGS::Fasta;
 
 use 5.12.0;
-use version; our $VERSION = qv('0.01');
+use version; our $VERSION = qv('0.02_01');
 use Bio::DB::Fasta;
 use Moose;
 use Carp;
