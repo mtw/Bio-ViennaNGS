@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-07 16:36:44 mtw>
+# Last changed Time-stamp: <2014-10-08 00:38:25 mtw>
 
 package Bio::ViennaNGS;
 
@@ -733,13 +733,15 @@ L<BEDtools|https://github.com/arq5x/bedtools2> on your system.
 
 =head1 SEE ALSO
 
-=over 3
+=over 4
 
-=item perldoc Bio::ViennaNGS::AnnoC
+=item L<Bio::ViennaNGS::AnnoC>
 
-=item perldoc Bio::ViennaNGS::UCSC
+=item L<Bio::ViennaNGS::UCSC>
 
-=item perldoc Bio::ViennaNGS::SpliceJunc
+=item L<Bio::ViennaNGS::SpliceJunc>
+
+=item L<Bio::ViennaNGS::Fasta>
 
 =back
 
