@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-02 14:44:36 mtw>
+# Last changed Time-stamp: <2014-10-04 00:16:24 mtw>
 #
 # Convert GFF3 to BED12; produce separate BED files for each gbkey
 # (CDS/tRNA/etc)
@@ -35,7 +35,7 @@ use warnings;
 use Getopt::Long;
 use Data::Dumper;
 use File::Basename;
-use Bio::ViennaNGS::AnnoC qw(&parse_gff &feature_summary $fstat $feat);
+use Bio::ViennaNGS::AnnoC qw(&parse_gff &feature_summary &features2bed $fstat $feat);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
@@ -70,54 +70,11 @@ $infile = $workdir.$infile;
 print "gff2bed INFO: processing $infile\n";
 
 parse_gff($infile);
+
 feature_summary($fstat,$workdir);
-make_beds_from_features($feat,$fstat);
 
+features2bed($feat,$fstat,"xxx",$workdir,$bn,undef);
 
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
-#^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
-sub make_beds_from_features {
-  my ($f,$stat) = @_;
-  my ($chrom, $chrom_start, $chrom_end, $name, $score, $strand, $thick_start, $thick_end);
-  my ($reserved, $block_count, $block_sizes, $block_starts);
-  
- # print "in make_beds:...\n";
- # print Dumper (\$f);
-  # 1. loop over all feature types found in GFF3
-  foreach my $gbkey (keys %$stat) {
-    next if ($gbkey eq 'total' || $gbkey eq 'Src' || $gbkey eq 'accession' || $gbkey eq 'origin');
-    my $bednameuns = $workdir.$bn.".".$gbkey.".uns.bed";
-    my $bedname    = $workdir.$bn.".".$gbkey.".bed";
-    print "Processing gbkey $gbkey...into $bedname\n";
-    open (BEDFILE, "> $bednameuns") or die "ERROR: cannot open $bednameuns for writing\n";
-    # 2. print unsorted info from DS extracted from GFF3 as BED
-    foreach my $uid (keys %$f){
-      next unless ($$f{$uid}->{gbkey} eq $gbkey);
-      my @bedline = ();
-      $chrom        = $$f{$uid}->{seqid};
-      $chrom_start  = $$f{$uid}->{start};
-      $chrom_start--; # BED is 0-based
-      $chrom_end    = $$f{$uid}->{end};
-      $name         = $$f{$uid}->{name};
-      $score        = $$f{$uid}->{score};
-      $strand       = $$f{$uid}->{strand} == -1 ? '-' : '+'; #default to +
-      $thick_start  = $chrom_start;
-      $thick_end    = $chrom_end;
-      $reserved     = 0; 
-      $block_count  = 1;
-      $block_sizes  = $$f{$uid}->{length}.",";
-      $block_starts = "0,";
-      @bedline = join ("\t", ($chrom,$chrom_start,$chrom_end,$name,$score,$strand,$thick_start,$thick_end,$reserved,$block_count,$block_sizes, $block_starts));
-      print BEDFILE "@bedline\n";
-    }
-    close BEDFILE;
-
-    my $cmdl = $sortBed." -i ".$bednameuns." > ".$bedname;
-    system($cmdl);
-    unlink($bednameuns);
-  }
-}
 
 sub usage {
   print <<EOF;
