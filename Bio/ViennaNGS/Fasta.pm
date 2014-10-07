@@ -2,6 +2,7 @@ package Bio::ViennaNGS::Fasta;
 
 use 5.12.0;
 use version; our $VERSION = qv('0.02_01');
+use Bio::Perl 1.006924;
 use Bio::DB::Fasta;
 use Moose;
 use Carp;
@@ -72,13 +73,34 @@ sub _get_primaryseq {
   my $this_function = (caller(0))[3];
   confess "ERROR [$this_function] Attribute 'fastaids' not found $!"
     unless ($self->has_ids);
-  print "in _get_primaryseq\n";
-  my %fo = ();
-  foreach my $id ($self->fastaids) {
-    $fo{$id} = $self->fastadb->get_Seq_by_id($id); # Bio::PrimarySeq::Fasta object
+  my %fobj = ();
+  my $db = $self->fastadb or croak $!;
+  foreach my $id (@{$self->fastaids}) {
+    $fobj{$id} = $db->get_Seq_by_id($id); # Bio::PrimarySeq::Fasta object
   }
-  print Dumper(%fo);
-  return \%fo;
+  return \%fobj;
+}
+
+# stranded_subsequence ($id,$start,$stop,$strand)
+# retrieve RNA/DNA sequence from a Bio::PrimarySeqI /
+# Bio::PrimarySeq::Fasta object
+sub stranded_subsequence {
+  my ($self,$id,$start,$end,$strand) = @_;
+  my ($this_function,$seq,$rc,$p,$obj);
+  $this_function = (caller(0))[3];
+  confess "ERROR [$this_function] Attribute 'fastaids' not found $!"
+    unless ($self->has_ids);
+  $p = $self->primaryseq; # Hash of Bio::PrimarySeq::Fasta objects
+  confess "ERROR [$this_function] Fasta ID $id not found in hash $!"
+    unless (exists $$p{$id});
+  $obj = $$p{$id};
+  $seq = $obj->subseq($start => $end);
+  if ($strand eq '-1' || $strand eq '-') {
+    $rc = revcom($seq);
+    $seq = $rc->seq();
+  }
+ # print "id:$id\nstart:$start\nend:$end\n";
+  return $seq;
 }
 
 __PACKAGE__->meta->make_immutable;
@@ -100,6 +122,17 @@ Bio::ViennaNGS::Fasta - Moose wrapper for Bio::DB::Fasta
   # get all FASTA IDs
   my @ids = $f->fastaids;
 
+  # get a reference to a hash of Bio::PrimarySeq::Fasta objects whose
+  # keys are the Fasta IDs
+  my $ps = $f->primaryseq;
+
+  # get the strand-specific genomic sequence for a certain Fasta ID
+  my $id = "chr1";
+  my $start = 287;
+  my $end = 1289;
+  my $strand = "+";
+  my $seq = $foo->stranded_subsequence($id,$start,$end,$strand);
+
 =head1 DESCRIPTION
 
 This module provides a L<Moose> interface to L<Bio::DB::Fasta>.
@@ -108,6 +141,21 @@ This module provides a L<Moose> interface to L<Bio::DB::Fasta>.
 
 None by default.
 
+=head1 DEPENDENCIES
+
+=over 5
+
+=item L<Bio::Perl> >= 1.006924
+
+=item L<Bio::DB::Fasta>
+
+=item L<Moose>
+
+=item L<Carp>
+
+=item L<namespace::autoclean>
+
+=back
 
 =head1 SEE ALSO
 
