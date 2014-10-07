@@ -1,14 +1,15 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-03 00:09:06 mtw>
+# Last changed Time-stamp: <2014-10-08 01:02:21 mtw>
 
 package Bio::ViennaNGS::SpliceJunc;
 
 use Exporter;
-use version; our $VERSION = qv('0.04');
+use version; our $VERSION = qv('0.05_01');
 use strict;
 use warnings;
 use Data::Dumper;
 use Bio::ViennaNGS;
+use Bio::ViennaNGS::Fasta;
 use IPC::Cmd qw(can_run run);
 use Path::Class;
 use Carp;
@@ -283,15 +284,14 @@ sub intersect_sj{
 # 3'===]GA..........TG[====5'
 #
 sub ss_isCanonical{
-  my ($chr,$p5,$p3,$fastaobjR) = @_;
+  my ($chr,$p5,$p3,$fo) = @_;
   my ($seqL,$seqR,$pattern);
-  my %fastaO = %$fastaobjR;
   my $ss_motif_length = 2;
   my $this_function = (caller(0))[3];
   my $c = -1;
 
-  $seqL = get_stranded_subsequence($fastaO{$chr},$p5+1,$p5+$ss_motif_length,"+");
-  $seqR = get_stranded_subsequence($fastaO{$chr},$p3-$ss_motif_length+1,$p3,"+");
+  $seqL = $fo->stranded_subsequence($chr,$p5+1,$p5+$ss_motif_length,"+");
+  $seqR = $fo->stranded_subsequence($chr,$p3-$ss_motif_length+1,$p3,"+");
 
   $pattern = sprintf("%s|%s",$seqL,$seqR);
   #print STDERR "[$this_function] p5->p3 ($p5 -- $p3) $seqL -- $seqR\n";
@@ -416,13 +416,13 @@ sorting operations are performed with F<bedtools sort>.
 Writes two BEd6 files to $dest (optionally prefixed by $prefix), which
 contain novel and existing splice junctions, respectively.
 
-=item ss_isCanonical($chr,$p5,$p3,$fastaobjR)
+=item ss_isCanonical($chr,$p5,$p3,$fo)
 
 Checks whether a given splice junction is canonical, ie. whether the
 first and last two nucleotides of the enclosed intron correspond to a
 certain nucleotide motif. C<$chr> is the chromosome name, C<$p5> and
-C<$p3> the 5' and 3' ends of the splice junction and C<$fastaobjR> is
-a L<Bio::PrimarySeq::Fasta> object holding the underlying reference
+C<$p3> the 5' and 3' ends of the splice junction and C<$fo> is a
+L<Bio::ViennaNGS::Fasta> object holding the underlying reference
 genome
 
 This routine does not explicitly consider standedness in the sense
