@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-02 15:06:57 mtw>
+# Last changed Time-stamp: <2014-10-07 17:19:40 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -33,6 +33,7 @@ use IPC::Cmd qw(can_run);
 use Bio::ViennaNGS  qw(bed2bigBed);
 use Bio::ViennaNGS::AnnoC qw(&get_fasta_ids $fastadb);
 use Bio::ViennaNGS::SpliceJunc qw(bed6_ss_from_bed12 bed6_ss_from_rnaseq intersect_sj);
+use Bio::ViennaNGS::Fasta;
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
@@ -115,8 +116,9 @@ unless (-d $path_ss){mkdir $path_ss or die $!;}
 
 
 if($want_canonical){
-  # Parse Fasta file, populate @fastaids
-  my @fo = get_fasta_ids($fa_in);
+  # get Fasta objects (array of Fasta headers)
+  my $fasta = Bio::ViennaNGS::Fasta->new(fa=>$fa_in);
+  my @fo = $fasta->fastaids;
   # Get genomic sequences
   foreach my $id (@fo) {
     $fastaobj{$id} = $fastadb->get_Seq_by_id($id); # Bio::PrimarySeq::Fasta object
