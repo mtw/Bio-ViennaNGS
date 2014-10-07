@@ -63,7 +63,7 @@ __END__
 
 =head1 NAME
 
-Bio::ViennaNGS::Fasta - Moose warapper for Bio::DB::Fasta
+Bio::ViennaNGS::Fasta - Moose wrapper for Bio::DB::Fasta
 
 =head1 SYNOPSIS
 
