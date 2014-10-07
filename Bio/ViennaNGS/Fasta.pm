@@ -31,6 +31,18 @@ has 'fastaids' => (
 		   lazy => 1,
 		  );
 
+has 'primaryseq' => (
+		     is => 'ro',
+		     isa => 'HashRef',
+		     builder => '_get_primaryseq',
+		     lazy => 1,
+		    );
+
+before 'primaryseq' => sub{
+  my $self = shift;
+  $self->fastaids;
+};
+
 before 'fastaids' => sub{
   my $self = shift;
   $self->fastadb;
@@ -53,6 +65,20 @@ sub _get_fastaids {
   my $db = $self->fastadb or croak $!;
   my @ids = $db->ids or croak $!;
   return \@ids;
+}
+
+sub _get_primaryseq {
+  my $self = shift;
+  my $this_function = (caller(0))[3];
+  confess "ERROR [$this_function] Attribute 'fastaids' not found $!"
+    unless ($self->has_ids);
+  print "in _get_primaryseq\n";
+  my %fo = ();
+  foreach my $id ($self->fastaids) {
+    $fo{$id} = $self->fastadb->get_Seq_by_id($id); # Bio::PrimarySeq::Fasta object
+  }
+  print Dumper(%fo);
+  return \%fo;
 }
 
 __PACKAGE__->meta->make_immutable;
