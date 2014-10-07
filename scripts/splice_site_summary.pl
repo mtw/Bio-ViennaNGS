@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-07 17:19:40 mtw>
+# Last changed Time-stamp: <2014-10-08 01:18:37 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -31,7 +31,6 @@ use Pod::Usage;
 use Data::Dumper;
 use IPC::Cmd qw(can_run);
 use Bio::ViennaNGS  qw(bed2bigBed);
-use Bio::ViennaNGS::AnnoC qw(&get_fasta_ids $fastadb);
 use Bio::ViennaNGS::SpliceJunc qw(bed6_ss_from_bed12 bed6_ss_from_rnaseq intersect_sj);
 use Bio::ViennaNGS::Fasta;
 
@@ -39,7 +38,7 @@ use Bio::ViennaNGS::Fasta;
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-my ($path_out,$path_annot,$path_ss);
+my ($path_out,$path_annot,$path_ss,$fastaO);
 my $mincov = 10;
 my $window = 10;
 my $max_intron_length = 7000; # 7000 for A. thaliana
@@ -114,24 +113,16 @@ unless (-d $path_annot){mkdir $path_annot or die $!;}
 $path_ss = $outdir.$dirname_ss;
 unless (-d $path_ss){mkdir $path_ss or die $!;}
 
-
 if($want_canonical){
-  # get Fasta objects (array of Fasta headers)
-  my $fasta = Bio::ViennaNGS::Fasta->new(fa=>$fa_in);
-  my @fo = $fasta->fastaids;
-  # Get genomic sequences
-  foreach my $id (@fo) {
-    $fastaobj{$id} = $fastadb->get_Seq_by_id($id); # Bio::PrimarySeq::Fasta object
-  }
+  $fastaO = Bio::ViennaNGS::Fasta->new(fa=>$fa_in);
 }
 
-
 # Extract annotated splice sites from a BED12 file
-bed6_ss_from_bed12($bed12_in,$path_annot,$window,$want_canonical,\%fastaobj);
+bed6_ss_from_bed12($bed12_in,$path_annot,$window,$want_canonical,$fastaO);
 
 # Extract mapped splice junctions and create a BED6 file for each
 # of them
-bed6_ss_from_rnaseq($s_in,$path_ss,$window,$mincov,$want_canonical,\%fastaobj);
+bed6_ss_from_rnaseq($s_in,$path_ss,$window,$mincov,$want_canonical,$fastaO);
 
 # Check for each splice junction seen in RNA-seq if it overlaps with
 # any annotated splice junction
