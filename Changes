@@ -56,3 +56,6 @@ Revision history for Perl extension ViennaNGS.
 	- adjusted utilities to use new namespace
 	- everything is exported via @EXPORT_OK now
 	- updated README
+
+0.10
+	- updated POD
