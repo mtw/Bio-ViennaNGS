@@ -48,12 +48,14 @@ sub make_assembly_hub{
   my $fastaToTwobit_cmd = $faToTwoBit_path . " " . $fasta_file_path . " " . $twoBitFastaFilePath;
   system($fastaToTwobit_cmd);
 
-  #construct hub.txt
-  my $hubtxt_path = $assembly_hub_directory . "/hub.txt";
-  my $hubtxt_template = Template->new({
+  #template definition
+  my $template = Template->new({
   INCLUDE_PATH => ["$template_path"],
   RELATIVE=>1,
   });
+
+  #construct hub.txt
+  my $hubtxt_path = $assembly_hub_directory . "/hub.txt";
   my $hubtxt_file = 'hub.txt';
   my $hubtxt_vars = {
   hubName => "hubName",
@@ -63,9 +65,25 @@ sub make_assembly_hub{
   email => "email",
   descriptionURL => "descriptionURL"
   };
-  my $hubtxt = $hubtxt_template->process($hubtxt_file,$hubtxt_vars,$hubtxt_path) || die "Template process failed: ", $hubtxt_template->error(), "\n";
-}
+  $template->process($hubtxt_file,$hubtxt_vars,$hubtxt_path) || die "Template process failed: ", $template->error(), "\n";
 
+  #construct genome.txt
+  my $genometxt_path = $assembly_hub_directory . "/genome.txt";
+  my $genometxt_file = 'genome.txt';
+  my $genometxt_vars = {
+  genome => "genomeAssembly",
+  trackDb => "genomeAssembly/trackDb.txt",
+  groups => "groups",
+  description => "description",
+  twoBitPath => "genomeAssembly/genomeAssembly.2bit",
+  organism => "organism",
+  defaultPos => "defaultPos",
+  orderKey => "orderKey",
+  scientificName => "scientificName",
+  htmlPath => "genomeAssembly/description.html"
+  };
+  $template->process($genometxt_file,$genometxt_vars,$genometxt_path) || die "Template process failed: ", $template->error(), "\n";
+}
 1;
 __END__
 
