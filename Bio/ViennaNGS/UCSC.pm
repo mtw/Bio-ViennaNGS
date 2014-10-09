@@ -25,6 +25,11 @@ sub make_assembly_hub{
   die("ERROR [Bio::ViennaNGS::UCSC] \$log_path does not exist\n") unless (-e $log_path);
 
   #check program dependencies
+  my $module_path = $INC{"Bio/ViennaNGS/UCSC.pm"};
+  my $template_path = $module_path;
+  $template_path =~ s/UCSC.pm/template\//;
+  die("ERROR [Bio::ViennaNGS::UCSC] template directory not found\n") unless (-d $template_path);
+
   my $faToTwoBit_path = which('faToTwoBit');
   die("ERROR [ViennaNGS::UCSC] faToTwoBit does not exist in \$PATH\n") unless (-e $faToTwoBit_path);
   my $gff2bed_path = which('gff2bed');
@@ -43,6 +48,7 @@ sub make_assembly_hub{
   my $fastaToTwobit_cmd = $faToTwoBit_path . " " . $fasta_file_path . " " . $twoBitFastaFilePath;
   print STDERR ">> " . $fastaToTwobit_cmd . "\n";
   system($fastaToTwobit_cmd);
+
 }
 
 1;
@@ -85,7 +91,7 @@ perldoc ViennaNGS::AnnoC
 =head1 AUTHORS
 
 Michael Thomas Wolfinger, E<lt>michael@wolfinger.euE<gt>
-Florian Eggenhofer, E<lt>egg@tbi.univie.ac.atE<gt>
+Florian Eggenhofer, E<lt>florian.eggenhofer@univie.ac.atE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
