@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-09 17:08:31 mtw>
+# Last changed Time-stamp: <2014-10-09 23:58:37 mtw>
 #
 # Find motifs in annotated sequences. The motif is provided as regex
 # via the command line
@@ -41,38 +41,50 @@ use strict;
 use warnings;
 use Getopt::Long;
 use Data::Dumper;
+use Pod::Usage;
 use Bio::ViennaNGS::Fasta;
-use Bio::ViennaNGS::AnnoC qw(&parse_gff &get_fasta_ids @fastaids $feat $fastadb);
+use Bio::ViennaNGS::AnnoC qw(&parse_gff $feat);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-my ($gff_in,$fa_in,$obj,$fastaO);
+my ($gff_in,$fa_in,$fastaO);
+my $gbkey      = "CDS";
 my $motif      = undef;
 my $inframe    = 0;
 my $offset     = 0;
-my @fastaIDs   = ();
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 Getopt::Long::config('no_ignore_case');
-&usage() unless GetOptions("gff=s"      => \$gff_in,
-                           "fa=s"       => \$fa_in,
-                           "motif=s"    => \$motif,
-			   "inframe"    => \$inframe,
-			   "offset=i"   => \$offset,
-                           "-help"      => \&usage,
-                           "v");
+pod2usage(-verbose => 1) unless GetOptions("gff|g=s"    => \$gff_in,
+					   "fa|f=s"     => \$fa_in,
+					   "motif|m=s"  => \$motif,
+					   "gbkey=s"    => \$gbkey,
+					   "inframe|i"  => sub{$inframe=1},
+					   "offset|o=i" => \$offset,
+					   "man"        => sub{pod2usage(-verbose => 2)},
+					   "help|h"     => sub{pod2usage(1)}
+					   );
 unless ($gff_in =~ /^\//) {$gff_in = "./".$gff_in;}
-die "$gff_in not found\n" unless (-f $gff_in);
+unless (-f $gff_in){
+  warn "Could not find input file $gff_in given via --gff|-g option";
+  pod2usage(-verbose => 0);
+}
 
 unless ($fa_in =~ /^\//) {$fa_in = "./".$fa_in;}
-die "$fa_in not found\n" unless (-f $fa_in);
+unless (-f $fa_in){
+  warn "Could not find input file $fa_in given via --fa|-f option";
+  pod2usage(-verbose => 0);
+}
 
-unless (defined $motif) {die "please provide motif as regex\n";}
+unless (defined $motif) {
+  warn "Please provide motif as regular expression";
+  pod2usage(-verbose => 0);
+}
 
 $fastaO = Bio::ViennaNGS::Fasta->new(fa=>$fa_in);
 
@@ -83,7 +95,7 @@ find_motifs($fastaO);
 #^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-# loop over all features parsed from GFF3 and see if we have the motif
+# loop over all features and check for the motif
 sub find_motifs {
   my ($fo) = @_;
   my ($id,$start,$stop,$strand,$name,$seq,$length,$chr);
@@ -93,7 +105,7 @@ sub find_motifs {
     my @fm = ();  # AoH for storing found motifs and their position
 
     # TODO let user choose where to look for the mtoif 
-    next unless ($$feat{$id}->{gbkey} eq "CDS");
+    next unless ($$feat{$id}->{gbkey} eq $gbkey);
     $start  = $$feat{$id}->{start};
     $stop   = $$feat{$id}->{end};
     $strand = $$feat{$id}->{strand};
@@ -105,15 +117,13 @@ sub find_motifs {
     unless ($fo->has_sequid($chr)){
       my $_ids= $fo->fastaids;
       print STDERR "\'$chr\' is not a valid Fasta ID. ";
-      print STDERR "The provided Fasta file provides the following IDs:\n";
+      print STDERR "The provided Fasta file has the following IDs:\n";
       print STDERR join " | ", @$_ids;
       print STDERR "\n";
       die;
     }
 
     $seq    = $fo->stranded_subsequence($chr,$start,$stop,$strand);
-    #print Dumper($$feat{$id});
-    #print Dumper(\$seq);
 
     #  $seq    =~ s/T/U/g; # make RNA from DNA
     while ($seq =~ m/$motif/g) {
@@ -127,8 +137,7 @@ sub find_motifs {
 		  stop=>$stop},
 	   );
     }
-    
-    print Dumper(\@fm);
+
     for (my $i=0;$i<$have_motif;$i++) {
       next unless (($inframe == 1) && (($fm[$i]->{pos}+$offset)%3==0));
       # ATG in frame
@@ -140,22 +149,69 @@ sub find_motifs {
 	print "abs ".eval($fm[$i]->{stop}-$fm[$i]->{pos}+1)."\n";
       }
       print "$fm[$i]->{motif}\n";
-    }
-  }
+    } # end for
+
+  } # end foreach
 }
 
 
-sub usage {
-  print <<EOF;
-Find  motifs in annotated sequences
+__END__
 
-usage: $0 [options]
-program specific options:                                    default:
- -motif    <string>  motif to search for (as regex)           ($motif)
- -gff      <string>  GFF3 file annotation file                ($gff_in)
- -fa       <string>  (multi) fasta file holding sequence      ($fa_in)
- -offset   <int>     offset for determination of frame        ($offset)
- -inframe            print only motifs in current ORF         ($inframe)
-EOF
-exit;
-}
+=head1 NAME
+
+motiffinda.pl - Find sequence motifs in annotated features.
+
+=head1 SYNOPSIS
+
+motiffinda.pl [--motif I<REGEX>] [--gff I<FILE>] [--fa I<FILE>]
+[options]
+
+=head1 DESCRIPTION
+
+This script extracts sequence motifs from gene annotation data. The
+motif can be provided as regualr expression. Optionally, only motifs
+I<in frame> with the annoation are reported.
+
+The tool returns B<all motifs> matching the search criteria as a
+(mutli-)Fasta file to STDOUT. This means if teh motif is found more
+than once within an annotated feature, all matches will be reported.
+
+=head1 OPTIONS
+
+=over
+
+=item B<motif|m>
+
+The motif to search for as regular expression. For technical reasons,
+the regular expression must be enclosed in brackets ().
+
+=item B<gff|g>
+
+Genome annotation in GFF3 format
+
+=item B<fa|f>
+
+Reference genome in Fasta format
+
+=item B<gbkey>
+
+Motifs are only searched for in this feature type, aka Genbank key
+(e.g. CDS or gene). Currently only one Genbank key provided via this
+option will be procesed.
+
+=item B<offset|o>
+
+Offset for determination of frame
+
+=item <inframe|i>
+
+Only report motifs in current ORF
+
+
+=back
+
+=head1 AUTHOR
+
+Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+
+=cut
