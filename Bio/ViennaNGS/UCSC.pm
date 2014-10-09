@@ -46,9 +46,24 @@ sub make_assembly_hub{
   #2-bit fasta file conversion
   my $twoBitFastaFilePath = $genome_assembly_directory ."/" . "genomeAssembly" . ".2bit";
   my $fastaToTwobit_cmd = $faToTwoBit_path . " " . $fasta_file_path . " " . $twoBitFastaFilePath;
-  print STDERR ">> " . $fastaToTwobit_cmd . "\n";
   system($fastaToTwobit_cmd);
 
+  #construct hub.txt
+  my $hubtxt_path = $assembly_hub_directory . "/hub.txt";
+  my $hubtxt_template = Template->new({
+  INCLUDE_PATH => ["$template_path"],
+  RELATIVE=>1,
+  });
+  my $hubtxt_file = 'hub.txt';
+  my $hubtxt_vars = {
+  hubName => "hubName",
+  shortLabel => "shortLabel",
+  longLabel => "longLabel",
+  genomesFile => "genomesFile",
+  email => "email",
+  descriptionURL => "descriptionURL"
+  };
+  my $hubtxt = $hubtxt_template->process($hubtxt_file,$hubtxt_vars,$hubtxt_path) || die "Template process failed: ", $hubtxt_template->error(), "\n";
 }
 
 1;
