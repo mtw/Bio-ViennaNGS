@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-02 14:49:54 mtw>
+# Last changed Time-stamp: <2014-10-09 17:08:31 mtw>
 #
 # Find motifs in annotated sequences. The motif is provided as regex
 # via the command line
@@ -8,8 +8,8 @@
 # usage: motiffinda.pl -motif <REXGEX> -gff <GFFFILE> -fa <FASTAFILE>
 #                      -offset <OFFSET> -inframe
 #
-# The motif must be privided within braces, because use $1 to obtain
-# the position of the motif within the query sequece.
+# The motif must be privided within braces, because we use $1 to obtain
+# the position of the motif within the query sequence.
 #
 # ./motiffinda.pl -motif "(ACATG\w{4,13}ACATG)" -gff NC_000913.gff
 #                 -fa NC_000913.fna -offset 1
@@ -17,7 +17,7 @@
 # ***********************************************************************
 # *  Copyright notice
 # *
-# *  Copyright 2013 Michael T. Wolfinger <michael@wolfinger.eu>
+# *  Copyright 2014 Michael T. Wolfinger <michael@wolfinger.eu>
 # *  All rights reserved
 # *
 # *  This program is free software: you can redistribute it and/or modify
@@ -41,20 +41,18 @@ use strict;
 use warnings;
 use Getopt::Long;
 use Data::Dumper;
-use POSIX qw(strftime);
-use Bio::ViennaNGS qw(&get_stranded_subsequence);
+use Bio::ViennaNGS::Fasta;
 use Bio::ViennaNGS::AnnoC qw(&parse_gff &get_fasta_ids @fastaids $feat $fastadb);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-my ($gff_in,$fa_in,$obj);
+my ($gff_in,$fa_in,$obj,$fastaO);
 my $motif      = undef;
 my $inframe    = 0;
 my $offset     = 0;
-my $timestamp  = strftime("%Y%m%d-%H%M", localtime(time));  # timestamp
-my @fa_ids     = ();
+my @fastaIDs   = ();
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
@@ -76,23 +74,10 @@ die "$fa_in not found\n" unless (-f $fa_in);
 
 unless (defined $motif) {die "please provide motif as regex\n";}
 
-# 1) parse GFF annotation
+$fastaO = Bio::ViennaNGS::Fasta->new(fa=>$fa_in);
+
 parse_gff($gff_in);
-#print Dumper($feat);
-#print Dumper($fstat);
-
-# 2) parse Fasta file, populate @fastaids
-get_fasta_ids($fa_in);
-#print Dumper(\@fastaids);
-foreach my $id (@fastaids) {
-  $obj = $fastadb->get_Seq_by_id($id);  # Bio::PrimarySeq::Fasta
-  #print Dumper($obj);
-
-  # 3) find motif in annotated regions
-  find_motifs();
-}
-
-
+find_motifs($fastaO);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
@@ -100,25 +85,50 @@ foreach my $id (@fastaids) {
 
 # loop over all features parsed from GFF3 and see if we have the motif
 sub find_motifs {
-  my ($id,$start,$stop,$strand,$name,$seq,$length);
+  my ($fo) = @_;
+  my ($id,$start,$stop,$strand,$name,$seq,$length,$chr);
 
   foreach $id (keys %$feat){
     my $have_motif = 0;
     my @fm = ();  # AoH for storing found motifs and their position
 
+    # TODO let user choose where to look for the mtoif 
     next unless ($$feat{$id}->{gbkey} eq "CDS");
     $start  = $$feat{$id}->{start};
     $stop   = $$feat{$id}->{end};
     $strand = $$feat{$id}->{strand};
     $name   = $$feat{$id}->{name};
     $length = $$feat{$id}->{length};
-    $seq    = get_stranded_subsequence($obj,$start,$stop,$strand);
+    $chr    = $$feat{$id}->{seqid};
+
+    # check if we can provide sequence information for this $chr
+    unless ($fo->has_sequid($chr)){
+      my $_ids= $fo->fastaids;
+      print STDERR "\'$chr\' is not a valid Fasta ID. ";
+      print STDERR "The provided Fasta file provides the following IDs:\n";
+      print STDERR join " | ", @$_ids;
+      print STDERR "\n";
+      die;
+    }
+
+    $seq    = $fo->stranded_subsequence($chr,$start,$stop,$strand);
+    #print Dumper($$feat{$id});
+    #print Dumper(\$seq);
+
     #  $seq    =~ s/T/U/g; # make RNA from DNA
     while ($seq =~ m/$motif/g) {
       my $p = pos($seq)-length($1)+1;
       $have_motif++;
-      push (@fm, {motif=>$1,pos=>$p,name=>$name,strand=>$strand,start=>$start,stop=>$stop});
+      push (@fm, {motif=>$1,
+		  pos=>$p,
+		  name=>$name,
+		  strand=>$strand,
+		  start=>$start,
+		  stop=>$stop},
+	   );
     }
+    
+    print Dumper(\@fm);
     for (my $i=0;$i<$have_motif;$i++) {
       next unless (($inframe == 1) && (($fm[$i]->{pos}+$offset)%3==0));
       # ATG in frame
