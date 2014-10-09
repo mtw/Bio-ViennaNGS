@@ -88,6 +88,7 @@ sub stranded_subsequence {
   my ($self,$id,$start,$end,$strand) = @_;
   my ($this_function,$seq,$rc,$p,$obj);
   $this_function = (caller(0))[3];
+  my @dummy = $self->fastaids;
   confess "ERROR [$this_function] Attribute 'fastaids' not found $!"
     unless ($self->has_ids);
   $p = $self->primaryseq; # Hash of Bio::PrimarySeq::Fasta objects
@@ -99,8 +100,19 @@ sub stranded_subsequence {
     $rc = revcom($seq);
     $seq = $rc->seq();
   }
- # print "id:$id\nstart:$start\nend:$end\n";
+  # print "id:$id\nstart:$start\nend:$end\n";
   return $seq;
+}
+
+sub has_sequid {
+  my ($self,$id) = @_;
+  my $ids = $self->fastaids;
+  #$i = grep{$_ eq $id}@{$ids} ? 1 : 0;
+  for my $j (@$ids){
+    if ($id eq $j){return 1;}
+    else {return 0;}
+  }
+  return -1;
 }
 
 __PACKAGE__->meta->make_immutable;
