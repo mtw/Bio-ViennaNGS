@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-08 01:18:37 mtw>
+# Last changed Time-stamp: <2014-10-09 23:44:47 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -146,9 +146,14 @@ splice_site_summary.pl - Find novel splice junctions in RNA-seq data.
 splice_site_summary.pl [-s I<FILE>] [-a I<FILE>] [-f I<FILE>]
 [options]
 
+=head1 DESCRIPTION
+
+This program identifies and characterizes splice sites from mapped
+RNA-seq data against annotated splice junctions.
+
 =head1 OPTIONS
 
-=over 
+=over
 
 =item B<-a>
 
@@ -205,11 +210,6 @@ Print short help
 Prints the manual page and exits
 
 =back
-
-=head1 DESCRIPTION
-
-This program identifies and characterizes splice sites from mapped
-RNA-seq data against annotated splice junctions.
 
 =head1 AUTHOR
 
