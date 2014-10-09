@@ -59,3 +59,4 @@ Revision history for Perl extension ViennaNGS.
 
 0.10
 	- updated POD
+	- refactored scripts/motiffinda.pl
