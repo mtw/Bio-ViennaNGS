@@ -11,7 +11,7 @@
 # *  Copyright notice
 # *
 # *  Copyright 2014 Michael Thomas Wolfinger <michael@wolfinger.eu>
-# *                 Florian Michel Eggenhofer <florian@eggenhofer.eu>
+# *                 Florian Eggenhofer <florian.eggenhofer@univie.ac.at>
 # *  All rights reserved
 # *
 # *  This program is free software: you can redistribute it and/or modify
@@ -35,12 +35,12 @@ use warnings;
 use Getopt::Long;
 use Data::Dumper;
 use File::Basename;
-use ViennaNGS::UCSC qw( make_assembly_hub );
+use Bio::ViennaNGS::UCSC qw( make_assembly_hub );
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
-my ($fasta_file_path,$assembly_hub_destination_path,$base_URL,$log_path);
+my ($fasta_file_path,$assembly_hub_destination_path,$base_URL,$assembly_hub_return_value,$log_path);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
@@ -49,19 +49,19 @@ Getopt::Long::config('no_ignore_case');
 &usage() unless GetOptions("i=s"           => \$fasta_file_path,
 			   "a=s"           => \$assembly_hub_destination_path,
                            "b=s"           => \$base_URL,
-			   "d"             => sub{$debug=1},
                            "-help"         => \&usage,
                            "v");
 
 die "ERROR in [assembly_hub_constructer.pl]: no input fasta file provided" unless(defined $fasta_file_path);
 die "ERROR in [assembly_hub_constructer.pl]: input fasta file not found" unless (-e $fasta_file_path);
-unless ($infile =~ /^\// || $infile =~ /^\.\//){$infile = "./".$infile;}
+die "ERROR in [assembly_hub_constructer.pl]: no assembly hub destination path provided" unless(defined $assembly_hub_destination_path);
+die "ERROR in [assembly_hub_constructer.pl]: assembly hub destination path not writable" unless (-e $assembly_hub_destination_path);
+die "ERROR in [assembly_hub_constructer.pl]: no URL (network location for upload to UCSC) provided" unless(defined $base_URL);
 unless ($assembly_hub_destination_path =~ /\/$/){$assembly_hub_destination_path.= "/";}
-$log_path = $assembly_hub_destination_path . "Log"
-#unless (-d $destdir){$cmd = "mkdir -p $destdir"; system($cmd);}
-#($basename,$dir,$ext) = fileparse($infile,qr/\.[^.]*/);
+$log_path = $assembly_hub_destination_path . "Log/";
+unless (-d $log_path){my $cmd = "mkdir -p  $log_path"; system($cmd);}
 
-make_assembly_hub $fasta_file_path $assembly_hub_destination_path $base_URL $log_path;
+$assembly_hub_return_value = make_assembly_hub($fasta_file_path,$assembly_hub_destination_path,$base_URL,$log_path);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
@@ -74,10 +74,9 @@ Calculate normalized expression values (TPM/RPKM) for multicov data
 
 usage: $0 [options]
 program specific options:                                default:
- -i      <file>                                          ($infile)
- -a      <path>   output directory                       ($destdir)
- -b      <url>    URL - network location for upload to UCSC                            ($readlength)
- -d               debug output                           ($debug)
+ -i      <file>                                          ($fasta_file_path)
+ -a      <path>   output directory                       ($assembly_hub_destination_path)
+ -b      <url>    URL - network location for upload to UCSC                            ($base_URL)
  -help            print this information
 
 EOF
