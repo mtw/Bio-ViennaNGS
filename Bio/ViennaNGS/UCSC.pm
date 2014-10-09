@@ -19,16 +19,16 @@ our @EXPORT = ();
 sub make_assembly_hub{
   my ($fasta_file_path,$assembly_hub_destination_path,$base_URL,$log_path) = @_;
   #check arguments
-  die("ERROR [ViennaNGS::UCSC] $fasta_file_path does not exist\n") unless (-e $fasta_file_path);
-  die("ERROR [ViennaNGS::UCSC] $assembly_hub_destination_path does not exist\n") unless (-d $assembly_hub_destination_path);
-  die("ERROR [ViennaNGS::UCSC] $base_URL is not set\n") if ($base_URL == "");
-  die("ERROR [ViennaNGS::UCSC] $log_path does not exist\n") unless (-e $log_path);
+  die("ERROR [Bio::ViennaNGS::UCSC] \$fasta_file_path does not exist\n") unless (-e $fasta_file_path);
+  die("ERROR [Bio::ViennaNGS::UCSC] \$assembly_hub_destination_path does not exist\n") unless (-d $assembly_hub_destination_path);
+  die "ERROR [Bio::ViennaNGS::UCSC]: no URL (network location for upload to UCSC) provided" unless(defined $base_URL);
+  die("ERROR [Bio::ViennaNGS::UCSC] \$log_path does not exist\n") unless (-e $log_path);
 
   #check program dependencies
   my $faToTwoBit_path = which('faToTwoBit');
-  die("ERROR [ViennaNGS::UCSC] faToTwoBit does not exist in $PATH\n") unless (-e $faToTwoBit_path);
+  die("ERROR [ViennaNGS::UCSC] faToTwoBit does not exist in \$PATH\n") unless (-e $faToTwoBit_path);
   my $gff2bed_path = which('gff2bed');
-  die("ERROR [ViennaNGS::UCSC] gff2bed does not exist in $PATH\n") unless (-e $gff2bed);
+  die("ERROR [ViennaNGS::UCSC] gff2bed does not exist in \$PATH\n") unless (-e $gff2bed_path);
 
   #create assembly hub directory structure
   my $assembly_hub_name = "Test";
@@ -39,8 +39,8 @@ sub make_assembly_hub{
   mkdir $genome_assembly_directory;
 
   #2-bit fasta file conversion
-  my $2bit_fasta_file_path = $genome_assembly_directory ."/" . "genomeAssembly" . ".2bit"
-  my $fastaToTwobit_cmd =  $faToTwoBit_path . " " . $fasta_file_path . " " . $2bit_fasta_file_path;
+  my $twoBitFastaFilePath = $genome_assembly_directory ."/" . "genomeAssembly" . ".2bit";
+  my $fastaToTwobit_cmd = $faToTwoBit_path . " " . $fasta_file_path . " " . $twoBitFastaFilePath;
   print STDERR ">> " . $fastaToTwobit_cmd . "\n";
   system($fastaToTwobit_cmd);
 }
