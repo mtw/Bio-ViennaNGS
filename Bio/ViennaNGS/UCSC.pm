@@ -83,7 +83,33 @@ sub make_assembly_hub{
   htmlPath => "genomeAssembly/description.html"
   };
   $template->process($genometxt_file,$genometxt_vars,$genometxt_path) || die "Template process failed: ", $template->error(), "\n";
+
+  #construct description.html
+  my $description_html_path = $genome_assembly_directory . "/description.html";
+  my $description_html_file = 'description.html';
+  my $description_html_vars = {
+  imageLink  => "imageLink",
+  imageSource => "imageSource",
+  imageAlternative => "imageAlternative",
+  taxonomicName => "taxonomicName",
+  imageOrigin => "imageOrigin",
+  imageOriginDescription => "imageOriginDescription",
+  ucscId => "ucscId",
+  sequencingId => "sequencingId",
+  assemblyDate => "assemblyDate",
+  genbankAccessionId => "genbankAccessionId",
+  ncbiGenomeInformationLink => "ncbiGenomeInformationLink",
+  ncbiGenomeInformationDescription => "ncbiGenomeInformationDescription",
+  ncbiAssemblyInformationLink => "ncbiAssemblyInformationLink",
+  ncbiAssemblyInformationDescription => "ncbiAssemblyInformationDescription",
+  bioProjectInformationLink => "bioProjectInformationLink",
+  bioProjectInformationDescription => "bioProjectInformationDescription",
+  sequenceAnnotationLink => "sequenceAnnotationLink"
+  };
+  $template->process($description_html_file,$description_html_vars,$description_html_path) || die "Template process failed: ", $template->error(), "\n";
+
 }
+
 1;
 __END__
 
