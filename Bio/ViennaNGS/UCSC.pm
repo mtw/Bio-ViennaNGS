@@ -32,8 +32,6 @@ sub make_assembly_hub{
 
   my $faToTwoBit_path = which('faToTwoBit');
   die("ERROR [ViennaNGS::UCSC] faToTwoBit does not exist in \$PATH\n") unless (-e $faToTwoBit_path);
-  my $gff2bed_path = which('gff2bed');
-  die("ERROR [ViennaNGS::UCSC] gff2bed does not exist in \$PATH\n") unless (-e $gff2bed_path);
 
   #create assembly hub directory structure
   my $assembly_hub_name = "Test";
