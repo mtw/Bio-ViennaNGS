@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-14 00:48:03 mtw>
+# Last changed Time-stamp: <2014-10-16 00:08:43 mtw>
 
 package Bio::ViennaNGS::AnnoC;
 
@@ -10,71 +10,66 @@ use IPC::Cmd qw(can_run run);
 use Path::Class;
 use Carp;
 use Moose;
+use Data::Dumper;
 
-#our @ISA       = qw(Exporter);
-#our @EXPORT_OK = qw(&parse_gff &feature_summary &get_fasta_ids &features2bed
-#		    $feat $fstat $fastadb
-#		    @fastaids
-#		    %features %featsta);
-#our @EXPORT    = ();
-
-#our ($fastadb);
-#our %features  = ();
-#our %featstat  = ();
-#our $feat      = \%features;
-#our $fstat     = \%featstat;
-#our @fastaids  = ();
 
 has 'features' => (
 		   is => 'ro',
 		   isa => 'HashRef',
 		   predicate => 'has_features',
-		   #trigger => \&_set_featstat,
+		   default => sub { {} },
 		  );
 
-hash 'nr_features' => (
-		       is 'ro',
-		       isa => 'Int',
-		       builder => '_get_nr_of_features',
-		       lazy => 1,
-		      );
+has 'nr_features' => (
+		     is => 'ro',
+		     isa => 'Int',
+		     builder => '_get_nr_of_features',
+		     lazy => 1,
+		     );
 
 has 'featstat' => (
-		   is 'ro',
+		   is => 'ro',
 		   isa => 'HashRef',
 		   builder => '_set_featstat',
 		   predicate => 'has_featstat',
+		   lazy => 1,
 		  );
 
 before 'featstat' => sub {
   my $self = shift;
-  $self->_get_nr_of_features;
-}
+  $self->_get_nr_of_features();
+};
 
 sub _set_featstat {
   my $self = shift;
   my $this_function = (caller(0))[3];
+  my %fs = ();
   confess "ERROR [$this_function] \$self->features not available"
-    unless (-f $self->has_features);
-  #my $nr = $self->nr_features or croak $!;
-  $self->featstat{total} = 0;
-  $self->featstat{origin} = "$this_function ".$VERSION;
-  foreach my $ft (keys %($self->features)){
-    $self->featstat{total}++;
-    unless (exists $self->featstat{$key}){
-      $self->featstat{$key} = 0;
-    }
-    $self->featstat{$key} += 1;
-  }
+    unless ($self->has_features);
 
+  $fs{total} = 0;
+  $fs{accession} = "n/a";
+  $fs{origin} = "$this_function ".$VERSION;
+  $fs{count} = $self->nr_features;
+  foreach my $key ( keys %{$self->features} ){
+    #print Dumper (\$key);
+    $fs{total} += 1;
+    next if ($key eq 'accession');
+    next if ($key eq 'origin');
+    unless (exists $fs{$key}){
+      $fs{$key} = 0;
+    }
+    $fs{$key} += 1;
+  }
+  return \%fs;
 }
 
 sub _get_nr_of_features {
   my $self = shift;
   my $this_function = (caller(0))[3];
   confess "ERROR [$this_function] \$self->features not available"
-    unless (-f $self->has_features);
-  return keys %{$self->features};
+    unless ($self->has_features);
+  return (keys %{$self->features});
 }
 
 sub parse_gff {
@@ -86,10 +81,10 @@ sub parse_gff {
 				-gff_version  => 3,
 			       );
   $gffio->ignore_sequence(1);
-  if ($header = $gffio->next_segment() ){
-    $featstat{accession}= $header->display_id();
-  }
-  else{ carp "[$this_function]: Cannot parse GFF header\n" }
+  #if ($header = $gffio->next_segment() ){
+  #  ${$self->featstat}{accession}= $header->display_id();
+  #}
+  #else{ carp "[$this_function]: Cannot parse GFF header\n" }
 
   while($f = $gffio->next_feature()) {
     my ($uid,$feat_name);
@@ -131,42 +126,43 @@ sub parse_gff {
               $f->gbkey at pos. $f->start\n";
     }
 
-    unless (exists $self->features{$uid}) { # gene / ribosome_entry_site / etc.
-      $self->features{$uid}->{start}     = $f->start;
-      $self->features{$uid}->{end}       = $f->end;
-      $self->features{$uid}->{strand}    = $f->strand;
-      $self->features{$uid}->{length}    = $f->length;
-      $self->features{$uid}->{seqid}     = $f->seq_id;
-      $self->features{$uid}->{score}     = $f->score || 0;
-      $self->features{$uid}->{gbkey}     = $gbkey;
-      $self->features{$uid}->{name}      = $feat_name;
-      $self->features{$uid}->{uid}       = $uid;
+    unless (exists ${$self->features}{$uid}) { # gene / ribosome_entry_site / etc.
+      ${$self->features}{$uid}->{start}     = $f->start;
+      ${$self->features}{$uid}->{end}       = $f->end;
+      ${$self->features}{$uid}->{strand}    = $f->strand;
+      ${$self->features}{$uid}->{length}    = $f->length;
+      ${$self->features}{$uid}->{seqid}     = $f->seq_id;
+      ${$self->features}{$uid}->{score}     = $f->score || 0;
+      ${$self->features}{$uid}->{gbkey}     = $gbkey;
+      ${$self->features}{$uid}->{name}      = $feat_name;
+      ${$self->features}{$uid}->{uid}       = $uid;
     }
     else { # CDS / tRNA / rRNA / etcx
-      $self->features{$uid}->{gbkey} = $gbkey;  # gbkey for tRNA/ rRNA/ CDS etc
+      ${$self->features}{$uid}->{gbkey} = $gbkey;  # gbkey for tRNA/ rRNA/ CDS etc
     }
   }
 
   # finally generate some statistics on features present in this annotation
-  $self->_set_featstat;
-
-  #$featstat{total} = 0;
-  #$featstat{origin} = "$this_function ".$VERSION;
-  #foreach my $ft (keys %{$self->features}){
-  #  $featstat{total}++;
-  #  my $key = $self->features{$ft}->{gbkey};
-  #  unless (exists $featstat{$key}){
-  #    $featstat{$key} = 0;
-  #  }
-  #  $featstat{$key} += 1;
-  #}
+  #$self->_set_featstat;
 
   $gffio->close();
-  #print Dumper (\%features);
-  #die;
 }
 
 no Moose;
+
+#our @ISA       = qw(Exporter);
+#our @EXPORT_OK = qw(&parse_gff &feature_summary &get_fasta_ids &features2bed
+#		    $feat $fstat $fastadb
+#		    @fastaids
+#		    %features %featsta);
+#our @EXPORT    = ();
+#our ($fastadb);
+#our %features  = ();
+our %featstat  = ();
+#our $feat      = \%features;
+our $fstat     = \%featstat;
+#our @fastaids  = ();
+
 
 # features2bed($featR,$fstatR,$feature,$dest,$bn,$log)
 # Convert genome annotation features to BED12
