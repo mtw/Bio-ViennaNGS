@@ -1,10 +1,11 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-22 13:02:24 mtw>
+# Last changed Time-stamp: <2014-10-22 14:03:15 mtw>
 
 package Bio::ViennaNGS::AnnoC;
 
 use 5.12.0;
-use version; our $VERSION = qv('0.07_02');
+use version; our $VERSION = qv('0.07');
+use Bio::ViennaNGS qw(sortbed);
 use Bio::Tools::GFF;
 use IPC::Cmd qw(can_run run);
 use Path::Class;
@@ -205,27 +206,12 @@ sub features2bed {
     }
    close (BEDOUT);
 
-   # sort bed file
-   my $cmd = "$bedtools sort -i $bedname_u > $bedname";
-   my ( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) =
-     run( command => $cmd, verbose => 0 );
-   if( !$success ) {
-     print STDERR "ERROR [$this_function] Call to $bedtools unsuccessful\n";
-     print STDERR "ERROR: this is what the command printed:\n";
-     print join "", @$full_buf;
-     croak $!;
-   }
-   unlink($bedname_u);
+   sortbed($bedname_u,".",$bedname,1,undef);  # sort bed file
 
  } # end foreach
  if (defined $log){close(LOG)};
 }
 
-# feature_summary($fsR,$dest)
-# Print summary of %featstat hash
-#
-# ARG1: reference to %featstat hash
-# ARG2: path for output file
 sub feature_summary {
   my ($self, $dest) = @_;
   my ($fn,$fh);
