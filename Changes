@@ -58,6 +58,10 @@ Revision history for Perl extension ViennaNGS.
 	- updated README
 
 0.10
-	- updated POD
+	- requires Perl >= 5.12.0
+	- added sortbed()
 	- refactored scripts/motiffinda.pl
 	- updated scripts/assembly_hub_constructer.pl
+	- made scripts/gff2bed.pl work with OO Bio::ViennaNGS::AnnoC 
+	- removed get_stranded_subsequence (now lives in Bio::ViennaNGS::Fasta)
+	- updated POD
