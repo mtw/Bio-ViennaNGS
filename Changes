@@ -57,7 +57,7 @@ Revision history for Perl extension ViennaNGS.
 	- everything is exported via @EXPORT_OK now
 	- updated README
 
-0.10  Wed Oct 22 2014
+0.10  
 	- requires Perl >= 5.12.0
 	- added sortbed()
 	- refactored scripts/motiffinda.pl
