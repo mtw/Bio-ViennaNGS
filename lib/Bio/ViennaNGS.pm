@@ -1,8 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-08 00:38:25 mtw>
+# Last changed Time-stamp: <2014-10-22 15:32:51 mtw>
 
 package Bio::ViennaNGS;
 
+use 5.12.0;
 use Exporter;
 use version; our $VERSION = qv('0.10');
 use strict;
@@ -18,9 +19,9 @@ use Carp;
 
 our @ISA = qw(Exporter);
 our @EXPORT = ();
-our @EXPORT_OK = qw(get_stranded_subsequence split_bam bam2bw bed2bw
+our @EXPORT_OK = qw ( split_bam bam2bw bed2bw sortbed
 		    bed2bigBed computeTPM featCount_data
-		    parse_multicov write_multicov totalreads);
+		    parse_multicov write_multicov totalreads );
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
@@ -34,23 +35,6 @@ our @featCount = ();
 
 sub featCount_data {
   return \@featCount;
-}
-
-# get_stranded_subsequence ($obj,$start,$stop,$strand)
-# retrieve RNA/DNA sequence from a Bio::PrimarySeqI /
-# Bio::PrimarySeq::Fasta object
-sub get_stranded_subsequence {
-  my ($o,$start,$end,$strand) = @_;
-  unless (defined $o){
-    confess "Fasta object not available"
-  }
-  my $seq = $o->subseq($start => $end);
-  if ($strand eq '-1' || $strand eq '-') {
-    my $rc = revcom($seq);
-    $seq = $rc->seq();
-  }
-  #print "id:$id\nstart:$start\nend:$end\n";
-  return $seq;
 }
 
 # split_bam ( $bam,$reverse,$want_uniq,$want_bed,$dest_dir,$log )
@@ -414,7 +398,7 @@ sub bed2bigBed {
     run( command => $cmd, verbose => 0 );
 
   if( !$success ) {
-    print STDERR "ERROR [$this_function] Call to $bed2bigBed  unsuccessful\n";
+    print STDERR "ERROR [$this_function] Call to $bed2bigBed unsuccessful\n";
     print STDERR "ERROR: this is what the command printed:\n";
     print join "", @$full_buf;
     croak $!;
@@ -423,6 +407,44 @@ sub bed2bigBed {
   if (defined $log){ close(LOG); }
 
   return $outfile;
+}
+
+# sortbed ($infile,$dest,$outfile,$rm_orig,$log)
+# sorts BED file with 'bedtools sort'
+sub sortbed {
+  my ($infile,$dest,$outfile,$rm_orig,$log) = @_;
+  my ($cmd,$out);
+  my $this_function = (caller(0))[3];
+  my $bedtools = can_run('bedtools') or
+    croak "ERROR [$this_function bedtools utility not found";
+
+  croak "ERROR [$this_function] Cannot find $infile"
+    unless (-e $infile);
+  croak "ERROR [$this_function] $dest does not exist"
+    unless (-d $dest);
+  if (defined $log){open(LOG, ">>", $log) or croak $!;}
+
+  $out = file($dest,$outfile);
+  $cmd = "$bedtools sort -i $infile > $out";
+  if (defined $log){ print LOG "LOG [$this_function] $cmd\n"; }
+  my ( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) =
+    run( command => $cmd, verbose => 0 );
+  if( !$success ) {
+    print STDERR "ERROR [$this_function] Call to $bedtools unsuccessful\n";
+    print STDERR "ERROR: this is what the command printed:\n";
+    print join "", @$full_buf;
+    croak $!;
+  }
+
+  if($rm_orig){
+    unlink($infile) or
+      carp "WARN [$this_function] Could not unlink $infile";
+    if (defined $log){
+      print LOG "[$this_function] removed $infile $!\n";
+    }
+  }
+
+  if (defined $log){ close(LOG); }
 }
 
 # computeTPM($featCount_sample,$readlength)
@@ -552,15 +574,6 @@ analysis
 
   use Bio::ViennaNGS;
 
-  # get Bio::PrimarySeq::Fasta object
-  my @fo = get_fasta_ids($fasta_in);
-  foreach my $id (@fo) {
-    $fastaobj{$id} = $fastadb->get_Seq_by_id($id);
-  }
-
-  # get strand-specific genomic sequence between $start and $end
-  $seq = get_stranded_subsequence($obj,$start,$stop,$fastaobj{$id});
-
   # split a single-end  or paired-end BAM file by strands
   @result = split_bam($bam_in,$rev,$want_uniq,$want_bed,$destdir,$logfile);
 
@@ -573,6 +586,9 @@ analysis
   # make bigBed from BED
   my $bb = bed2bigBed($bed_in,$cs_in,$destdir,$logfile);
 
+  # sort a BED file 
+  sortbed($bed_in,$destdir,$bed_out,$rm_orig,$logfile)
+
   # compute transcript abundance in TPM
   $meanTPM = computeTPM($sample,$readlength);
 
@@ -584,40 +600,32 @@ analysis
 
 =head1 DESCRIPTION
 
-ViennaNGS is a collection of utilities and subroutines often used for
-Next-Generation Sequencing (NGS) data analysis.
+ViennaNGS is a collection of utilities and subroutines for building
+Next-Generation Sequencing (NGS) data analysis pipelines.
 
-=over 5
-
-=item get_stranded_subsequence($object,$start,$stop,$strand)
-
-Returns the actual DNA/RNA sequence from $start to $end. $object is a
-Bio::PrimarySeq::Fasta object, which obeys the Bio::PrimarySeqI
-conventions. To recover the entire raw DNA or protein sequence, call
-$object->seq(). $strand is 1 or -1 for [+] or [-] strand,
-respectively.
+=over 
 
 =item split_bam($bam,$reverse,$want_uniq,$want_bed,$dest_dir,$log)
 
-Splits BAM file $bam according to [+] and [-] strand. $reverse,
-$want_uniq and $want_bed are switches with values of 0 or 1,
+Splits BAM file $bam according to [+] and [-] strand. C<$reverse>,
+C<$want_uniq> and C<$want_bed> are switches with values of 0 or 1,
 triggering forced reversion of strand mapping (due to RNA-seq protocol
 constraints), filtering of unique mappers (identified via NH:i:1 SAM
 argument), and forced output of a BED file corresponding to
-strand-specific mapping, respectively. $log holds name and path of the
-log file.
+strand-specific mapping, respectively. C<$log> holds name and path of
+the log file.
 
 Strand-splitting is done in a way that in paired-end alignments, FIRST
 and SECOND mates (reads) are treated as _one_ fragment, ie FIRST_MATE
 reads determine the strand, while SECOND_MATE reads are assigned the
-opposite strand per definitionem. (This also holds if the reads are
-not mapped in proper pairs and even if ther is no mapping partner at
-all)
+opposite strand I<per definitionem>. This also holds if the reads are
+not mapped in proper pairs and even if there is no mapping partner at
+all.
 
 Sometimes the library preparation protocol causes inversion of the
 read assignment (with respect to the underlying annotation). In those
 cases, the natural mapping of the reads can be obtained by the
-$reverse flag.
+C<$reverse> flag.
 
 NOTE: Filtering of unique mappers is only safe for single-end
 experiments; In paired-end experiments, read and mate are treated
@@ -628,56 +636,62 @@ in an ambiguous alignment of the entire fragment.
 =item bam2bw($bam,$chromsizes)
 
 Creates BedGraph and BigWig coverage profiles from BAM files. These
-can easily be visualized as TrackHubs within the UCSC Genome Browser
-(http://genome.ucsc.edu/goldenPath/help/hgTrackHubHelp.html). Internally,
+can easily be visualized as L<UCSC Genome Browser
+TrackHubs|http://genome.ucsc.edu/goldenPath/help/hgTrackHubHelp.html>. Internally,
 the conversion is accomplished by two third-party applications:
-genomeCoverageBed (from BEDtools, see
-http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html)
-and bedGraphToBigWig (from the UCSC Genome Browser, see
-http://hgdownload.cse.ucsc.edu/admin/exe/).
+L<genomeCoverageBed|http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html>
+and L<bedGraphToBigWig|http://hgdownload.cse.ucsc.edu/admin/exe/>.
 
 =item bed2bw($infile,$chromsizes,$strand,$dest,$want_norm,$size,$scale,$log)
 
 Creates stranded, normalized BigWig coverage profiles from BED
-files. $chromsizes is the chromosome.sizes files, $strand is either
-"+" or "-" and $dest contains the output path for results. For
-normlization of bigWig profiles, additional attributes are required:
-$want_norm triggers normalization with values 0 or 1. $size is the
-number of elements (features) in the BED file and $scale gives the
-number to which data is normalized (ie. every bedGraph entry is
-multiplied by a factor ($scale/$size). $log holds path and name of log
-file.
+files. C<$chromsizes> is the chromosome.sizes files, C<$strand> is
+either "+" or "-" and C<$dest> contains the output path for
+results. For normlization of bigWig profiles, additional attributes
+are required: C<$want_norm> triggers normalization with values 0 or
+1. C<$size> is the number of elements (features) in the BED file and
+C<$scale> gives the number to which data is normalized (ie. every
+bedGraph entry is multiplied by a factor (C<$scale>/C<$size>). C<$log>
+holds path and name of log file.
 
 Stranded BigWigs can easily be visualized via TrackHubs in the UCSC
 Genome Browser. Internally, the conversion is accomplished by two
-third-party applications: genomeCoverageBed (from BEDtools, see
-http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html)
-and bedGraphToBigWig (from the UCSC Genome Browser, see
-http://hgdownload.cse.ucsc.edu/admin/exe/). Intermediate bedGraph
-files are removed automatically.
+third-party applications:
+L<genomeCoverageBed|http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html>
+and
+L<bedGraphToBigWig|http://hgdownload.cse.ucsc.edu/admin/exe/>. Intermediate
+bedGraph files are removed automatically.
+
+=item sortbed($infile,$dest,$outfile,$rm_orig,$log)
+
+Sorts BED file C<$infile> with F<bedtools sortt>. C<$dest> and
+C<outfile> name path and filename of the resulting sorted BED
+file. C<$rm_infile> is either 1 or 0 and indicated whether the
+original C<$infile> should be deleted. C<$log> holds path and name of
+log file.
 
 =item bed2bigBed($infile,$chromsizes,$dest,$log)
 
 Creates an indexed bigBed file from a BED file. C<$infile> is the BED
 file to be transformed, C<$chromsizes> is the chromosome.sizes file
-and $dest contains the output path for results. $log is the name of a
-log file, or undef if no logging is reuqired. A '.bed', '.bed6' or
-'.bed12' suffix in C<$infile> will be replace by '.bb' in the
+and C<$dest> contains the output path for results. C<$log> is the name
+of a log file, or undef if no logging is reuqired. A '.bed', '.bed6'
+or '.bed12' suffix in C<$infile> will be replace by '.bb' in the
 output. Else, the name of the output bigBed file will be the value of
 C<$infile> plus '.bb' appended.
 
 The conversion from BED to bigBed is done by a third-party utility
 (bedToBigBed), which is executed by IPC::Cmd.
 
-=item  computeTPM($featCount_sample,$rl)
+=item computeTPM($featCount_sample,$rl)
 
 Computes expression in Transcript per Million (TPM) [Wagner
-et.al. Theory Biosci. (2012)]. $featCount_sample is a reference to a
-HoH data straucture where keys are feature names and values hold a
-hash that must at least contain length and raw read
-counts. Practically, $featCount_sample is represented by _one_ element
-of @featCount, which is populated from a multicov file by
-parse_multicov(). $rl is the read length of the sequencing run.
+et.al. Theory Biosci. (2012)]. C<$featCount_sample> is a reference to
+a Hash of Hashes data straucture where keys are feature names and
+values hold a hash that must at least contain length and raw read
+counts. Practically, C<$featCount_sample> is represented by _one_
+element of C<@featCount>, which is populated from a multicov file by
+C<parse_multicov()>. C<$rl> is the read length of the sequencing run.
 
 Returns the mean TPM of the processed sample, which is invariant among
 samples. (TPM models relative molar concentration and thus fulfills
@@ -687,18 +701,19 @@ the invariant average criterion.)
 
 Parse a bedtools multicov (multiBamCov) file, i.e. an extended BED6
 file, into an Array of Hash of Hashes data structure
-(@featCount). $file is the input file. Returns the number of samples
-present in the multicov file, ie. the numner of columns extending the
-canonical BED6 columns in the input multicov file.
+(C<@featCount>). C<$file> is the input file. Returns the number of
+samples present in the multicov file, ie. the numner of columns
+extending the canonical BED6 columns in the input multicov file.
 
 =item write_multicov($item,$dest_dir,$base_name)
 
-Write @featCount data to a bedtools multicov (multiBamCov)-type
-file. $item specifies the type of information from @featCount HoH
-entries, e.g. TPM or RPKM. These values must have been computed and
-inserted into @featCount beforehand by e.g. computeTPM(). $dest_dir
-gives the absolute path and $base_name the basename (will be extended by
-$item.csv) of the output file.
+Write C<@featCount> data to a bedtools multicov (multiBamCov)-type
+file. C<$item> specifies the type of information from C<@featCount>
+HoH entries, e.g. TPM or RPKM. These values must have been computed
+and inserted into C<@featCount> beforehand by
+e.g. C<computeTPM()>. C<$dest_dir> gives the absolute path and
+C<$base_name> the basename (will be extended by C<$item>.csv) of the
+output file.
 
 =back
 
@@ -722,13 +737,13 @@ $item.csv) of the output file.
 
 =back
 
-L<ViennaNGS::SpliceJunc> uses third-party tools for computing
-intersections of BED files: F<bedtools intersect> from the
+L<Bio::ViennaNGS> uses third-party tools for computing intersections
+of BED files: F<bedtools intersect> from the
 L<BEDtools|http://bedtools.readthedocs.org/en/latest/content/tools/intersect.html>
 suite is used to compute overlaps and F<bedtools sort> is used to sort
 BED output files. Make sure that those third-party utilities are
 available on your system, and that hey can be found and executed by
-the perl interpreter. We recommend installing the latest version of
+the Perl interpreter. We recommend installing the latest version of
 L<BEDtools|https://github.com/arq5x/bedtools2> on your system.
 
 =head1 SEE ALSO
@@ -747,9 +762,15 @@ L<BEDtools|https://github.com/arq5x/bedtools2> on your system.
 
 =head1 AUTHORS
 
-Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
-Florian Eggenhofer E<lt>egg@tbi.univie.ac.atE<gt>
-Joerg Fallmann E<lt>fall@tbi.univie.ac.atE<gt>
+=over
+
+=item Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+
+=item Florian Eggenhofer E<lt>florian.eggenhofer@univie.ac.atE<gt>
+
+=item Joerg Fallmann E<lt>fall@tbi.univie.ac.atE<gt>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
