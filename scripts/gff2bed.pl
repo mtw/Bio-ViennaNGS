@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-04 00:16:24 mtw>
+# Last changed Time-stamp: <2014-10-22 09:18:24 mtw>
 #
 # Convert GFF3 to BED12; produce separate BED files for each gbkey
 # (CDS/tRNA/etc)
@@ -35,19 +35,18 @@ use warnings;
 use Getopt::Long;
 use Data::Dumper;
 use File::Basename;
-use Bio::ViennaNGS::AnnoC qw(&parse_gff &feature_summary &features2bed $fstat $feat);
+use Bio::ViennaNGS::AnnoC;
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 my $chr_name      = '';
-my $feature       = 'gene'; # look for 'gene' per default
+my $feature       = undef; # look for all features per default
 my $infile        = '';
 my $workdir       = undef;
 my $ext           = ".gff";
-my $sortBed       = "sortBed";
-my ($bn);
+my ($bn,$obj);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
@@ -69,11 +68,11 @@ $bn = basename($infile, $ext);
 $infile = $workdir.$infile;
 print "gff2bed INFO: processing $infile\n";
 
-parse_gff($infile);
-
-feature_summary($fstat,$workdir);
-
-features2bed($feat,$fstat,"xxx",$workdir,$bn,undef);
+$obj = Bio::ViennaNGS::AnnoC->new();
+$obj->parse_gff($infile);
+$obj->featstat;
+$obj->feature_summary($workdir);
+$obj->features2bed($feature,$workdir,$bn,undef);
 
 
 sub usage {
@@ -83,7 +82,7 @@ Convert GFF3 to BED12
 usage: $0 [options]
 program specific options:                                     default:
  -chr     <string>  specify chromosome name (1st GFF column)  ($chr_name)
- -feature <string>  specify feature to extract                ($feature)
+ -feat    <string>  specify feature to extract                ($feature)
  -i       <string>  input file (GFF3)
  -wd      <string>  working directory (path to GFF file)      ($workdir)
  -help              rint this information
