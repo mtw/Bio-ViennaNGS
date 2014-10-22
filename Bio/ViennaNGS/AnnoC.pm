@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-16 00:08:43 mtw>
+# Last changed Time-stamp: <2014-10-22 09:24:22 mtw>
 
 package Bio::ViennaNGS::AnnoC;
 
@@ -12,6 +12,11 @@ use Carp;
 use Moose;
 use Data::Dumper;
 
+has 'accession' => (
+		    is => 'rw',
+		    isa => 'Str',
+		    predicate => 'has_accession',
+		   );
 
 has 'features' => (
 		   is => 'ro',
@@ -46,20 +51,16 @@ sub _set_featstat {
   my %fs = ();
   confess "ERROR [$this_function] \$self->features not available"
     unless ($self->has_features);
-
   $fs{total} = 0;
-  $fs{accession} = "n/a";
   $fs{origin} = "$this_function ".$VERSION;
   $fs{count} = $self->nr_features;
-  foreach my $key ( keys %{$self->features} ){
-    #print Dumper (\$key);
+  foreach my $uid ( keys %{$self->features} ){
+    my $gbkey = ${$self->features}{$uid}->{gbkey};
     $fs{total} += 1;
-    next if ($key eq 'accession');
-    next if ($key eq 'origin');
-    unless (exists $fs{$key}){
-      $fs{$key} = 0;
+    unless (exists $fs{$gbkey}){
+      $fs{$gbkey} = 0;
     }
-    $fs{$key} += 1;
+    $fs{$gbkey} += 1;
   }
   return \%fs;
 }
@@ -81,10 +82,10 @@ sub parse_gff {
 				-gff_version  => 3,
 			       );
   $gffio->ignore_sequence(1);
-  #if ($header = $gffio->next_segment() ){
-  #  ${$self->featstat}{accession}= $header->display_id();
-  #}
-  #else{ carp "[$this_function]: Cannot parse GFF header\n" }
+  if ($header = $gffio->next_segment() ){
+    $self->accession( $header->display_id() );
+  }
+  else{ carp "ERROR [$this_function] Cannot parse GFF header\n" }
 
   while($f = $gffio->next_feature()) {
     my ($uid,$feat_name);
@@ -127,48 +128,28 @@ sub parse_gff {
     }
 
     unless (exists ${$self->features}{$uid}) { # gene / ribosome_entry_site / etc.
-      ${$self->features}{$uid}->{start}     = $f->start;
-      ${$self->features}{$uid}->{end}       = $f->end;
-      ${$self->features}{$uid}->{strand}    = $f->strand;
-      ${$self->features}{$uid}->{length}    = $f->length;
-      ${$self->features}{$uid}->{seqid}     = $f->seq_id;
-      ${$self->features}{$uid}->{score}     = $f->score || 0;
-      ${$self->features}{$uid}->{gbkey}     = $gbkey;
-      ${$self->features}{$uid}->{name}      = $feat_name;
-      ${$self->features}{$uid}->{uid}       = $uid;
+      ${$self->features}{$uid}->{start}   = $f->start;
+      ${$self->features}{$uid}->{end}     = $f->end;
+      ${$self->features}{$uid}->{strand}  = $f->strand;
+      ${$self->features}{$uid}->{length}  = $f->length;
+      ${$self->features}{$uid}->{seqid}   = $f->seq_id;
+      ${$self->features}{$uid}->{score}   = $f->score || 0;
+      ${$self->features}{$uid}->{gbkey}   = $gbkey;
+      ${$self->features}{$uid}->{name}    = $feat_name;
+      ${$self->features}{$uid}->{uid}     = $uid;
     }
-    else { # CDS / tRNA / rRNA / etcx
+    else { # CDS / tRNA / rRNA / etc.
       ${$self->features}{$uid}->{gbkey} = $gbkey;  # gbkey for tRNA/ rRNA/ CDS etc
     }
   }
-
-  # finally generate some statistics on features present in this annotation
-  #$self->_set_featstat;
-
   $gffio->close();
 }
 
-no Moose;
-
-#our @ISA       = qw(Exporter);
-#our @EXPORT_OK = qw(&parse_gff &feature_summary &get_fasta_ids &features2bed
-#		    $feat $fstat $fastadb
-#		    @fastaids
-#		    %features %featsta);
-#our @EXPORT    = ();
-#our ($fastadb);
-#our %features  = ();
-our %featstat  = ();
-#our $feat      = \%features;
-our $fstat     = \%featstat;
-#our @fastaids  = ();
-
-
-# features2bed($featR,$fstatR,$feature,$dest,$bn,$log)
+# features2bed($self,$gbkey,$dest,$bn,$log)
 # Convert genome annotation features to BED12
 # Returns a BED12 for each feature type in %features hash
 sub features2bed {
- my ($featR,$fstatR,$feature,$dest,$bn,$log) = @_;
+ my ($self,$gbkey,$dest,$bn,$log) = @_;
  my ($chrom,$chrom_start,$chrom_end,$name,$score,$strand,$thick_start);
  my ($thick_end,$reserved,$block_count,$block_sizes,$block_starts);
  my @ft = ();
@@ -176,25 +157,26 @@ sub features2bed {
  my $bedtools = can_run('bedtools') or
    croak "ERROR [$this_function] Cannot find 'bedtools' utility";
 
- croak "ERROR [$this_function] undef \%features hash"
-   unless (defined $featR);
- croak "ERROT [$this_function] undef \%fstat hash"
-   unless (defined $fstatR);
+ croak "ERROR [$this_function] $self->features not available"
+   unless ($self->has_features);
+ croak "ERROT [$this_function] $self->featstat not available"
+   unless ($self->has_featstat);
  croak "ERROR [$this_function] $dest does not exist"
     unless (-d $dest);
-  if (defined $log){open(LOG, ">>", $log) or croak $!;}
+ if (defined $log){open(LOG, ">>", $log) or croak $!;}
 
- if (defined $feature){ # dump one feature type
-   confess "ERROR [$this_function] feature type \'$feature\' N/A in hash "
-     unless (exists $$fstat{$feature});
-   $ft[0] = $feature;
+ print Dumper(\$self);
+
+ if (defined $gbkey){ # dump features of just one genbank key
+   confess "ERROR [$this_function] genbank key \'$gbkey\' N/A in hash "
+     unless (exists ${$self->featstat}{$gbkey});
+   $ft[0] = $gbkey;
  }
- else{ # dump all feature types
-   # get all feature types from in %$featR
-   foreach my $gbkey (keys %$fstatR) {
-     next if ($gbkey eq 'total' || $gbkey eq 'Src' ||
-	      $gbkey eq 'accession' || $gbkey eq 'origin');
-     push @ft,$gbkey;
+ else{ # dump features for all genbank keys
+   foreach my $gbk (keys %{$self->featstat}) {
+     next if ($gbk eq 'total' || $gbk eq 'Src' || $gbk eq 'accession' ||
+	      $gbk eq 'origin' || $gbk eq 'count');
+     push @ft,$gbk;
    }
  }
 
@@ -204,21 +186,21 @@ sub features2bed {
    open (BEDOUT, "> $bedname_u") or croak $!;
 
    # dump unsorted gene annotation from DS to BED12
-   foreach my $uid (keys %$featR){
-      next unless ($$featR{$uid}->{gbkey} eq $f);
+   foreach my $uid (keys %{$self->features}){
+      next unless (${$self->features}{$uid}->{gbkey} eq $f);
       my @bedline = ();
-      $chrom        = $$featR{$uid}->{seqid};
-      $chrom_start  = $$featR{$uid}->{start};
+      $chrom        = ${$self->features}{$uid}->{seqid};
+      $chrom_start  = ${$self->features}{$uid}->{start};
       $chrom_start--; # BED is 0-based
-      $chrom_end    = $$featR{$uid}->{end};
-      $name         = $$featR{$uid}->{name};
-      $score        = $$featR{$uid}->{score};
-      $strand       = $$featR{$uid}->{strand} == -1 ? '-' : '+'; #default to +
+      $chrom_end    = ${$self->features}{$uid}->{end};
+      $name         = ${$self->features}{$uid}->{name};
+      $score        = ${$self->features}{$uid}->{score};
+      $strand       = ${$self->features}{$uid}->{strand} == -1 ? '-' : '+'; #default to +
       $thick_start  = $chrom_start;
       $thick_end    = $chrom_end;
       $reserved     = 0; 
       $block_count  = 1;
-      $block_sizes  = $$featR{$uid}->{length}.",";
+      $block_sizes  = ${$self->features}{$uid}->{length}.",";
       $block_starts = "0,";
       @bedline = join ("\t", ($chrom,$chrom_start,$chrom_end,
 			      $name,$score,$strand,$thick_start,
@@ -233,7 +215,7 @@ sub features2bed {
    my ( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) =
      run( command => $cmd, verbose => 0 );
    if( !$success ) {
-     print STDERR "ERROR [$this_function] Call to $bedtools  unsuccessful\n";
+     print STDERR "ERROR [$this_function] Call to $bedtools unsuccessful\n";
      print STDERR "ERROR: this is what the command printed:\n";
      print join "", @$full_buf;
      croak $!;
@@ -250,23 +232,25 @@ sub features2bed {
 # ARG1: reference to %featstat hash
 # ARG2: path for output file
 sub feature_summary {
-  my ($fsR, $dest) = @_;
+  my ($self, $dest) = @_;
   my ($fn,$fh);
   my $this_function = (caller(0))[3];
 
   croak "ERROR [$this_function] $dest does not exist\n"
     unless (-d $dest);
+  croak "ERROR [$this_function] $self->accession not available\n"
+    unless ($self->has_accession);
 
-  $fn = dir($dest,$$fsR{accession}.".summary.txt");
+  $fn = dir($dest,$self->accession.".summary.txt");
   open $fh, ">", $fn or croak $!;
 
-  print $fh "Accession\t $$fsR{accession}\n";
-  print $fh "Origin   \t $$fsR{origin}\n";
-  foreach my $ft (sort keys %$fsR){
+  print $fh "Accession\t ".$self->accession."\n";
+  print $fh "Origin   \t ${$self->featstat}{origin}\n";
+  foreach my $ft (sort keys %{$self->featstat}){
     next if ($ft =~ /total/ || $ft =~ /accession/ || $ft =~ /origin/);
-    print $fh "$ft\t$$fsR{$ft}\n";
+    print $fh "$ft\t${$self->featstat}{$ft}\n";
   }
-  print $fh "Total\t$$fsR{total}\n";
+  print $fh "Total\t${$self->featstat}{total}\n";
   close $fh;
 }
 
@@ -288,7 +272,7 @@ annotation formats
 
   feature_summary($fstat,$dest);
 
-  features2bed($featR,$fstatR,$feature,$dest,$bn,$log)
+  features2bed($featR,$fstatR,$gbkey,$dest,$bn,$log)
 
   get_fasta_ids($fasta_file);
 
@@ -316,15 +300,15 @@ parse_gff. It expects two arguments: C<$fstat> is a refence to the
 summary hash generated by C<parse_gff()> and C<$dest> is the output
 path for a summary.txt file.
 
-=item features2bed($featR,$fstatR,$feature,$dest,$bn,$log)
+=item features2bed($featR,$fstatR,$gbkey,$dest,$bn,$log)
 
 Thsi routine converts genomic features from a L<Bio::ViennaNGS::AnnoC>
 C<%features> hash into BED12 format. C<$featR> and C<$fstatR> are
 references to the C<%features> and C<%featstat> hashes,
-respectively. C<$feature> can be either a string corresponding to a
+respectively. C<$gbkey> can be either a string corresponding to a
 genbank key present in C<%features> or C<undef>. If it is defined,
 only features of the speficied key will be written to one single BED12
-file. If C<$feature> is undef, BED12 files will be generated for each
+file. If C<$gbkey> is undef, BED12 files will be generated for each
 genbank key present in C<%features>. C<$dest> is the output directory
 and C<$bn> the basename for all output files. C<$log> can either be
 the full path to a logfile or C<undef>.
