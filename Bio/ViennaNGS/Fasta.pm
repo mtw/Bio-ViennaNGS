@@ -149,9 +149,22 @@ Bio::ViennaNGS::Fasta - Moose wrapper for Bio::DB::Fasta
 
 This module provides a L<Moose> interface to L<Bio::DB::Fasta>.
 
-=head1 EXPORT
+=head1 METHODS
 
-None by default.
+=over
+
+=item stranded_subsequence
+
+  Title   : stranded_subsequence
+  Usage   : $obj->stranded_subsequence($id,$start,$end,$strand)
+  Function: Returns the DNA/RNA sequence for C<$id> from
+            C<$start> to C<$end>.
+  Args    : C<$id> is the Fasta ID (a L<Bio::PrimarySeq::Fasta> object). 
+            C<$start> and C<$end>  should be self-explnatory, C<$strand>
+            is 1 or -1 for [+] or [-] strand, respectively
+  Returns : A string
+
+=back
 
 =head1 DEPENDENCIES
 
