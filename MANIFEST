@@ -4,3 +4,4 @@ MANIFEST
 README
 t/Bio-ViennaNGS.t
 lib/Bio/ViennaNGS.pm
+lib/Bio/ViennaNGS/Feature.pm
