@@ -1,13 +1,12 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-22 14:03:15 mtw>
+# Last changed Time-stamp: <2014-10-24 10:26:50 mtw>
 
 package Bio::ViennaNGS::AnnoC;
 
 use 5.12.0;
-use version; our $VERSION = qv('0.07');
+use version; our $VERSION = qv('0.08_01');
 use Bio::ViennaNGS qw(sortbed);
 use Bio::Tools::GFF;
-use IPC::Cmd qw(can_run run);
 use Path::Class;
 use Carp;
 use Moose;
@@ -152,8 +151,6 @@ sub features2bed {
  my ($thick_end,$reserved,$block_count,$block_sizes,$block_starts);
  my @ft = ();
  my $this_function = (caller(0))[3];
- my $bedtools = can_run('bedtools') or
-   croak "ERROR [$this_function] Cannot find 'bedtools' utility";
 
  croak "ERROR [$this_function] $self->features not available"
    unless ($self->has_features);
