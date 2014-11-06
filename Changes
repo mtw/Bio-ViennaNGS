@@ -65,3 +65,4 @@ Revision history for Perl extension ViennaNGS.
 	- made scripts/gff2bed.pl work with OO Bio::ViennaNGS::AnnoC 
 	- removed get_stranded_subsequence (now lives in Bio::ViennaNGS::Fasta)
 	- updated POD
+	- added Moose classes for Feature handling
