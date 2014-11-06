@@ -8,7 +8,7 @@ use version; our $VERSION = qv('0.01');
 use strict;
 use warnings;
 use Template;
-use File::Which qw(which where);
+use IPC::Cmd qw[can_run run run_forked];
 
 our @ISA = qw(Exporter);
 
@@ -29,9 +29,8 @@ sub make_assembly_hub{
   my $template_path = $module_path;
   $template_path =~ s/UCSC.pm/template\//;
   die("ERROR [Bio::ViennaNGS::UCSC] template directory not found\n") unless (-d $template_path);
-
-  my $faToTwoBit_path = which('faToTwoBit');
-  die("ERROR [ViennaNGS::UCSC] faToTwoBit does not exist in \$PATH\n") unless (-e $faToTwoBit_path);
+  my $faToTwoBit_path = can_run('faToTwoBit') or die 'ERROR [ViennaNGS::UCSC] faToTwoBit is not installed!';
+  #die("ERROR [ViennaNGS::UCSC] faToTwoBit does not exist in \$PATH\n") unless (-e $faToTwoBit_path);
 
   #create assembly hub directory structure
   my $assembly_hub_name = "Test";
@@ -43,6 +42,7 @@ sub make_assembly_hub{
 
   #2-bit fasta file conversion
   my $twoBitFastaFilePath = $genome_assembly_directory ."/" . "genomeAssembly" . ".2bit";
+  my $full_path = can_run('faToTwoBit') or die 'faToTwoBit is not installed!';
   my $fastaToTwobit_cmd = $faToTwoBit_path . " " . $fasta_file_path . " " . $twoBitFastaFilePath;
   system($fastaToTwobit_cmd);
 
@@ -106,6 +106,25 @@ sub make_assembly_hub{
   };
   $template->process($description_html_file,$description_html_vars,$description_html_path) || die "Template process failed: ", $template->error(), "\n";
 
+  my $groups = "group";
+
+  #construct group.txt
+  my $group_txt_path = $genome_assembly_directory . "/group.txt";
+  my $group_txt_file = 'group.txt';
+  my $group_txt_vars = {
+  groups  => "$groups",
+  };
+  $template->process($group_txt_file,$group_txt_vars,$group_txt_path) || die "Template process failed: ", $template->error(), "\n";
+
+  my $tracks = "track";
+
+  #construct trackDb.txt
+  my $trackDb_txt_path = $genome_assembly_directory . "/trackDb.txt";
+  my $trackDb_txt_file = 'trackDb.txt';
+  my $trackDb_txt_vars = {
+  tracks  => "$tracks"
+  };
+  $template->process($trackDb_txt_file,$trackDb_txt_vars,$trackDb_txt_path) || die "Template process failed: ", $template->error(), "\n";
 }
 
 1;
