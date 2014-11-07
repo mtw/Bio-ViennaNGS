@@ -106,7 +106,7 @@ sub make_assembly_hub{
   };
   $template->process($description_html_file,$description_html_vars,$description_html_path) || die "Template process failed: ", $template->error(), "\n";
 
-  my $groups = "group";
+  my $groups = make_group("annotation", "Annotation", "1", "0");
 
   #construct group.txt
   my $group_txt_path = $genome_assembly_directory . "/group.txt";
@@ -127,6 +127,11 @@ sub make_assembly_hub{
   $template->process($trackDb_txt_file,$trackDb_txt_vars,$trackDb_txt_path) || die "Template process failed: ", $template->error(), "\n";
 }
 
+sub make_group{
+  my ($name,$label,$priority,$defaultIsClosed) = @_;
+  my $group ="name $name\nlabel $label\npriority $priority\ndefaultIsClosed $defaultIsClosed\n";
+  return $group;
+}
 1;
 __END__
 
