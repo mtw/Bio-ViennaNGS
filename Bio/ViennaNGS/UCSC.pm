@@ -17,7 +17,7 @@ our @EXPORT_OK = qw( make_assembly_hub  );
 our @EXPORT = ();
 
 sub make_assembly_hub{
-  my ($fasta_file_path,$assembly_hub_destination_path,$base_URL,$log_path) = @_;
+  my ($fasta_file_path, $assembly_hub_destination_path, $base_URL, $log_path) = @_;
   #check arguments
   die("ERROR [Bio::ViennaNGS::UCSC] \$fasta_file_path does not exist\n") unless (-e $fasta_file_path);
   die("ERROR [Bio::ViennaNGS::UCSC] \$assembly_hub_destination_path does not exist\n") unless (-d $assembly_hub_destination_path);
@@ -116,8 +116,8 @@ sub make_assembly_hub{
   };
   $template->process($group_txt_file,$group_txt_vars,$group_txt_path) || die "Template process failed: ", $template->error(), "\n";
 
-  my $tracks = "track";
-
+  my $tracks = make_track("track", "bigDataUrl", "shortLabel", "longLabel", "type", "autoScale", "bedNameLabel", "searchIndex", "colorByStrand", "visibility", "group", "priority");
+  
   #construct trackDb.txt
   my $trackDb_txt_path = $genome_assembly_directory . "/trackDb.txt";
   my $trackDb_txt_file = 'trackDb.txt';
@@ -128,10 +128,17 @@ sub make_assembly_hub{
 }
 
 sub make_group{
-  my ($name,$label,$priority,$defaultIsClosed) = @_;
+  my ($name, $label, $priority, $defaultIsClosed) = @_;
   my $group ="name $name\nlabel $label\npriority $priority\ndefaultIsClosed $defaultIsClosed\n";
   return $group;
 }
+
+sub make_track{
+  my ($track, $bigDataUrl, $shortLabel, $longLabel, $type, $autoScale, $bedNameLabel, $searchIndex, $colorByStrand, $visibility, $group, $priority) = @_;
+  my $trackEntry ="#$track\ntrack $track\nbigDataUrl $bigDataUrl\nshortLabel $shortLabel\nlongLabel $longLabel\ntype $type\nautoScale $autoScale\nbedNameLabel $bedNameLabel\nsearchIndex $searchIndex\ncolorByStrand $colorByStrand\nvisibility $visibility\ngroup $group\npriority $priority\n";
+  return $trackEntry;
+}
+
 1;
 __END__
 
