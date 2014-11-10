@@ -9,6 +9,7 @@ use strict;
 use warnings;
 use Template;
 use Cwd;
+use File::Basename;
 use IPC::Cmd qw[can_run run run_forked];
 
 our @ISA = qw(Exporter);
@@ -24,6 +25,8 @@ sub make_assembly_hub{
   die("ERROR [Bio::ViennaNGS::UCSC] \$assembly_hub_destination_path does not exist\n") unless (-d $assembly_hub_destination_path);
   die "ERROR [Bio::ViennaNGS::UCSC]: no URL (network location for upload to UCSC) provided" unless(defined $base_URL);
   die("ERROR [Bio::ViennaNGS::UCSC] \$log_path does not exist\n") unless (-e $log_path);
+  #bedfiles path
+  my $bedFileDirectory = dirname($fasta_file_path);
 
   #check program dependencies
   my $module_path = $INC{"Bio/ViennaNGS/UCSC.pm"};
@@ -48,62 +51,65 @@ sub make_assembly_hub{
 
   #template definition
   my $template = Template->new({
-  INCLUDE_PATH => ["$template_path"],
-  RELATIVE=>1,
+                                INCLUDE_PATH => ["$template_path"],
+                                RELATIVE=>1,
   });
 
   #construct hub.txt
   my $hubtxt_path = $assembly_hub_directory . "/hub.txt";
   my $hubtxt_file = 'hub.txt';
-  my $hubtxt_vars = {
-                     hubName => "hubName",
-                     shortLabel => "shortLabel",
-                     longLabel => "longLabel",
-                     genomesFile => "genomesFile",
-                     email => "email",
-                     descriptionURL => "descriptionURL"
-                    };
+  my $hubtxt_vars = 
+    {
+     hubName => "hubName",
+     shortLabel => "shortLabel",
+     longLabel => "longLabel",
+     genomesFile => "genomesFile",
+     email => "email",
+     descriptionURL => "descriptionURL"
+    };
   $template->process($hubtxt_file,$hubtxt_vars,$hubtxt_path) || die "Template process failed: ", $template->error(), "\n";
   
   #construct genome.txt
   my $genometxt_path = $assembly_hub_directory . "/genome.txt";
   my $genometxt_file = 'genome.txt';
-  my $genometxt_vars = {
-                        genome => "genomeAssembly",
-                        trackDb => "genomeAssembly/trackDb.txt",
-                        groups => "groups",
-                        description => "description",
-                        twoBitPath => "genomeAssembly/genomeAssembly.2bit",
-                        organism => "organism",
-                        defaultPos => "defaultPos",
-                        orderKey => "orderKey",
-                        scientificName => "scientificName",
-                        htmlPath => "genomeAssembly/description.html"
-                       };
+  my $genometxt_vars = 
+    {
+     genome => "genomeAssembly",
+     trackDb => "genomeAssembly/trackDb.txt",
+     groups => "groups",
+     description => "description",
+     twoBitPath => "genomeAssembly/genomeAssembly.2bit",
+     organism => "organism",
+     defaultPos => "defaultPos",
+     orderKey => "orderKey",
+     scientificName => "scientificName",
+     htmlPath => "genomeAssembly/description.html"
+    };
   $template->process($genometxt_file,$genometxt_vars,$genometxt_path) || die "Template process failed: ", $template->error(), "\n";
   
   #construct description.html
   my $description_html_path = $genome_assembly_directory . "/description.html";
   my $description_html_file = 'description.html';
-  my $description_html_vars = {
-                               imageLink  => "imageLink",
-                               imageSource => "imageSource",
-                               imageAlternative => "imageAlternative",
-                               taxonomicName => "taxonomicName",
-                               imageOrigin => "imageOrigin",
-                               imageOriginDescription => "imageOriginDescription",
-                               ucscId => "ucscId",
-                               sequencingId => "sequencingId",
-                               assemblyDate => "assemblyDate",
-                               genbankAccessionId => "genbankAccessionId",
-                               ncbiGenomeInformationLink => "ncbiGenomeInformationLink",
-                               ncbiGenomeInformationDescription => "ncbiGenomeInformationDescription",
-                               ncbiAssemblyInformationLink => "ncbiAssemblyInformationLink",
-                               ncbiAssemblyInformationDescription => "ncbiAssemblyInformationDescription",
-                               bioProjectInformationLink => "bioProjectInformationLink",
-                               bioProjectInformationDescription => "bioProjectInformationDescription",
-                               sequenceAnnotationLink => "sequenceAnnotationLink"
-                              };
+  my $description_html_vars = 
+    {
+     imageLink  => "imageLink",
+     imageSource => "imageSource",
+     imageAlternative => "imageAlternative",
+     taxonomicName => "taxonomicName",
+     imageOrigin => "imageOrigin",
+     imageOriginDescription => "imageOriginDescription",
+     ucscId => "ucscId",
+     sequencingId => "sequencingId",
+     assemblyDate => "assemblyDate",
+     genbankAccessionId => "genbankAccessionId",
+     ncbiGenomeInformationLink => "ncbiGenomeInformationLink",
+     ncbiGenomeInformationDescription => "ncbiGenomeInformationDescription",
+     ncbiAssemblyInformationLink => "ncbiAssemblyInformationLink",
+     ncbiAssemblyInformationDescription => "ncbiAssemblyInformationDescription",
+     bioProjectInformationLink => "bioProjectInformationLink",
+     bioProjectInformationDescription => "bioProjectInformationDescription",
+     sequenceAnnotationLink => "sequenceAnnotationLink"
+    };
   $template->process($description_html_file,$description_html_vars,$description_html_path) || die "Template process failed: ", $template->error(), "\n";
 
   my $groups = make_group("annotation", "Annotation", "1", "0");
@@ -111,11 +117,12 @@ sub make_assembly_hub{
   #construct group.txt
   my $group_txt_path = $genome_assembly_directory . "/group.txt";
   my $group_txt_file = 'group.txt';
-  my $group_txt_vars = {
-                        groups  => "$groups",
-                       };
+  my $group_txt_vars = 
+    {
+     groups  => "$groups",
+    };
   $template->process($group_txt_file,$group_txt_vars,$group_txt_path) || die "Template process failed: ", $template->error(), "\n";
-
+  
   my @trackfiles = retrieve_tracks("/home/mescalin/egg/current/Projects/Perl/assemblyhub_test/",$base_URL);
   my $tracksList;
   foreach my $track (@trackfiles){
@@ -126,9 +133,10 @@ sub make_assembly_hub{
   #construct trackDb.txt
   my $trackDb_txt_path = $genome_assembly_directory . "/trackDb.txt";
   my $trackDb_txt_file = 'trackDb.txt';
-  my $trackDb_txt_vars = {
-  tracks  => "$tracksList"
-  };
+  my $trackDb_txt_vars = 
+    {
+     tracks  => "$tracksList"
+    };
   $template->process($trackDb_txt_file,$trackDb_txt_vars,$trackDb_txt_path) || die "Template process failed: ", $template->error(), "\n";
 }
 
