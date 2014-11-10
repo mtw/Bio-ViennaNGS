@@ -25,9 +25,12 @@ sub make_assembly_hub{
   die("ERROR [Bio::ViennaNGS::UCSC] \$assembly_hub_destination_path does not exist\n") unless (-d $assembly_hub_destination_path);
   die "ERROR [Bio::ViennaNGS::UCSC]: no URL (network location for upload to UCSC) provided" unless(defined $base_URL);
   die("ERROR [Bio::ViennaNGS::UCSC] \$log_path does not exist\n") unless (-e $log_path);
+  #ensure that base_URL ends with slash
+  $base_URL =~ s!/*$!/!;
   #bedfiles path
   my $bedFileDirectory = dirname($fasta_file_path);
-
+  my $accession = basename($fasta_file_path);
+  $accession =~ s/.fa$//;
   #check program dependencies
   my $module_path = $INC{"Bio/ViennaNGS/UCSC.pm"};
   my $template_path = $module_path;
@@ -36,15 +39,15 @@ sub make_assembly_hub{
   my $faToTwoBit_path = can_run('faToTwoBit') or die 'ERROR [ViennaNGS::UCSC] faToTwoBit is not installed!';
 
   #create assembly hub directory structure
-  my $assembly_hub_name = "Test";
+  my $assembly_hub_name = "assemblyHub";
   my $assembly_hub_directory = $assembly_hub_destination_path . $assembly_hub_name;
-  my $genome_assembly_name = "genomeAssembly";
+  my $genome_assembly_name = "$accession";
   my $genome_assembly_directory = $assembly_hub_directory ."/" . $genome_assembly_name;
   mkdir $assembly_hub_directory;
   mkdir $genome_assembly_directory;
 
   #2-bit fasta file conversion
-  my $twoBitFastaFilePath = $genome_assembly_directory ."/" . "genomeAssembly" . ".2bit";
+  my $twoBitFastaFilePath = $genome_assembly_directory ."/" . "$accession" . ".2bit";
   my $full_path = can_run('faToTwoBit') or die 'faToTwoBit is not installed!';
   my $fastaToTwobit_cmd = $faToTwoBit_path . " " . $fasta_file_path . " " . $twoBitFastaFilePath;
   system($fastaToTwobit_cmd);
@@ -58,35 +61,35 @@ sub make_assembly_hub{
   #construct hub.txt
   my $hubtxt_path = $assembly_hub_directory . "/hub.txt";
   my $hubtxt_file = 'hub.txt';
-  my $hubtxt_vars = 
+  my $hubtxt_vars =
     {
-     hubName => "hubName",
-     shortLabel => "shortLabel",
-     longLabel => "longLabel",
-     genomesFile => "genomesFile",
+     hubName => "$accession",
+     shortLabel => "$accession",
+     longLabel => "$accession",
+     genomesFile => "genome.txt",
      email => "email",
-     descriptionURL => "descriptionURL"
+     descriptionURL => $base_URL . "description.html"
     };
   $template->process($hubtxt_file,$hubtxt_vars,$hubtxt_path) || die "Template process failed: ", $template->error(), "\n";
-  
+
   #construct genome.txt
   my $genometxt_path = $assembly_hub_directory . "/genome.txt";
   my $genometxt_file = 'genome.txt';
-  my $genometxt_vars = 
+  my $genometxt_vars =
     {
-     genome => "genomeAssembly",
-     trackDb => "genomeAssembly/trackDb.txt",
-     groups => "groups",
-     description => "description",
-     twoBitPath => "genomeAssembly/genomeAssembly.2bit",
+     genome => "$accession",
+     trackDb => "$accession/trackDb.txt",
+     groups => "$accession/groups.txt",
+     description => "$accession",
+     twoBitPath => "$accession/$accession.2bit",
      organism => "organism",
-     defaultPos => "defaultPos",
-     orderKey => "orderKey",
+     defaultPos => $accession . ":1-1,000",
+     orderKey => "10",
      scientificName => "scientificName",
-     htmlPath => "genomeAssembly/description.html"
+     htmlPath => "$accession/description.html"
     };
   $template->process($genometxt_file,$genometxt_vars,$genometxt_path) || die "Template process failed: ", $template->error(), "\n";
-  
+
   #construct description.html
   my $description_html_path = $genome_assembly_directory . "/description.html";
   my $description_html_file = 'description.html';
@@ -115,15 +118,15 @@ sub make_assembly_hub{
   my $groups = make_group("annotation", "Annotation", "1", "0");
 
   #construct group.txt
-  my $group_txt_path = $genome_assembly_directory . "/group.txt";
-  my $group_txt_file = 'group.txt';
+  my $group_txt_path = $genome_assembly_directory . "/groups.txt";
+  my $group_txt_file = 'groups.txt';
   my $group_txt_vars = 
     {
      groups  => "$groups",
     };
   $template->process($group_txt_file,$group_txt_vars,$group_txt_path) || die "Template process failed: ", $template->error(), "\n";
-  
-  my @trackfiles = retrieve_tracks("/home/mescalin/egg/current/Projects/Perl/assemblyhub_test/",$base_URL);
+
+  my @trackfiles = retrieve_tracks("/home/mescalin/egg/current/Projects/Perl/assemblyhub_test/", $base_URL, $assembly_hub_name);
   my $tracksList;
   foreach my $track (@trackfiles){
     my $trackString = make_track(@$track);
@@ -141,7 +144,7 @@ sub make_assembly_hub{
 }
 
 sub retrieve_tracks{
-  my ($directoryPath,$base_URL) = @_;
+  my ($directoryPath,$base_URL,$assembly_hub_name) = @_;
   my $currentDirectory = getcwd;
   chdir $directoryPath or die $!;
   my @trackfiles = <*.bb>;
@@ -154,7 +157,7 @@ sub retrieve_tracks{
     my $tag = $filenameSplit[1];
     my $id = lc($tag);
     my $track = "refseq_" . $id;
-    my $bigDataUrl = $base_URL . $trackfile;
+    my $bigDataUrl = $base_URL . $assembly_hub_name ."/". $trackfile;
     my $shortLabel = "RefSeq " . $tag;
     my $longLabel = "RefSeq " . $tag;
     my $type = "bigBed 12 .";
