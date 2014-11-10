@@ -31,7 +31,6 @@ sub make_assembly_hub{
   $template_path =~ s/UCSC.pm/template\//;
   die("ERROR [Bio::ViennaNGS::UCSC] template directory not found\n") unless (-d $template_path);
   my $faToTwoBit_path = can_run('faToTwoBit') or die 'ERROR [ViennaNGS::UCSC] faToTwoBit is not installed!';
-  #die("ERROR [ViennaNGS::UCSC] faToTwoBit does not exist in \$PATH\n") unless (-e $faToTwoBit_path);
 
   #create assembly hub directory structure
   my $assembly_hub_name = "Test";
@@ -57,54 +56,54 @@ sub make_assembly_hub{
   my $hubtxt_path = $assembly_hub_directory . "/hub.txt";
   my $hubtxt_file = 'hub.txt';
   my $hubtxt_vars = {
-  hubName => "hubName",
-  shortLabel => "shortLabel",
-  longLabel => "longLabel",
-  genomesFile => "genomesFile",
-  email => "email",
-  descriptionURL => "descriptionURL"
-  };
+                     hubName => "hubName",
+                     shortLabel => "shortLabel",
+                     longLabel => "longLabel",
+                     genomesFile => "genomesFile",
+                     email => "email",
+                     descriptionURL => "descriptionURL"
+                    };
   $template->process($hubtxt_file,$hubtxt_vars,$hubtxt_path) || die "Template process failed: ", $template->error(), "\n";
-
+  
   #construct genome.txt
   my $genometxt_path = $assembly_hub_directory . "/genome.txt";
   my $genometxt_file = 'genome.txt';
   my $genometxt_vars = {
-  genome => "genomeAssembly",
-  trackDb => "genomeAssembly/trackDb.txt",
-  groups => "groups",
-  description => "description",
-  twoBitPath => "genomeAssembly/genomeAssembly.2bit",
-  organism => "organism",
-  defaultPos => "defaultPos",
-  orderKey => "orderKey",
-  scientificName => "scientificName",
-  htmlPath => "genomeAssembly/description.html"
-  };
+                        genome => "genomeAssembly",
+                        trackDb => "genomeAssembly/trackDb.txt",
+                        groups => "groups",
+                        description => "description",
+                        twoBitPath => "genomeAssembly/genomeAssembly.2bit",
+                        organism => "organism",
+                        defaultPos => "defaultPos",
+                        orderKey => "orderKey",
+                        scientificName => "scientificName",
+                        htmlPath => "genomeAssembly/description.html"
+                       };
   $template->process($genometxt_file,$genometxt_vars,$genometxt_path) || die "Template process failed: ", $template->error(), "\n";
-
+  
   #construct description.html
   my $description_html_path = $genome_assembly_directory . "/description.html";
   my $description_html_file = 'description.html';
   my $description_html_vars = {
-  imageLink  => "imageLink",
-  imageSource => "imageSource",
-  imageAlternative => "imageAlternative",
-  taxonomicName => "taxonomicName",
-  imageOrigin => "imageOrigin",
-  imageOriginDescription => "imageOriginDescription",
-  ucscId => "ucscId",
-  sequencingId => "sequencingId",
-  assemblyDate => "assemblyDate",
-  genbankAccessionId => "genbankAccessionId",
-  ncbiGenomeInformationLink => "ncbiGenomeInformationLink",
-  ncbiGenomeInformationDescription => "ncbiGenomeInformationDescription",
-  ncbiAssemblyInformationLink => "ncbiAssemblyInformationLink",
-  ncbiAssemblyInformationDescription => "ncbiAssemblyInformationDescription",
-  bioProjectInformationLink => "bioProjectInformationLink",
-  bioProjectInformationDescription => "bioProjectInformationDescription",
-  sequenceAnnotationLink => "sequenceAnnotationLink"
-  };
+                               imageLink  => "imageLink",
+                               imageSource => "imageSource",
+                               imageAlternative => "imageAlternative",
+                               taxonomicName => "taxonomicName",
+                               imageOrigin => "imageOrigin",
+                               imageOriginDescription => "imageOriginDescription",
+                               ucscId => "ucscId",
+                               sequencingId => "sequencingId",
+                               assemblyDate => "assemblyDate",
+                               genbankAccessionId => "genbankAccessionId",
+                               ncbiGenomeInformationLink => "ncbiGenomeInformationLink",
+                               ncbiGenomeInformationDescription => "ncbiGenomeInformationDescription",
+                               ncbiAssemblyInformationLink => "ncbiAssemblyInformationLink",
+                               ncbiAssemblyInformationDescription => "ncbiAssemblyInformationDescription",
+                               bioProjectInformationLink => "bioProjectInformationLink",
+                               bioProjectInformationDescription => "bioProjectInformationDescription",
+                               sequenceAnnotationLink => "sequenceAnnotationLink"
+                              };
   $template->process($description_html_file,$description_html_vars,$description_html_path) || die "Template process failed: ", $template->error(), "\n";
 
   my $groups = make_group("annotation", "Annotation", "1", "0");
@@ -113,8 +112,8 @@ sub make_assembly_hub{
   my $group_txt_path = $genome_assembly_directory . "/group.txt";
   my $group_txt_file = 'group.txt';
   my $group_txt_vars = {
-  groups  => "$groups",
-  };
+                        groups  => "$groups",
+                       };
   $template->process($group_txt_file,$group_txt_vars,$group_txt_path) || die "Template process failed: ", $template->error(), "\n";
 
   my @trackfiles = retrieve_tracks("/home/mescalin/egg/current/Projects/Perl/assemblyhub_test/",$base_URL);
@@ -123,7 +122,6 @@ sub make_assembly_hub{
     my $trackString = make_track(@$track);
     $tracksList .= $trackString;
   }
-  #my $trackslist = make_track("track", "bigDataUrl", "shortLabel", "longLabel", "type", "autoScale", "bedNameLabel", "searchIndex", "colorByStrand", "visibility", "group", "priority");
 
   #construct trackDb.txt
   my $trackDb_txt_path = $genome_assembly_directory . "/trackDb.txt";
