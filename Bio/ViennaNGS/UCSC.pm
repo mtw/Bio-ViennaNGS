@@ -8,6 +8,7 @@ use version; our $VERSION = qv('0.01');
 use strict;
 use warnings;
 use Template;
+use Cwd;
 use IPC::Cmd qw[can_run run run_forked];
 
 our @ISA = qw(Exporter);
@@ -116,15 +117,54 @@ sub make_assembly_hub{
   };
   $template->process($group_txt_file,$group_txt_vars,$group_txt_path) || die "Template process failed: ", $template->error(), "\n";
 
-  my $tracks = make_track("track", "bigDataUrl", "shortLabel", "longLabel", "type", "autoScale", "bedNameLabel", "searchIndex", "colorByStrand", "visibility", "group", "priority");
-  
+  my @trackfiles = retrieve_tracks("/home/mescalin/egg/current/Projects/Perl/assemblyhub_test/",$base_URL);
+  my $tracksList;
+  foreach my $track (@trackfiles){
+    my $trackString = make_track(@$track);
+    $tracksList .= $trackString;
+  }
+  #my $trackslist = make_track("track", "bigDataUrl", "shortLabel", "longLabel", "type", "autoScale", "bedNameLabel", "searchIndex", "colorByStrand", "visibility", "group", "priority");
+
   #construct trackDb.txt
   my $trackDb_txt_path = $genome_assembly_directory . "/trackDb.txt";
   my $trackDb_txt_file = 'trackDb.txt';
   my $trackDb_txt_vars = {
-  tracks  => "$tracks"
+  tracks  => "$tracksList"
   };
   $template->process($trackDb_txt_file,$trackDb_txt_vars,$trackDb_txt_path) || die "Template process failed: ", $template->error(), "\n";
+}
+
+sub retrieve_tracks{
+  my ($directoryPath,$base_URL) = @_;
+  my $currentDirectory = getcwd;
+  chdir $directoryPath or die $!;
+  my @trackfiles = <*.bb>;
+  my @tracks;
+  foreach my $trackfile (@trackfiles){
+    my $filename = $trackfile;
+    $filename =~ s/.bb$//;
+    my @filenameSplit = split(/\./, $filename);
+    my $accession = $filenameSplit[0];
+    my $tag = $filenameSplit[1];
+    my $id = lc($tag);
+    my $track = "refseq_" . $id;
+    my $bigDataUrl = $base_URL . $trackfile;
+    my $shortLabel = "RefSeq " . $tag;
+    my $longLabel = "RefSeq " . $tag;
+    my $type = "bigBed 12 .";
+    my $autoScale = "off";
+    my $bedNameLabel = "Gene Id";
+    my $searchIndex = "name";
+    my $colorByStrand = "100,205,255 55,155,205";
+    my $visibility = "pack";
+    my $group = "annotation";
+    my $priority = "10";
+    my @track = ($tag,$track, $bigDataUrl,$shortLabel,$longLabel,$type,$autoScale,$bedNameLabel,$searchIndex,$colorByStrand,$visibility,$group,$priority);
+    my $trackreference = \@track;
+    push(@tracks, $trackreference);
+  }
+  chdir $currentDirectory or die $!;
+  return @tracks;
 }
 
 sub make_group{
@@ -134,8 +174,8 @@ sub make_group{
 }
 
 sub make_track{
-  my ($track, $bigDataUrl, $shortLabel, $longLabel, $type, $autoScale, $bedNameLabel, $searchIndex, $colorByStrand, $visibility, $group, $priority) = @_;
-  my $trackEntry ="#$track\ntrack $track\nbigDataUrl $bigDataUrl\nshortLabel $shortLabel\nlongLabel $longLabel\ntype $type\nautoScale $autoScale\nbedNameLabel $bedNameLabel\nsearchIndex $searchIndex\ncolorByStrand $colorByStrand\nvisibility $visibility\ngroup $group\npriority $priority\n";
+  my ($tag, $track, $bigDataUrl, $shortLabel, $longLabel, $type, $autoScale, $bedNameLabel, $searchIndex, $colorByStrand, $visibility, $group, $priority) = @_;
+  my $trackEntry ="#$tag\ntrack $track\nbigDataUrl $bigDataUrl\nshortLabel $shortLabel\nlongLabel $longLabel\ntype $type\nautoScale $autoScale\nbedNameLabel $bedNameLabel\nsearchIndex $searchIndex\ncolorByStrand $colorByStrand\nvisibility $visibility\ngroup $group\npriority $priority\n\n";
   return $trackEntry;
 }
 
