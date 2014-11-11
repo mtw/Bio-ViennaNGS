@@ -188,6 +188,24 @@ sub make_track{
   return $trackEntry;
 }
 
+sub valid_ncbi_accession {
+  # receives a NCBI accession ID, with or without version number
+  # returns NCBI accession ID without version number
+  my $acc = shift;
+  if ($acc =~ /^(N[CST]\_\d{6})\.\d+?$/){
+    info '>> '.$acc.' is a valid NCBI accession number,continuing with '. $1;
+    return $1; # NCBI accession ID without version
+  }
+  elsif ($acc =~ /^(N[CST]\_\d{6})$/){
+    info '>> '.$acc.' is a valid NCBI accession number,continuing with '.  $1;
+    return $1; # NCBI accession ID without version
+  }
+  else {
+    warning '>> '.$acc.' is NOT a valid NCBI accession number';
+    return 0;
+  }
+}
+
 1;
 __END__
 
