@@ -29,8 +29,12 @@ sub make_assembly_hub{
   $base_URL =~ s!/*$!/!;
   #bedfiles path
   my $bedFileDirectory = dirname($fasta_file_path);
-  my $accession = basename($fasta_file_path);
-  $accession =~ s/.fa$//;
+  my @parsedHeader = parse_fasta_header($fasta_file_path);
+  my $unchecked_accession = $parsedHeader[0];
+  print $unchecked_accession;
+  my $scientificName = $parsedHeader[1];
+  print $scientificName;
+  my $accession = valid_ncbi_accession($unchecked_accession);
   #check program dependencies
   my $module_path = $INC{"Bio/ViennaNGS/UCSC.pm"};
   my $template_path = $module_path;
@@ -85,7 +89,7 @@ sub make_assembly_hub{
      organism => "organism",
      defaultPos => $accession . ":1-1,000",
      orderKey => "10",
-     scientificName => "scientificName",
+     scientificName => "$scientificName",
      htmlPath => "$accession/description.html"
     };
   $template->process($genometxt_file,$genometxt_vars,$genometxt_path) || die "Template process failed: ", $template->error(), "\n";
@@ -188,22 +192,32 @@ sub make_track{
   return $trackEntry;
 }
 
-sub valid_ncbi_accession {
+sub valid_ncbi_accession{
   # receives a NCBI accession ID, with or without version number
   # returns NCBI accession ID without version number
   my $acc = shift;
   if ($acc =~ /^(N[CST]\_\d{6})\.\d+?$/){
-    info '>> '.$acc.' is a valid NCBI accession number,continuing with '. $1;
-    return $1; # NCBI accession ID without version
+    return $acc; # NCBI accession ID without version
   }
   elsif ($acc =~ /^(N[CST]\_\d{6})$/){
-    info '>> '.$acc.' is a valid NCBI accession number,continuing with '.  $1;
     return $1; # NCBI accession ID without version
   }
   else {
-    warning '>> '.$acc.' is NOT a valid NCBI accession number';
     return 0;
   }
+}
+
+sub parse_fasta_header{
+  my $filepath = shift;
+  open my $file, '<', "$filepath";
+  my $fastaheader = <$file>;
+  print $fastaheader;
+  close $file;
+  #>gi|556503834|ref|NC_000913.3| Escherichia coli str. K-12 substr. MG1655
+  my @headerfields = split(/\|/, $fastaheader);
+  my $accession = $headerfields[3];
+  my $scientificName = $headerfields[4];
+  return ($accession,$scientificName);
 }
 
 1;
