@@ -26,7 +26,15 @@ sub make_assembly_hub{
   die "ERROR [Bio::ViennaNGS::UCSC]: no URL (network location for upload to UCSC) provided" unless(defined $base_URL);
   die("ERROR [Bio::ViennaNGS::UCSC] \$log_path does not exist\n") unless (-e $log_path);
   #ensure that base_URL ends with slash
-  $base_URL =~ s!/*$!/!;
+  $base_URL =~ s!/*$!/!;  
+
+  #check program dependencies
+  my $module_path = $INC{"Bio/ViennaNGS/UCSC.pm"};
+  my $template_path = $module_path;
+  $template_path =~ s/UCSC.pm/template\//;
+  die("ERROR [Bio::ViennaNGS::UCSC] template directory not found\n") unless (-d $template_path);
+  my $faToTwoBit_path = can_run('faToTwoBit') or die 'ERROR [ViennaNGS::UCSC] faToTwoBit is not installed!';
+
   #bedfiles path
   my $bedFileDirectory = dirname($fasta_file_path);
   my @parsedHeader = parse_fasta_header($fasta_file_path);
@@ -35,12 +43,6 @@ sub make_assembly_hub{
   my $scientificName = $parsedHeader[1];
   print $scientificName;
   my $accession = valid_ncbi_accession($unchecked_accession);
-  #check program dependencies
-  my $module_path = $INC{"Bio/ViennaNGS/UCSC.pm"};
-  my $template_path = $module_path;
-  $template_path =~ s/UCSC.pm/template\//;
-  die("ERROR [Bio::ViennaNGS::UCSC] template directory not found\n") unless (-d $template_path);
-  my $faToTwoBit_path = can_run('faToTwoBit') or die 'ERROR [ViennaNGS::UCSC] faToTwoBit is not installed!';
 
   #create assembly hub directory structure
   my $assembly_hub_name = "assemblyHub";
@@ -51,9 +53,11 @@ sub make_assembly_hub{
   mkdir $genome_assembly_directory;
 
   #2-bit fasta file conversion
+  my $modified_fasta_path = $assembly_hub_directory."/".$accession."fa";
+  my $test7 = modify_fasta_header($fasta_file_path,$modified_fasta_path,$accession);
   my $twoBitFastaFilePath = $genome_assembly_directory ."/" . "$accession" . ".2bit";
   my $full_path = can_run('faToTwoBit') or die 'faToTwoBit is not installed!';
-  my $fastaToTwobit_cmd = $faToTwoBit_path . " " . $fasta_file_path . " " . $twoBitFastaFilePath;
+  my $fastaToTwobit_cmd = $faToTwoBit_path . " " . $modified_fasta_path . " " . $twoBitFastaFilePath;
   system($fastaToTwobit_cmd);
 
   #template definition
@@ -97,7 +101,7 @@ sub make_assembly_hub{
   #construct description.html
   my $description_html_path = $genome_assembly_directory . "/description.html";
   my $description_html_file = 'description.html';
-  my $description_html_vars = 
+  my $description_html_vars =
     {
      imageLink  => "imageLink",
      imageSource => "imageSource",
@@ -216,8 +220,31 @@ sub parse_fasta_header{
   #>gi|556503834|ref|NC_000913.3| Escherichia coli str. K-12 substr. MG1655
   my @headerfields = split(/\|/, $fastaheader);
   my $accession = $headerfields[3];
-  my $scientificName = $headerfields[4];
+  my $scientificName = chomp($headerfields[4]);
   return ($accession,$scientificName);
+}
+
+sub modify_fasta_header{
+  my $inputFilepath = shift;
+  my $outputFilepath = shift;
+  my $header = shift;
+
+  open INFILE, '<', "$inputFilepath";
+  my @newfasta;
+  while (<INFILE>) {
+   push(@newfasta, $_);
+  }
+  close INFILE;
+  #@newfasta  = @newfasta[ 1 .. $#newfasta ];
+  shift @newfasta;
+  unshift(@newfasta,">".$header."\n");
+
+  open OUTFILE, '>', "$outputFilepath";
+  foreach my $line (@newfasta) {
+   print OUTFILE $line;
+  }
+  close OUTFILE;
+  return 1;
 }
 
 1;
