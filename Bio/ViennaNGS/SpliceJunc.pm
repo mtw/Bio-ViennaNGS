@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-08 01:02:21 mtw>
+# Last changed Time-stamp: <2014-11-25 15:55:59 mtw>
 
 package Bio::ViennaNGS::SpliceJunc;
 
@@ -11,13 +11,14 @@ use Data::Dumper;
 use Bio::ViennaNGS;
 use Bio::ViennaNGS::Fasta;
 use IPC::Cmd qw(can_run run);
+use File::Basename;
 use Path::Class;
 use Carp;
 
 our @ISA = qw(Exporter);
 our @EXPORT = ();
 our @EXPORT_OK = qw(bed6_ss_from_bed12 bed6_ss_from_rnaseq
-		 intersect_sj ss_isCanonical);
+		 bed6_ss_to_bed12 intersect_sj ss_isCanonical);
 
 # bed6_ss_from_bed12( $bed12,$dest,$window,$can,$fastaobjR )
 #
@@ -29,8 +30,7 @@ our @EXPORT_OK = qw(bed6_ss_from_bed12 bed6_ss_from_rnaseq
 sub bed6_ss_from_bed12{
   my ($bed12,$dest,$window,$can,$fastaobjR) = @_;
   my ($i,$tr_name,$pos5,$pos3);
-  my $splicesites = 0;
-  my $c = 0;
+  my ($splicesites,$c,$totalsj,$cansj) = 0x4;
   my @bedline = ();
   my $this_function = (caller(0))[3];
 
@@ -58,9 +58,13 @@ sub bed6_ss_from_bed12{
       open(BED6OUT, "> $bed6_fn") or croak "cannot open BED6OUT $!";
 
       for ($i=0;$i<$blockCount-1;$i++){
+	$totalsj++;
 	$pos5 = $chromStart+$blockStart[$i]+$blockSize[$i];
 	$pos3 = $chromStart+$blockStart[$i+1];
-	if($can){$c = ss_isCanonical($chr,$pos5,$pos3,$fastaobjR);}
+	if($can){
+	  $c = ss_isCanonical($chr,$pos5,$pos3,$fastaobjR);
+	  $cansj++;
+	}
 	$tr_name = sprintf("%s.%02d",$name,$tr_count++);
 	@bedline = join("\t",$chr,eval($pos5-$window),
 			eval($pos5+$window),$tr_name,$c,$strand);
@@ -127,6 +131,64 @@ sub bed6_ss_from_rnaseq{
     close(BED6OUT);
   }
   close(INBED);
+}
+
+# bed6_ss_to_bed12 ($bed_in,$dest,$window,$mcov)
+#
+# Produce BED12 from BED6 file holdig splice junctions from mapped
+# RNA-seq data
+
+sub bed6_ss_to_bed12{
+  my ($bed_in,$dest,$window,$mcov,$circ) = @_;
+  my ($reads,$proper,$passed,$pos5,$pos3,$basename,$fn,$bed12_fn);
+  my @result = ();
+  my @bedline = ();
+  my $this_function = (caller(0))[3];
+
+  croak "ERROR [$this_function] $bed_in does not exist\n"
+    unless (-e $bed_in);
+  croak "ERROR [$this_function] $dest does not exist"
+    unless (-d $dest);
+
+  $basename = fileparse($bed_in,qr/\.[^.]*/);
+  $fn = $basename.".bed12";
+  $bed12_fn = file($dest,$fn);
+  open(BED12OUT, "> $bed12_fn");
+
+  open(INBED, "< $bed_in") or croak $!;
+  while(<INBED>){
+    chomp;
+    my ($chr, $start, $end, $info, $score, $strand) = split("\t");
+
+    if ($info =~ /^splits\:(\d+)\:(\d+)\:(\d+):(\w):(\w)/){
+      $reads = $1;
+      $proper = $4;
+      $passed = $5;
+      if ($circ == 1){ # skip 'N' (normal), 'L' (left) and 'R' (right)
+	next unless ($proper =~ /[C]$/);
+      }
+      else { # skip 'L', 'R' and 'C'
+	next unless ($proper =~ /[N]$/);
+      }
+      next unless ($passed =~ /[PM]$/); # ignore 'F'
+      next if($reads < $mcov);
+    }
+    else {
+      croak "ERROR [$this_function] unsupported INFO field in input BED:\n$info\n";
+    }
+    $pos5 = $start;
+    $pos3 = $end;
+
+    @bedline = join("\t",$chr,eval($start-$window),
+		    eval($end+$window),$info,$score,$strand,$start,$end,
+		    "0","2","1,1","0,".eval($end-$start-1));
+    print BED12OUT "@bedline\n";
+  }
+  close(INBED);
+  close(BED12OUT);
+
+  push (@result, $bed12_fn);
+  return @result;
 }
 
 # intersect_sj($p_annot,$p_mapped,$dest,$prefix,$window,$mil)
@@ -443,9 +505,11 @@ to one of the following cases:
 
 This modules depends on the following Perl modules:
 
-=over 4
+=over
 
 =item L<Bio::ViennaNGS>
+
+=item L<Bio::ViennaNGS::Fasta>
 
 =item L<IPC::Cmd>
 
