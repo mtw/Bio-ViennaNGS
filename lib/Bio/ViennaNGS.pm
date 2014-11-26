@@ -5,7 +5,7 @@ package Bio::ViennaNGS;
 
 use 5.12.0;
 use Exporter;
-use version; our $VERSION = qv('0.10_02');
+use version; our $VERSION = qv('0.10_03');
 use strict;
 use warnings;
 use Bio::Perl 1.006924;
