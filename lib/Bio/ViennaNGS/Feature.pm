@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-11-06 22:56:11 mtw>
+# Last changed Time-stamp: <2014-11-10 19:34:35 fall>
 
 package Bio::ViennaNGS::Feature;
 
@@ -20,10 +20,22 @@ has 'score' => (
 		default => '0',
 	       );
 
-has 'ext' => (
+has 'extension' => (
 	      is      => 'rw',
 	      isa     => 'Str',
+	      default => '',
 	     );
+
+sub set_Feature{
+  my ($self,$chromosome,$start,$end,$name,$score,$strand,$extension) = @_;
+  $self->chromosome($chromosome);
+  $self->start($start);
+  $self->end($end);
+  $self->name($name);
+  $self->score($score);
+  $self->strand($strand);
+  $self->extension($extension);
+}
 
 no Moose;
 #__PACKAGE__=>meta->make_immutable;

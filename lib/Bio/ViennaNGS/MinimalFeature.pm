@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-11-06 22:57:05 mtw>
+# Last changed Time-stamp: <2014-11-10 19:40:06 fall>
 
 package Bio::ViennaNGS::MinimalFeature;
 
@@ -9,15 +9,15 @@ use Moose::Util::TypeConstraints;
 subtype 'PlusOrMinus',
   as 'Str',
   where { /[\+\-\.]/ },
-  message { "$_ is neither +/- or ."};
+  message { "$_ is neither +/- nor ."};
 no Moose::Util::TypeConstraints;
 
 use Moose;
-has 'chr' => (
+has 'chromosome' => (
 	      is  => 'rw',
 	      isa => 'Str',
 	      required => 1,
-	      predicate => 'has_chr',
+	      predicate => 'has_chromosome',
 	     );
 
 has 'start' => (
@@ -43,13 +43,13 @@ has 'strand' => (
 
 sub set_minimalFeature{
   my ($self,$chr,$start,$end,$strand) = @_;
-  $self->chr($chr);
+  $self->chromosome($chr);
   $self->start($start);
   $self->end($end);
   $self->strand($strand);
 }
 
-#no Moose;
+no Moose;
 
 1;
 

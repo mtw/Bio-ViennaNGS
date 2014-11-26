@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-22 15:49:09 mtw>
+# Last changed Time-stamp: <2014-11-26 16:59:15 fall>
 
 package Bio::ViennaNGS;
 
@@ -16,18 +16,21 @@ use File::Temp qw(tempfile);
 use IPC::Cmd qw(can_run run);
 use Path::Class;
 use Carp;
+use Bio::ViennaNGS::FeatureChain;
 
 our @ISA = qw(Exporter);
 our @EXPORT = ();
 our @EXPORT_OK = qw ( split_bam bam2bw bed2bw sortbed
 		    bed2bigBed computeTPM featCount_data
-		    parse_multicov write_multicov totalreads );
+		    parse_multicov write_multicov totalreads 
+		    unique_array kmer_enrichment extend_chain parse_bed6);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 our @featCount = ();
+my %unique = ();
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
@@ -559,6 +562,141 @@ sub write_multicov {
 
 sub totalreads {
   return 1;
+}
+
+sub unique_array{
+
+    my $arrayref = shift;
+    my @array = @{$arrayref};
+
+    foreach my $item (@array)
+    {
+	$unique{$item} ++;
+    }
+    my @arrayuid = sort {$a cmp $b} keys %unique;
+
+    return(\@arrayuid);
+}
+
+sub kmer_enrichment{
+
+    my @seqs =  @{$_[0]};
+    my $klen     = $_[1]; 
+#    my @seq = split( //, $read_tmp );
+    my $kstring ='';
+#return variables
+    my %km;
+    foreach my $sequences (@seqs){
+#      print STDERR $sequences,"\n";
+      my @seq = split( //, $sequences );
+      for ( my $seq_pos = 0; $seq_pos <= $#seq-$klen ; $seq_pos++ ) {
+	for (my $i=$seq_pos;$i<=$seq_pos+($klen-1);$i++){
+	  $kstring .= $seq[$i]; 
+	}
+	$km{$kstring}++;
+	$kstring = "";
+      }
+    }
+    return( \%km );
+}
+
+sub extend_chain{
+  my %sizes = %{$_[0]};
+  my $chain = $_[1];
+  my $l	    = $_[2];
+  my $r	    = $_[3];
+
+  ##return a new chain with extended coordinates
+  my $extendchain = $chain;
+  ## got through all features in original chain, calculate new start and end and safe in extendchain
+  my @featarray = @{$extendchain->chain};
+  foreach my $feature (@featarray){
+    my $chrom  = $feature->chromosome;
+    my $start  = $feature->start;
+    my $end    = $feature->end;
+    my $strand = $feature->strand;
+    my $width  = nearest(1,($end-$start)/2);
+    my $right;
+    my $left;
+    
+    if ($strand eq "+"){
+      $right=$r;
+      $left=$l;
+    }
+    elsif ($strand eq "-"){
+      $right=$l;
+      $left=$r;
+    }
+    
+    if (($right-$width) <= 0){
+      $right = 0;
+    }
+    else{
+      $right-=$width;
+    }
+    if (($left-$width) <= 0 ){
+      $left = 0;
+    }
+    else{
+      $left-=$width;
+    }
+    
+    if ( $start-$left >= 1 ){
+      if ($end+$right >= $sizes{"chr".$chrom}){
+	$end = $sizes{"chr".$chrom};
+      }
+      else{
+	$end = $end+$right;
+      }
+      $start -= ($left+1); ## Because of Bed coordinates, we need to 0-base the result
+    }
+    elsif ( $start-$left <= 0 ){
+      $start = 0;
+      if ($end+$right >= $sizes{"chr".$chrom}){
+	$end = $sizes{"chr".$chrom};
+      }
+      else{
+	$end = $end+$right;	
+      }
+    }
+    else{
+      die "Something wrong here!\n";
+    }
+    $feature->start($start);
+    $feature->end($end);
+  }
+  $extendchain->type('extended');
+  return($extendchain);
+}
+
+sub parse_bed6{
+  my $bedfile = shift;
+  open (my $Bed, "<:gzip(autopop)",$bedfile) or die "$!";
+  my @featurelist; ## This will become a FeatureChain
+  while(<$Bed>){
+#    ### This should be done by FeatureIO if want to;
+    chomp (my $raw = $_);
+    push my @line , split (/\t/,$raw);
+    push @line, "\." if ( !$line[5] ); 
+    
+    (my $chromosome  = $line[0])=~ s/chr//g;
+    my $start	     = $line[1]+1;
+    my $end	     = $line[2];
+    my $name	     = $line[3];
+    my $score	     = $line[4];
+    my $strand	     = $line[5];
+    my $extension = '';
+    
+    if ($line[6]){
+      for (6..$#line){
+	$extension .= $line[$_]."\t";
+      }
+      $extension = substr($extension,0,-1);
+    }
+    my $feat = Bio::ViennaNGS::Feature->new(chromosome=>$chromosome,start=>$start,end=>$end,name=>$name,score=>$score,strand=>$strand,extension=>$extension);
+    push @featurelist, $feat;
+  }
+  return (\@featurelist);
 }
 
 1;

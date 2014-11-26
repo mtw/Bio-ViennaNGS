@@ -1,9 +1,8 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-11-06 22:54:36 mtw>
+# Last changed Time-stamp: <2014-11-26 14:48:41 fall>
 
 package Bio::ViennaNGS::FeatureChain;
 
-use Tie::Hash::Indexed;
 #use namespace::autoclean;
 use Moose;
 use MooseX::InstanceTracking;
@@ -15,23 +14,29 @@ has 'type' => (
 
 has 'chain' => (
 		is => 'rw',
-		traits => ['Hash'], # it's a HashRef to a tied hash
-		isa => 'HashRef',
+		traits => ['Array'],
+		isa => 'ArrayRef[Bio::ViennaNGS::Feature]',
 		required => '1',
-		builder => '_build_chain',
+		builder => 'build_chain',
 		auto_deref => 1,
-		handles => { #  Moose::Meta::Attribute::Native::Trait::Hash
-			    add => 'set',
-			    elements => 'elements',
-			    kv => 'kv',
-			    count => 'count',
-			    lookup => 'accessor',
-			   },
 		);
 
-sub _build_chain {
-  tie my %hash, 'Tie::Hash::Indexed';
-  return \%hash;
+sub build_chain {
+  my $self = shift;
+  my $featurelist = shift; ## We expect features to be pre-sorted, So I simply read in an arrayref of Feature Objects
+  return ($featurelist);
+}
+
+sub print_chain{
+  my $self = shift;
+  return 0 if (!$self->chain);
+  my $out;
+  foreach my $feature (@{$self->chain}){
+    $out .= join("\t","chr".$feature->chromosome,$feature->start,$feature->end,$feature->name,$feature->score,$feature->strand);
+    $out .= "\t".$feature->extension if ($feature->extension);
+    $out .= "\n";
+  }
+  return $out;
 }
 
 no Moose;
