@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-11-05 12:47:56 mtw>
+# Last changed Time-stamp: <2014-11-25 15:57:55 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -42,6 +42,7 @@ my $mincov = 10;
 my $window = 0;
 my $outdir = "./";
 my $want_bigbed = 0;
+my $want_circular=0;
 my $s_in = '-';
 my $cs_in = '-';
 my @result = ();
@@ -57,6 +58,7 @@ pod2usage(-verbose => 1) unless GetOptions("s=s"     => \$s_in,
 					   "o=s"     => \$outdir,
 					   "r=s"     => \$mincov,
 					   "w=s"     => \$window,
+					   "z"       => sub{$want_circular=1},
 					   "man"     => sub{pod2usage(-verbose => 2)},
 					   "help|h"  => sub{pod2usage(1)}
 					  );
@@ -83,7 +85,7 @@ unless ($outdir =~ /\/$/){$outdir .= "/";}
 unless (-d $outdir){mkdir $outdir or die $!;}
 
 # Make BED12 line from each splice junction
-@result = bed6_ss_to_bed12($s_in,$outdir,$window,$mincov);
+@result = bed6_ss_to_bed12($s_in,$outdir,$window,$mincov,$want_circular);
 
 my ($bed12) = @result;
 
@@ -132,6 +134,10 @@ that are supported by at least this number of reads are considered.
 =item B<-w>
 
 Expand splice junctions by a window of this size on both sides
+
+=item B<-z>
+
+Filter circular splice junctions
 
 =item B<-o>
 
