@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-11-25 15:55:59 mtw>
+# Last changed Time-stamp: <2014-11-26 17:19:55 mtw>
 
 package Bio::ViennaNGS::SpliceJunc;
 
 use Exporter;
-use version; our $VERSION = qv('0.05_01');
+use version; our $VERSION = qv('0.05_02');
 use strict;
 use warnings;
 use Data::Dumper;
@@ -20,7 +20,7 @@ our @EXPORT = ();
 our @EXPORT_OK = qw(bed6_ss_from_bed12 bed6_ss_from_rnaseq
 		 bed6_ss_to_bed12 intersect_sj ss_isCanonical);
 
-# bed6_ss_from_bed12( $bed12,$dest,$window,$can,$fastaobjR )
+# bed6_ss_from_bed12( $bed12,$dest,$window,$can,$fastaO)
 #
 # Extracts splice junctions from BED12 annotation.
 #
@@ -80,7 +80,7 @@ sub bed6_ss_from_bed12{
   close(BED12IN);
 }
 
-# bed6_ss_from_rnaseq ($bed_in,$dest,$window,$mincov,$can,$fastaobjR)
+# bed6_ss_from_rnaseq ($bed_in,$dest,$window,$mincov,$can,$fastaO)
 #
 # Extracts splice junctions from mapped RNA-seq data
 #
@@ -137,7 +137,6 @@ sub bed6_ss_from_rnaseq{
 #
 # Produce BED12 from BED6 file holdig splice junctions from mapped
 # RNA-seq data
-
 sub bed6_ss_to_bed12{
   my ($bed_in,$dest,$window,$mcov,$circ) = @_;
   my ($reads,$proper,$passed,$pos5,$pos3,$basename,$fn,$bed12_fn);
@@ -327,7 +326,7 @@ sub intersect_sj{
   return @result;
 }
 
-# ss_isCanonical ( $chr,$p5,$p3,$fastaobjR )
+# ss_isCanonical ( $chr,$p5,$p3,$fastaO )
 
 # Checks whether a given splice junction is canonical, ie. whether the
 # first and last two nucleotides of the enclosed intron correspond to
@@ -380,36 +379,33 @@ analysis
 =head1 SYNOPSIS
 
   use Bio::ViennaNGS::SpliceJunc;
+  use Bio::ViennaNGS::Fasta;
 
-  my $c;
-  my %fastaobj;
-  my (@fo,@res);
-
-  # get Bio::PrimarySeq::Fasta object
-  my @fo = get_fasta_ids($fasta_in);
-  foreach my $id (@fo) {
-    $fastaobj{$id} = $fastadb->get_Seq_by_id($id);
-  }
+  # get a Bio::ViennaNGS::Fasta object
+  my $fastaO = Bio::ViennaNGS::Fasta->new($fasta_in);
 
   # Extract annotated splice sites from BED12
-  bed6_ss_from_bed12($bed12_in,$p_annot,$window,$want_canonical,\%fastaobj);
+  bed6_ss_from_bed12($bed12_in,$dest_annot,$window,$want_canonical,$fastaO);
 
   # Extract mapped splice junctions from RNA-seq data
-  bed6_ss_from_rnaseq($s_in,$p_mapped,$window,$mincov,$want_canonical,\%fastaobj);
+  bed6_ss_from_rnaseq($bed_in,$dest_ss,$window,$mincov,$want_canonical,$fastaO);
 
   # Check for each splice junction seen in RNA-seq if it overlaps with
   # any annotated splice junction
-  @res = intersect_sj($p_annot,$p_mapped,$outdir,$prefix,$window,$mil);
+  @res = intersect_sj($dest_annot,$dest_ss,$dest,$prefix,$window,$mil);
+
+  # Convert splice junctions seen in RNA-seq data to BED12
+  @res = bed6_ss_to_bed12($s_in,$outdir,$window,$mincov,$want_circular);
 
   # Check whether a splice junction is canonical
-  $c = ss_isCanonical($chr,$pos5,$pos3,\%fastaobj)
+  $c = ss_isCanonical($chr,$pos5,$pos3,$fastaO);
 
 =head1 DESCRIPTION
 
 L<Bio::ViennaNGS::SpliceJunc> is a Perl module for alternative
-splicing (AS) analysis. It provides routines for identification and
-characterization of novel and existing (annotated) splice junctions
-from RNA-seq data.
+splicing (AS) analysis. It provides routines for identification,
+characterization and visualization of novel and existing (annotated)
+splice junctions from RNA-seq data.
 
 Identification of novel splice junctions is based on intersecting
 potentially novel splice junctions from RNA-seq data with annotated
@@ -419,17 +415,17 @@ splice junctions.
 
 =over 3
 
-=item bed6_ss_from_bed12($bed12,$dest,$window,$fastaobjR)
+=item bed6_ss_from_bed12($bed12,$dest,$window,$can,$fastaO)
 
-Extracts splice junctions from an BED12 file (provided via argument
+Extracts splice junctions from a BED12 file (provided via argument
 C<$bed12>), writes a BED6 file for each transcript to C<$dest>,
-containing all its splice junctions. Output splice junctions can be
-flanked by a window of +/- C<$window> nt. C<$fastaobjR> is a reference
-to a L<Bio::PrimarySeq::Fasta> object holding the underlying reference
-genome. Each splice junction is represented as two bed lines in the
-output BED6.
+containing all its splice junctions. If C<$can> is 1, canonical splice
+junctions are reported in the 'name' field of the output BED6 file.
+Output splice junctions can be flanked by a window of +/- C<$window>
+nt. C<$fastaO> is a L<Bio::ViennaNGS::Fasta> object. Each splice
+junction is represented as two bed lines in the output BED6.
 
-=item bed6_ss_from_rnaseq($bed_in,$dest,$window,$mcov)
+=item bed6_ss_from_rnaseq($bed_in,$dest,$window,$mcov,$can,$fastaO)
 
 Extracts splice junctions from mapped RNA-seq data. The input BED6
 file should contain coordinates of introns in the following syntax:
@@ -453,12 +449,33 @@ F<segemehl|http://www.bioinf.uni-leipzig.de/Software/segemehl/> for
 generating this type of BED6 files. This routine is, however, not
 limited to F<segemehl> output. BED6 files containing splice junction
 information from other short read mappers or third-party sources will
-be processed if hey are formatted as described above.
+be processed if they are formatted as described above.
 
 This routine writes a BED6 file for each splice junction provided in
 the input to C<$dest>. Output splice junctions can be flanked by a
-window of +/- C<$window> nt. Each splice junction is represented as
-two bed lines in the output BED6.
+window of +/- C<$window> nt. Canonical splice junctions are reported
+in the 'name' field of the output BED6 file if C<$can> is 1 nad
+C<$featO> is a L<Bio::ViennaNGS::Fasta> object. Each splice junction
+is represented as two bed lines in the output BED6. Only splice
+junctions that are supported by at least C<$mcov> reads are reported.
+
+=item bed6_ss_to_bed12($bed_in,$dest,$window,$mcov,$circ)
+
+Produce BED12 output for splice junctions found in RNA-seq data. Input
+BED6 files (provided via C<$bed_in>) are supposed to conform to the
+F<segemehl|http://www.bioinf.uni-leipzig.de/Software/segemehl/>
+standard format for reporting splice junctions, which has the
+following syntax:
+
+chr1    3913    3996    splits:97:97:97:N:P     0       +
+
+See L<bed6_ss_rom_rnaseq> for details.
+
+C<$dest> is the output path. Output splice junctions can optionally be
+flanked by a window of +/- C<$window> nt. Only splice junctions that
+are supported by at least C<$mcov> reads are reported. If C<$circ> is
+1, B<circular> splice junctions are reported (if present in the
+input), else B<normal> splice junctions are processed.
 
 =item intersect_sj($p_annot,$p_mapped,$dest,$prefix,$window,$mil)
 
@@ -475,7 +492,7 @@ The intersection operations are performed with F<bedtools intersect>
 from the L<BEDtools|https://github.com/arq5x/bedtools2> suite). BED
 sorting operations are performed with F<bedtools sort>.
 
-Writes two BEd6 files to $dest (optionally prefixed by $prefix), which
+Writes two BED6 files to C<$dest> (optionally prefixed by C<$prefix>), which
 contain novel and existing splice junctions, respectively.
 
 =item ss_isCanonical($chr,$p5,$p3,$fo)
