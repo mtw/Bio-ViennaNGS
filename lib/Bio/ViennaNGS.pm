@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-11-27 14:21:31 mtw>
+# Last changed Time-stamp: <2014-11-27 22:39:56 mtw>
 
 package Bio::ViennaNGS;
 
@@ -37,9 +37,6 @@ sub featCount_data {
   return \@featCount;
 }
 
-# split_bam ( $bam,$reverse,$want_uniq,$want_bed,$dest_dir,$log )
-# Splits BAM file $bam according to [+] and [-] strand
-# Returns array with newly splitted BAM files
 sub split_bam {
   my %data = ();
   my @NHval = ();
@@ -291,9 +288,6 @@ sub split_bam {
   return @processed_files;
 }
 
-# uniquify_bam ($bam,$dest,$log)
-# Deconvolute BAM files into unique and multi mappers
-# Returns array of filenames to .uniq. and .mult. BAM files
 sub uniquify_bam {
   my ($bamfile,$dest,$log) = @_;
   my ($bam, $bn,$path,$ext,$read,$header);
@@ -353,10 +347,6 @@ sub uniquify_bam {
   }
 }
 
-# bam2bw ( $bam,$chromsizes )
-# Generate BedGraph and BigWig coverage from BAM via two third-party tools:
-# genomeCoverageBed from BEDtools
-# bedGraphToBigWig from UCSC Genome Browser tools
 sub bam2bw {
   my ($bamfile,$chromsizes) = @_;
   my $genomeCoverageBed = `which genomeCoverageBed`; chomp($genomeCoverageBed);
@@ -381,10 +371,6 @@ sub bam2bw {
   system($BGTBW_cmd);
 }
 
-# bed2bw ($infile,$chromsizes,$strand,$dest,$want_norm,$size,$scale,$log)
-# Generate stranded BigWig coverage profiles from BED via two third-party tools:
-# genomeCoverageBed from BEDtools
-# bedGraphToBigWig from UCSC Genome Browser tools
 sub bed2bw {
   my ($infile,$chromsizes,$strand,$dest,$want_norm,$size,$scale,$log) = @_;
   my ($bn,$path,$ext,$cmd);
@@ -430,11 +416,6 @@ sub bed2bw {
   close (LOG);
 }
 
-# bed2bigBed($infile,$chromsizes,$dest,$log)
-#
-# Use 'bedToBigBed' to make bigBed from BED. A '.bed', '.bed6' or
-# '.bed12' extension of the input file will be replaced by '.bb' in
-# the output.
 sub bed2bigBed {
   my ($infile,$chromsizes,$dest,$log) = @_;
   my ($bn,$path,$ext,$cmd,$outfile);
@@ -471,8 +452,6 @@ sub bed2bigBed {
   return $outfile;
 }
 
-# sortbed ($infile,$dest,$outfile,$rm_orig,$log)
-# sorts BED file with 'bedtools sort'
 sub sortbed {
   my ($infile,$dest,$outfile,$rm_orig,$log) = @_;
   my ($cmd,$out);
@@ -509,9 +488,6 @@ sub sortbed {
   if (defined $log){ close(LOG); }
 }
 
-# computeTPM($featCount_sample,$readlength)
-# compute TPM values for a HoH data structure (eg. a single multicov
-# or HTSeq-count column)
 sub computeTPM {
   my ($featCount_sample,$rl) = @_;
   my ($TPM,$T,$totalTPM) = (0)x3;
@@ -535,9 +511,6 @@ sub computeTPM {
   return $meanTPM;
 }
 
-# parse_multicov ($multicov)
-# Parse bedtools multicov (extended BED6) into an Array of Hash of
-# Hashes
 sub parse_multicov {
   my ($file) = @_;
   my @mcData = ();
@@ -569,8 +542,6 @@ sub parse_multicov {
   return $mcSamples;
 }
 
-# write_multicov($item,$dest_dir,$base_name)
-# Write a bedtools multicov (extended BED6) file based from data from @featCount
 sub write_multicov {
   my ($item,$dest_dir,$base_name) = @_;
   my ($outfile,$mcSamples,$nrFeatures,$feat,$i);
@@ -840,9 +811,10 @@ L<BEDtools|https://github.com/arq5x/bedtools2> on your system.
 
 =item Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
-=item Florian Eggenhofer E<lt>florian.eggenhofer@univie.ac.atE<gt>
+=item Jörg Fallmann E<lt>fall@tbi.univie.ac.atE<gt>
 
-=item Joerg Fallmann E<lt>fall@tbi.univie.ac.atE<gt>
+=item Florian Eggenhofer E<lt>florian.eggenhofer@tbi.univie.ac.atE<gt>
+
 
 =back
 
