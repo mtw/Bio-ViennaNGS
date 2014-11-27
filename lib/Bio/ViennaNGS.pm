@@ -1,11 +1,11 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-22 15:49:09 mtw>
+# Last changed Time-stamp: <2014-11-27 14:21:31 mtw>
 
 package Bio::ViennaNGS;
 
 use 5.12.0;
 use Exporter;
-use version; our $VERSION = qv('0.10_03');
+use version; our $VERSION = qv('0.10');
 use strict;
 use warnings;
 use Bio::Perl 1.006924;
@@ -19,7 +19,7 @@ use Carp;
 
 our @ISA = qw(Exporter);
 our @EXPORT = ();
-our @EXPORT_OK = qw ( split_bam bam2bw bed2bw sortbed
+our @EXPORT_OK = qw ( split_bam uniquify_bam bam2bw bed2bw sortbed
 		    bed2bigBed computeTPM featCount_data
 		    parse_multicov write_multicov totalreads );
 
@@ -289,6 +289,68 @@ sub split_bam {
   printf LOG "Dumper output:\n". Dumper(\%data);
   close(LOG);
   return @processed_files;
+}
+
+# uniquify_bam ($bam,$dest,$log)
+# Deconvolute BAM files into unique and multi mappers
+# Returns array of filenames to .uniq. and .mult. BAM files
+sub uniquify_bam {
+  my ($bamfile,$dest,$log) = @_;
+  my ($bam, $bn,$path,$ext,$read,$header);
+  my ($tmp_uniq,$tmp_mult,$fn_uniq,$fn_mult,$bam_uniq,$bam_mult);
+  my ($count_all,$count_uniq,$count_mult) = (0)x3;
+  my @processed_files = ();
+  my $this_function = (caller(0))[3];
+
+  croak "ERROR [$this_function] Cannot find $bamfile\n"
+    unless (-e $bamfile);
+  croak "ERROR [$this_function] $dest does not exist\n"
+    unless (-d $dest);
+
+  ($bn,$path,$ext) = fileparse($bamfile, qr /\..*/);
+
+  (undef,$tmp_uniq) = tempfile('BAM_UNIQ_XXXXXXX',UNLINK=>0);
+  (undef,$tmp_mult) = tempfile('BAM_MULT_XXXXXXX',UNLINK=>0);
+
+  $bam     = Bio::DB::Bam->open($bamfile, "r");
+  $fn_uniq = file($dest,$bn.".uniq".$ext);
+  $fn_mult = file($dest,$bn.".mult".$ext);
+  $header  = $bam->header; # TODO: modify header, leave traces ...
+
+  $bam_uniq = Bio::DB::Bam->open($tmp_uniq,'w')
+    or croak "ERROR [$this_function] Cannot open temp file for writing: $!";
+  $bam_mult = Bio::DB::Bam->open($tmp_mult,'w')
+    or croak "ERROR [$this_function] Cannot open temp file for writing: $!";
+  $bam_uniq->header_write($header);
+  $bam_mult->header_write($header);
+
+  while ($read = $bam->read1() ) {
+    $count_all++;
+    if ($read->aux_get("NH") == 1){ # uniquely mapped reads
+      $bam_uniq->write1($read);
+      $count_uniq++;
+    }
+    else { # multiply mapped reads
+      $bam_mult->write1($read);
+      $count_mult++;
+    }
+  }
+
+  croak "ERROR [$this_function] Read counts don't match\n"
+    unless ($count_uniq + $count_mult == $count_all);
+
+  rename ($tmp_uniq, $fn_uniq);
+  rename ($tmp_mult, $fn_mult);
+  push (@processed_files, $fn_uniq);
+  push (@processed_files, $fn_mult);
+
+  if (defined $log){
+    my $lf = file($dest,$log);
+    open(LOG, ">>", $lf) or croak $!;
+    printf LOG "%15d reads total\n%15d unique reads\n%15d multiple reads\n",
+      $count_all,$count_uniq,$count_mult;
+    close(LOG);
+  }
 }
 
 # bam2bw ( $bam,$chromsizes )
@@ -577,6 +639,9 @@ analysis
   # split a single-end  or paired-end BAM file by strands
   @result = split_bam($bam_in,$rev,$want_uniq,$want_bed,$destdir,$logfile);
 
+  # extract unique and multi mappers from a BAM file
+  @result = uniquify_bam($bam_in,$outdir,$logfile);
+
   # make bigWig from BAM
   bam2bw($bam_in,$chromsizes)
 
@@ -600,10 +665,11 @@ analysis
 
 =head1 DESCRIPTION
 
-ViennaNGS is a collection of utilities and subroutines for building
-Next-Generation Sequencing (NGS) data analysis pipelines.
+Bio::ViennaNGS is a collection of utilities and subroutines for
+building efficient Next-Generation Sequencing (NGS) data analysis
+pipelines.
 
-=over 
+=over
 
 =item split_bam($bam,$reverse,$want_uniq,$want_bed,$dest_dir,$log)
 
@@ -632,6 +698,14 @@ experiments; In paired-end experiments, read and mate are treated
 separately, thus allowing for scenarios where eg. one read is a
 multi-mapper, whereas its associate mate is a unique mapper, resulting
 in an ambiguous alignment of the entire fragment.
+
+=item uniquify_bam($bam,$dest,$log)
+
+Extract I<unique> and I<multi> mapping reads from BAM file
+C<$bam>. New BAM files for unique and multi mappers are created in the
+output folder C<$dest>, which are named B<basename.uniq.bam> and
+B<basename.mult.bam>, respectively. If defined, a logfile named
+C<$log> is created in the output folder.
 
 =item bam2bw($bam,$chromsizes)
 

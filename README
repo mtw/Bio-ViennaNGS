@@ -13,6 +13,10 @@ statistics. Optionally create BED output, as well as normalized bedGraph
 and bigWig files for coverage visualization in genome browsers (see
 dependencies on third-patry tools below).
 
+bam_uniq.pl
+Extract unique and multi mapping reads from BAM alignment files and create
+a separate BAM file for both uniqe (.uniq.) and multi (.mult.) mappers.
+
 gff2bed.pl:
 Convert RefSeq GFF3 annotation files to BED12 format. Individual BED12
 files are created for each feature type (CDS/tRNA/rRNA/etc.). Tested with
