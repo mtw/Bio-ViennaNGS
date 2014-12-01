@@ -38,6 +38,10 @@ splice_site_summary.pl:
 Identify and characterize splice junctions from RNA-seq data by
 intersecting them with annotated splice junctions.
 
+sj_visualizer.pl:
+Convert splice junctions from mapped RNA-seq data in segemehl BED6 splice
+junction format to BED12 for easy visualization in genome Browsers.
+
 newUCSCdb.pl:
 Create a new genome database for a locally installed instance of the UCSC
 genome browser. Based on
