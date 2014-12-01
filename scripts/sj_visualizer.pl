@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-11-25 15:57:55 mtw>
+# Last changed Time-stamp: <2014-12-01 23:30:45 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -107,8 +107,11 @@ sj_visualizer.pl [-s I<FILE>] [-f I<FILE>]
 
 =head1 DESCRIPTION
 
-This program identifies and characterizes splice sites from mapped
-RNA-seq data against annotated splice junctions.
+Convert splice junctions from mapped RNA-seq data to BED12 format for
+easy visualization in genome browsers. The program expects BED6 input
+in segemehl splice junction format (see the L<segemehl
+documentation|http://www.bioinf.uni-leipzig.de/Software/segemehl/segemehl_manual_0_1_7.pdf>
+for details).
 
 =head1 OPTIONS
 
