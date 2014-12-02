@@ -134,7 +134,7 @@ sub make_assembly_hub{
     };
   $template->process($group_txt_file,$group_txt_vars,$group_txt_path) || die "Template process failed: ", $template->error(), "\n";
 
-  my @trackfiles = retrieve_tracks("/home/mescalin/egg/current/Projects/Perl/assemblyhub_test/", $base_URL, $assembly_hub_name);
+  my @trackfiles = retrieve_tracks("$bedFileDirectory", $base_URL, $assembly_hub_name);
   my $tracksList;
   foreach my $track (@trackfiles){
     my $trackString = make_track(@$track);
