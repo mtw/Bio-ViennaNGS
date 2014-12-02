@@ -11,6 +11,7 @@ use Template;
 use Cwd;
 use File::Basename;
 use IPC::Cmd qw[can_run run run_forked];
+use Bio::ViennaNGS::AnnoC qw(&parse_gff &feature_summary &features2bed $fstat $feat);
 
 our @ISA = qw(Exporter);
 
@@ -27,14 +28,16 @@ sub make_assembly_hub{
   die("ERROR [Bio::ViennaNGS::UCSC] \$log_path does not exist\n") unless (-e $log_path);
   #ensure that base_URL ends with slash
   $base_URL =~ s!/*$!/!;  
-
+  my $mode = "novel";
+  
   #check program dependencies
   my $module_path = $INC{"Bio/ViennaNGS/UCSC.pm"};
   my $template_path = $module_path;
   $template_path =~ s/UCSC.pm/template\//;
   die("ERROR [Bio::ViennaNGS::UCSC] template directory not found\n") unless (-d $template_path);
   my $faToTwoBit_path = can_run('faToTwoBit') or die 'ERROR [ViennaNGS::UCSC] faToTwoBit is not installed!';
-
+  my $big_bed_info_path = can_run('bigBedInfo') or die 'bigBedInfo is not installed!';
+  
   #bedfiles path
   my $bedFileDirectory = dirname($fasta_file_path);
   my @parsedHeader = parse_fasta_header($fasta_file_path);
@@ -54,7 +57,7 @@ sub make_assembly_hub{
 
   #2-bit fasta file conversion
   my $modified_fasta_path = $assembly_hub_directory."/".$accession."fa";
-  my $test7 = modify_fasta_header($fasta_file_path,$modified_fasta_path,$accession);
+  modify_fasta_header($fasta_file_path,$modified_fasta_path,$accession);
   my $twoBitFastaFilePath = $genome_assembly_directory ."/" . "$accession" . ".2bit";
   my $full_path = can_run('faToTwoBit') or die 'faToTwoBit is not installed!';
   my $fastaToTwobit_cmd = $faToTwoBit_path . " " . $modified_fasta_path . " " . $twoBitFastaFilePath;
@@ -91,7 +94,7 @@ sub make_assembly_hub{
      description => "$accession",
      twoBitPath => "$accession/$accession.2bit",
      organism => "organism",
-     defaultPos => $accession . ":1-1,000",
+     defaultPos => $accession,
      orderKey => "10",
      scientificName => "$scientificName",
      htmlPath => "$accession/description.html"
