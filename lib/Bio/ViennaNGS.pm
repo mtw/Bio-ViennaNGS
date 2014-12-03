@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-03 15:05:00 mtw>
+# Last changed Time-stamp: <2014-12-03 15:21:57 mtw>
 
 package Bio::ViennaNGS;
 
@@ -630,7 +630,7 @@ analysis
   # make bigWig from BED or BAM
   $type = "bam";
   $strand = "+";
-  @result = bam_or_bed2bigWig($type,$infile,$cs_in,$strand,$destdir,$wantnorm,$size_p,$scale,$logfile);
+  $bwfile = bam_or_bed2bigWig($type,$infile,$cs_in,$strand,$destdir,$wantnorm,$size_p,$scale,$logfile);
 
   # make bigBed from BED
   my $bb = bed2bigBed($bed_in,$cs_in,$destdir,$logfile);
@@ -706,19 +706,19 @@ BAm files for unique and multi mappers, respectively.
 
 =item bam_or_bed2bigWig($type,$infile,$chromsizes,$strand,$dest,$want_norm,$size,$scale,$log)
 
-Creates stranded, normalized BigWig coverage profiles from BAM or BED
-files (provided via C<$infile>). The routine expects the file type
-('bam' or 'bed') being determined via C<$type>. C<$chromsizes> is the
-chromosome.sizes files, C<$strand> is either "+" or "-" and C<$dest>
-contains the output path for results. For normlization of bigWig
-profiles, additional attributes are required: C<$want_norm> triggers
-normalization with values 0 or 1. C<$size> is the number of
-fragments/elements in the BAM or BED file and C<$scale> gives the
-number to which data is normalized (ie. every bedGraph entry is
-multiplied by a factor (C<$scale>/C<$size>). C<$log> is expected to
-contain either the full path and file name of log file or be set to
-'undef'. The routine returns the full file name of the newly generated
-bigWig file.
+Creates stranded, normalized BigWig coverage profiles from
+strand-specific BAM or BED files (provided via C<$infile>). The
+routine expects the file type ('bam' or 'bed') being determined via
+C<$type>. C<$chromsizes> is the chromosome.sizes files, C<$strand> is
+either "+" or "-" and C<$dest> contains the output path for
+results. For normlization of bigWig profiles, additional attributes
+are required: C<$want_norm> triggers normalization with values 0 or
+1. C<$size> is the number of fragments/elements in the BAM or BED file
+and C<$scale> gives the number to which data is normalized (ie. every
+bedGraph entry is multiplied by a factor (C<$scale>/C<$size>). C<$log>
+is expected to contain either the full path and file name of log file
+or be set to 'undef'. The routine returns the full file name of the
+newly generated bigWig file.
 
 Stranded bigWigs can easily be visualized via
 L<TrackHubs|http://genome.ucsc.edu/goldenPath/help/hgTrackHubHelp.html>
@@ -729,6 +729,12 @@ and
 L<bedGraphToBigWig|http://hgdownload.cse.ucsc.edu/admin/exe/>. Intermediate
 bedGraph files are removed automatically once the bigWig files are
 ready.
+
+B<Please note:> This routine expects B<strand-split BAM or BED input>
+files. It B<will not extract> reads mapped either + or - strand, if
+the C<$strand> argument is specified. See the L<split_bam> routine for
+this functionality.
+
 
 =item sortbed($infile,$dest,$outfile,$rm_orig,$log)
 
