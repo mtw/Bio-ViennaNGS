@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-02 14:42:38 mtw>
+# Last changed Time-stamp: <2014-12-02 16:01:05 mtw>
 #
 # Split BAM files according to their strands, optionally filter unique
 # mappers
@@ -88,8 +88,8 @@ $bed_n  = $result[5]; # BED file containing fragments of [-] strand
 if ($bw == 1) {
   $destdir = $destdir."vis";
   $cmd = "mkdir -p $destdir"; system($cmd);
-  bed2bw($bed_p,$chromsi,"+",$destdir,$wantnorm,$size_p,$scale,$logfile);
-  bed2bw($bed_n,$chromsi,"-",$destdir,$wantnorm,$size_n,$scale,$logfile);
+  bam_or_bed2bw("bed",$bed_p,$chromsi,"+",$destdir,$wantnorm,$size_p,$scale,$logfile);
+  bam_or_bed2bw("bed",$bed_n,$chromsi,"-",$destdir,$wantnorm,$size_n,$scale,$logfile);
 }
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
