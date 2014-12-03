@@ -1,6 +1,6 @@
 #!/bin/perl
 #Script MEMExmlMotifExtractor.pl;
-#Last changed Time-stamp: <2014-10-01 16:23:17 fall> by joerg
+#Last changed Time-stamp: <2014-12-03 16:28:25 fall> by joerg
 ###############
 ###Use stuff
 ###############
@@ -165,11 +165,79 @@ chdir($dir) or die "Directory $dir not found!\n";
 
 ##################################END################################
 
-
 ###############
 ###POD
 ###############
 
+__END__
 
+=head1 NAME
+
+MEMExmlMotifExtractor.pl - Generates a simple statistic with ggplots about the sequence coverage of motifs from MEME standard xml output
+
+=head1 SYNOPSIS
+MEMExmlMotifExtractor.pl [-f I<FILE>] [-d I<STRING>] [-o I<STRING>] [-t I<STRING>] [-x I<String>] [-a I<STRING>] [-r I<STRING>]
+[options]
+	"dir|d=s"     => \$dir,
+	"odir|o=s"    => \$odir,
+	"file|f=s"    => \$file,
+	"outname|t=s" => \$outname,
+	"discard|x=s" => \$discard,
+	"acid|a=s"    => \$acid,
+	"rlib|r=s"    => \$rlibpath,
+=head1 OPTIONS
+
+=over 
+
+=item B<-f>
+
+MEME xml output file
+
+=item B<-d>
+
+Path to working dir containing the xml file
+
+=item B<-o>
+
+Path to Output directory
+
+=item B<-t>
+
+Name of output files
+
+=item B<-x>
+
+If annotation is found in the sequence name fields, items that should not be analyzed (e.g. annnotion like miscRNA, ncRNA, predicted_gene) can be defined here
+
+=item B<-a>
+
+Defined the type of nucleic acid in MEME input, defaults to DNA, can be ignored if protein sequences were used
+
+=item B<-r>
+
+Path to the R library
+
+=item B<--help -h>
+
+Print short help
+
+=item B<--man>
+
+Prints the manual page and exits
+
+=back
+
+=head1 DESCRIPTION
+
+This program digests MEME xml output and returns a list of found motifs with the number of sequences containing those motifs
+
+=head1 AUTHOR
+
+Joerg Fallmann E<lt>joerg.fallmann@univie.ac.atE<gt>
+
+=cut
+
+
+##################################END################################
 
 

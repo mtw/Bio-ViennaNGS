@@ -1,7 +1,7 @@
 #!/bin/perl
 
 #Script TrimFastq.pl;
-#Last changed Time-stamp: <2014-10-13 11:56:20 fall> by Joerg Fallmann <joerg.fallmann@univie.ac.at>
+#Last changed Time-stamp: <2014-12-03 15:40:24 fall> by Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ##############
 ###Library for Testing, remove before delivery
@@ -106,7 +106,7 @@ Prints the manual page and exits
 
 =head1 DESCRIPTION
 
-This program trims the sequence and qualitystring fields from a fastq file by user defined length
+This program trims the sequence and qualitystring fields from a fastq file by user defined length, for example to allow re-mapping if mapping quality is not sufficient without trimming.
 
 =head1 AUTHOR
 

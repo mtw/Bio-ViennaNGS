@@ -1,7 +1,7 @@
 #!/bin/perl
 
 #Script ExtendBed.pl;
-#Last changed Time-stamp: <2014-11-26 15:09:17 fall> by Joerg Fallmann <joerg.fallmann@univie.ac.at>
+#Last changed Time-stamp: <2014-12-03 15:20:34 fall> by Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
 ###Use stuff
@@ -23,26 +23,28 @@ use Bio::ViennaNGS::FeatureIO;
 ###############
 
 my $VERBOSE = 0;
-my ( $g, $b, $o, $l, $r, $e );
+my ( $g, $b, $o, $l, $r, $e, $u, $d );
 
 ###############
 ###Command Line Options
 ###############
 Getopt::Long::config('no_ignore_case');
 pod2usage(-verbose => 0) unless GetOptions(
-	"genome|g=s"     => \$g,
-	"bedfile|b=s"    => \$b,
-	"outfile|o=s"    => \$o,
-	"left|l=s"       => \$l,
-	"right|r=s"      => \$r,
-	"extend|e=s"     => \$e,
-	"help|h"         => sub{pod2usage(-verbose => 1)},
-	"man|m"          => sub{pod2usage(-verbose => 2)},      
-	"verbose"        => sub{ $VERBOSE++ }
+    "genome|g=s"  => \$g,
+    "bedfile|b=s" => \$b,
+    "outfile|o=s" => \$o,
+    "left|l=s"    => \$l,
+    "right|r=s"   => \$r,
+    "extend|e=s"  => \$e,
+    "up|u=s"      => \$u,
+    "down|d=s"    => \$d,
+    "help|h"      => sub{pod2usage(-verbose => 1)},
+    "man|m"       => sub{pod2usage(-verbose => 2)},      
+    "verbose"     => sub{ $VERBOSE++ }
     );
 
 ###############
-###MAIN
+### MAIN
 ###############
 
 unless (-f $g && -f $b ) {
@@ -50,8 +52,8 @@ unless (-f $g && -f $b ) {
 	pod2usage(-verbose => 0);
 }
 
-unless ( $e || $l || $r ){ 
-    warn "No number of flanking nucleotides chosen, output would be input!Please provde them via the -l and -r or -e option\n";
+unless ( $e || $l || $r || $u || $d){ 
+    warn "No number of flanking nucleotides chosen, output would be input! Please provide them via the -l, -r, -e, -u or -d shortoption\n";
     pod2usage(-verbose => 0);
 }
 
@@ -59,8 +61,11 @@ if ($e){
     $l=nearest(1,$e/2);
     $r=nearest(1,$e/2);
 }
+
 $l=0 unless $l;
 $r=0 unless $r;
+$d=0 unless $d;
+$u=0 unless $u;
 
 print STDERR "Using $g to extend $b by $l and $r and save it to $o\n";
 
@@ -75,48 +80,14 @@ while (<$Genome>){
     my ($chr,$size)=split (/\t/,$_);
     $sizes{$chr}=$size;
 }
-### This depends on MTW, either FeatureIO reads files and distributes to objects, or not
-### So far I do it directly in this script
-### Possible workarounds would be 
-#### my $bedobject = FeatureIO->new($b,);
-#### $bedobject->featurechain_from_Bed($b); ## Reads bed file into featurechain object
 
-#my @featurelist; ## This will become a FeatureChain
-#while(<$Bed>){
-##    ### This should be done by FeatureIO if want to;
-#    chomp (my $raw = $_);
-#    push my @line , split (/\t/,$raw);
-#    push @line, "\." if ( !$line[5] ); 
-#
-#    (my $chromosome  = $line[0])=~ s/chr//g;
-#    my $start	     = $line[1]+1;
-#    my $end	     = $line[2];
-#    my $name	     = $line[3];
-#    my $score	     = $line[4];
-#    my $strand	     = $line[5];
-#    my $extension = '';
-#
-#    if ($line[6]){
-#	for (6..$#line){
-#	    $extension .= $line[$_]."\t";
-#	}
-#	$extension = substr($extension,0,-1);
-#    }
-#    my $feat = Bio::ViennaNGS::Feature->new(chromosome=>$chromosome,start=>$start,end=>$end,name=>$name,score=>$score,strand=>$strand,extension=>$extension);
-#    push @featurelist, $feat;
-#}
-#
 my @featurelist = @{parse_bed6($b)};
-### Now I create a Bio::ViennaNGS::FeatureChain from the featurelist above
+### Now we create a Bio::ViennaNGS::FeatureChain from the featurelist above
 my $chain = Bio::ViennaNGS::FeatureChain->new('type'=>'original','chain'=>\@featurelist);
-#print STDERR "Dumping Chain of length ".scalar($#{$chain->chain})."\n";
-#print Dumper($chain);
 
 ### This chain is now processed, and all features are extended and stored into a separate chain
 print STDERR "Extending with $l and $r\n";
-my $extended_chain = extend_chain(\%sizes,$chain,$l,$r);
-#print STDERR "Dumping ExChain  of length ".scalar($#{$chain->chain})."\n";
-#print Dumper($extended_chain);
+my $extended_chain = extend_chain(\%sizes,$chain,$l,$r,$u,$d);
 
 print STDERR "Creating Output";
 my $out = $extended_chain->print_chain();
@@ -133,7 +104,7 @@ __END__
 ExtendBed.pl - Extends bed entries strand specific one- or two-sided.
 
 =head1 SYNOPSIS
-ExtendBed.pl [-g I<FILE>] [-b I<FILE>] [-o I<FILE>] [-e I<Interger>] [-l I<Interger>] [-r I<Interger>]
+ExtendBed.pl [-g I<FILE>] [-b I<FILE>] [-o I<FILE>] [-e I<Interger>] [-l I<Interger>] [-r I<Interger>] [-u I<Interger>] [-d I<Interger>]
 [options]
 
 =head1 OPTIONS
@@ -164,6 +135,16 @@ Extension to total length from 5' end
 
 Extension to total length from 3' end
 
+=item B<-u>
+
+Upstream only extension to total length from 5' end
+Can be combined with -d to get upstream extension, plus extension into original coordinate span
+
+=item B<-d>
+
+Downstream only extension to total length from 3' end
+Can be combined with -l to get downstream extension, plus extension into original coordinate span
+
 =item B<--help -h>
 
 Print short help
@@ -176,7 +157,7 @@ Prints the manual page and exits
 
 =head1 DESCRIPTION
 
-This program extends Bed files to a total length of at least -e, -r or -l nucleotides, or at least to begin or end of the corresponding chromosome
+This program extends Bed files to a total length of at least -e, -r or -l nucleotides, or at least to begin or end of the corresponding chromosome. Furthermore 3' or 5' end extension is possible, where only up- or downstream regions can be retrieved, or combinations of the latter with extension into the original coordinate span.
 
 =head1 AUTHOR
 

@@ -1,7 +1,7 @@
 #!/bin/perl
 
 #Script KmerAnalysis.pl;
-#Last changed Time-stamp: <2014-10-10 13:02:50 fall> by Joerg Fallmann <joerg.fallmann@univie.ac.at>
+#Last changed Time-stamp: <2014-12-03 15:41:55 fall> by Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ##############
 ###Library for Testing, remove before delivery
@@ -173,7 +173,7 @@ Prints the manual page and exits
 
 =head1 DESCRIPTION
 
-This program does
+This program counts k-mers of user defined length in fasta or fastq files.
 
 =head1 AUTHOR
 

@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-11-26 16:59:15 fall>
+# Last changed Time-stamp: <2014-12-03 16:35:25 fall>
 
 package Bio::ViennaNGS;
 
@@ -605,6 +605,8 @@ sub extend_chain{
   my $chain = $_[1];
   my $l	    = $_[2];
   my $r	    = $_[3];
+  my $u     = $_[4];
+  my $d     = $_[5];
 
   ##return a new chain with extended coordinates
   my $extendchain = $chain;
@@ -615,19 +617,36 @@ sub extend_chain{
     my $start  = $feature->start;
     my $end    = $feature->end;
     my $strand = $feature->strand;
+    my $right  = 0;
+    my $left   = 0;
     my $width  = nearest(1,($end-$start)/2);
-    my $right;
-    my $left;
-    
+    $width = 0 if ($d > 0 || $u > 0);
+
     if ($strand eq "+"){
+      if ($d > 0){
+	$start = $end+1;
+	$r = $d;
+      }
+      if ($u > 0){
+	$end = $start-1;
+	$l = $u;
+      }
       $right=$r;
       $left=$l;
     }
     elsif ($strand eq "-"){
+      if ($u > 0){
+	$start = $end+1;
+	$l = $u;
+      }
+      if ($d > 0){
+	$end = $start-1;
+	$r = $d;
+      }
       $right=$l;
       $left=$r;
     }
-    
+
     if (($right-$width) <= 0){
       $right = 0;
     }
@@ -640,13 +659,13 @@ sub extend_chain{
     else{
       $left-=$width;
     }
-    
+
     if ( $start-$left >= 1 ){
       if ($end+$right >= $sizes{"chr".$chrom}){
 	$end = $sizes{"chr".$chrom};
       }
       else{
-	$end = $end+$right;
+	$end += $right;
       }
       $start -= ($left+1); ## Because of Bed coordinates, we need to 0-base the result
     }
@@ -656,7 +675,7 @@ sub extend_chain{
 	$end = $sizes{"chr".$chrom};
       }
       else{
-	$end = $end+$right;	
+	$end = $end+$right;
       }
     }
     else{
