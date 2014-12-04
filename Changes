@@ -76,4 +76,5 @@ Revision history for Perl extension ViennaNGS.
 	  properly handle BAM files
 	- added '-split' option to 'genomeCoverageBed' call in
 	  bam_or_bed2bw()
+	- updated MakeMaker scripts (MANIFEST and Makefile.PL)
 	- updatedPOD	

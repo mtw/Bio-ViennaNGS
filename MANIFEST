@@ -8,13 +8,10 @@ README
 scripts/bam_split.pl
 scripts/bam_to_bigwig.pl
 scripts/bam_uniq.pl
-scripts/DEXSeq_gff2bed.pl
-scripts/ENSEMBL_SPECIES
 scripts/gff2bed.pl
 scripts/motiffinda.pl
 scripts/newUCSCdb.pl
 scripts/normalize_multicov.pl
-scripts/README.newUCSCdb
 scripts/sj_visualizer.pl
 scripts/splice_site_summary.pl
 t/Bio-ViennaNGS.t
