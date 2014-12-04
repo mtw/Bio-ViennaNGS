@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-02 14:52:21 mtw>
+# Last changed Time-stamp: <2014-12-04 22:20:43 mtw>
 #
 # Create a new genome database for the UCSC genome browser. Based on
 # http://genomewiki.ucsc.edu/index.php/Building_a_new_genome_database
@@ -9,6 +9,21 @@
 #                     -sname <SCIENTIFIC_NAME> -assembly <ASSEMBLY> -clade <CLADE>
 #                     -pos <DEFAULT_POSITION> -source <SOURCE> -key <INT>
 #
+#
+# EXAMPLE 1:
+# newUCSCdb.pl -db eColiMC4100 -fa NC_012759.fna -tax 595496 -genome
+# "Escherichia coli MC4100" -assembly "2013-09-09" -pos
+# "NC_012759.1:230000-867000" -key 204 -sname "Escherichia coli BW2952
+# uid 59391" -source "based on RefSeq NC_012759.1" -clade "bacteria"
+# -h
+#
+# EXAMPLE 2:
+# newUCSCdb.pl -db stenMaltK279a -tax 522373 -genome "Stenotrophomonas
+# maltophilia K279a" -assembly "2008-06-10" -pos "NC_010943.1:
+# 100000-200000" -fa NC_010943.fna -sname "Stenotrophomonas
+# maltophilia K279a uid 61647" -key 223 -source "based on RefSeq
+# NC_010943.1" -clade "bacteria" -h
+
 # ***********************************************************************
 # *  Copyright notice
 # *
