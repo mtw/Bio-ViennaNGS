@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-03 15:21:57 mtw>
+# Last changed Time-stamp: <2014-12-04 14:47:57 mtw>
 
 package Bio::ViennaNGS;
 
@@ -19,7 +19,7 @@ use Carp;
 
 our @ISA = qw(Exporter);
 our @EXPORT = ();
-our @EXPORT_OK = qw ( split_bam uniquify_bam bam2bw bam2bed bed2bw
+our @EXPORT_OK = qw ( split_bam uniquify_bam bed_or_bam2bw
 		    sortbed bed2bigBed computeTPM featCount_data
 		    parse_multicov write_multicov totalreads );
 
@@ -347,9 +347,8 @@ sub uniquify_bam {
 }
 
 sub bed_or_bam2bw {
-  # TODO: provide a non-strand-aware version
   my ($type,$infile,$chromsizes,$strand,$dest,$want_norm,$size,$scale,$log) = @_;
-  my ($fn_bg_pos,$fn_bg_neg,$fn_bg_neg1,$fn_bw_pos,$fn_bw_neg);
+  my ($fn_bg_tmp,$fn_bg,$fn_bw);
   my ($bn,$path,$ext,$cmd);
   my @processed_files = ();
   my $factor = 1.;
@@ -367,15 +366,17 @@ sub bed_or_bam2bw {
 
   if(defined $log){
     open(LOG, ">>", $log) or croak $!;
-    print LOG "LOG [$this_function] \$infile: $infile -- \$chromsizes: $chromsizes --\$dest: $dest\n";
+    print LOG "LOG [$this_function] \$infile: $infile\n";
+    print LOG "LOG [$this_function] \$dest: $dest\n";
+    print LOG "LOG [$this_function] \$chromsizes: $chromsizes\n";
   }
 
   croak "ERROR [$this_function] Cannot find $infile\n"
     unless (-e $infile);
-  croak "ERROR [$this_function] Cannot find $chromsizes\n"
-    unless (-e $chromsizes);
   croak "ERROR [$this_function] $dest does not exist\n"
     unless (-d $dest);
+  croak "ERROR [$this_function] Cannot find $chromsizes\n"
+      unless (-e $chromsizes);
 
   if ($want_norm == 1){
     $factor = $scale/$size;
@@ -384,24 +385,27 @@ sub bed_or_bam2bw {
   }
 
   ($bn,$path,$ext) = fileparse($infile, qr /\..*/);
-  $fn_bg_pos  = file($dest,$bn.".pos.bg");
-  $fn_bg_neg  = file($dest,$bn.".neg.bg");
-  $fn_bg_neg1 = file($dest,$bn.".neg.bg.1");
-  $fn_bw_pos  = file($dest,$bn.".pos.bw");
-  $fn_bw_neg  = file($dest,$bn.".neg.bw");
+  $fn_bg_tmp  = file($dest,$bn.".tmp.bg");
+  $fn_bg      = file($dest,$bn.".bg");
+  if($strand eq "+"){
+    $fn_bw  = file($dest,$bn.".pos.bw");
+  }
+  else {
+    $fn_bw  = file($dest,$bn.".neg.bw");
+  }
 
-  $cmd = "$genomeCoverageBed -bg -g $chromsizes -strand $strand -scale $factor -split ";
-  if ($type eq "bed"){ $cmd .= "-i $infile "; }
+  $cmd = "$genomeCoverageBed -bg -scale $factor -split ";
+  if ($type eq "bed"){ $cmd .= "-i $infile -g $chromsizes"; } # chrom.sizes only required for processing BED
   else { $cmd .= "-ibam $infile "; }
-  if ($strand eq "+"){ # positive strand
-    $cmd .= " > $fn_bg_pos";
-    $cmd .= " && $bedGraphToBigWig $fn_bg_pos $chromsizes $fn_bw_pos";
+  $cmd .= " > $fn_bg_tmp";
+
+  if($strand eq "-"){
+    $cmd .= " && cat $fn_bg_tmp | $awk \'{ \$4 = - \$4 ; print \$0 }\' > $fn_bg";
   }
-  else{ # negative strand
-    $cmd .= " > $fn_bg_neg1";
-    $cmd .= " && cat $fn_bg_neg1 | $awk \'{ \$4 = - \$4 ; print \$0 }\' > $fn_bg_neg";
-    $cmd .= " && $bedGraphToBigWig $fn_bg_neg $chromsizes $dest/$fn_bw_neg";
+  else{
+    $fn_bg = $fn_bg_tmp;
   }
+  $cmd .= " && $bedGraphToBigWig $fn_bg $chromsizes $fn_bw";
 
   if (defined $log){ print LOG "LOG [$this_function] $cmd\n";}
 
@@ -416,14 +420,9 @@ sub bed_or_bam2bw {
   }
   if (defined $log){ close(LOG); }
 
-  if ($strand eq "+"){  # delete intermediate bedGraph files
-    unlink ($fn_bg_pos);
-    return $fn_bw_pos;
-  }
-  else{
-    unlink($fn_bg_neg); unlink($fn_bg_neg1);
-    return $fn_bw_neg;
-  }
+  unlink ($fn_bg_tmp);
+  unlink ($fn_bg);
+  return $fn_bw;
 }
 
 sub bed2bigBed {
@@ -630,7 +629,7 @@ analysis
   # make bigWig from BED or BAM
   $type = "bam";
   $strand = "+";
-  $bwfile = bam_or_bed2bigWig($type,$infile,$cs_in,$strand,$destdir,$wantnorm,$size_p,$scale,$logfile);
+  $bwfile = bed_or_bam2bw($type,$infile,$cs_in,$strand,$destdir,$wantnorm,$size_p,$scale,$logfile);
 
   # make bigBed from BED
   my $bb = bed2bigBed($bed_in,$cs_in,$destdir,$logfile);
@@ -704,12 +703,12 @@ C<$log> is created in the output folder.
 This routine returns an array holding file names of the newly created
 BAm files for unique and multi mappers, respectively.
 
-=item bam_or_bed2bigWig($type,$infile,$chromsizes,$strand,$dest,$want_norm,$size,$scale,$log)
+=item bed_or_bam2bw($type,$infile,$chromsizes,$strand,$dest,$want_norm,$size,$scale,$log)
 
 Creates stranded, normalized BigWig coverage profiles from
 strand-specific BAM or BED files (provided via C<$infile>). The
-routine expects the file type ('bam' or 'bed') being determined via
-C<$type>. C<$chromsizes> is the chromosome.sizes files, C<$strand> is
+routine expects a file type 'bam' or 'bed' via the C<$type>
+argument. C<$chromsizes> is the chromosome.sizes files, C<$strand> is
 either "+" or "-" and C<$dest> contains the output path for
 results. For normlization of bigWig profiles, additional attributes
 are required: C<$want_norm> triggers normalization with values 0 or
@@ -717,8 +716,24 @@ are required: C<$want_norm> triggers normalization with values 0 or
 and C<$scale> gives the number to which data is normalized (ie. every
 bedGraph entry is multiplied by a factor (C<$scale>/C<$size>). C<$log>
 is expected to contain either the full path and file name of log file
-or be set to 'undef'. The routine returns the full file name of the
-newly generated bigWig file.
+or 'undef'. The routine returns the full file name of the newly
+generated bigWig file.
+
+While this routine can handle non-straned BAM/BED files (in which case
+C<$strand> should be set to "+" and hence all coverage profiles will
+be created with a positive sign, even if they map to the negative
+strand), usage of strand-specific data is highly recommended. For BAM
+file, this is easily achieved by calling the L<bam_split> routine (see
+above) prior to this one, thus creating dedicated BAM files containing
+exclusively reads mapped to the positive or negative strand,
+respectively.
+
+It is important to know that this routine B<does not extract> reads
+mapped to either strand from a non-stranded BAM/BED file if the
+C<$strand> argument is given. It rather adjusts the sign of B<all>
+mapped reads/features in a BAM/BED file and then creates bigWig
+files. See the L<split_bam> routine for extracting reads mapped to
+either strand.
 
 Stranded bigWigs can easily be visualized via
 L<TrackHubs|http://genome.ucsc.edu/goldenPath/help/hgTrackHubHelp.html>
@@ -729,12 +744,6 @@ and
 L<bedGraphToBigWig|http://hgdownload.cse.ucsc.edu/admin/exe/>. Intermediate
 bedGraph files are removed automatically once the bigWig files are
 ready.
-
-B<Please note:> This routine expects B<strand-split BAM or BED input>
-files. It B<will not extract> reads mapped either + or - strand, if
-the C<$strand> argument is specified. See the L<split_bam> routine for
-this functionality.
-
 
 =item sortbed($infile,$dest,$outfile,$rm_orig,$log)
 
