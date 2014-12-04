@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-03 14:11:20 mtw>
+# Last changed Time-stamp: <2014-12-04 14:22:31 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -29,20 +29,19 @@ use warnings;
 use Getopt::Long qw( :config posix_default bundling no_ignore_case );
 use Pod::Usage;
 use Data::Dumper;
-use IPC::Cmd qw(can_run);
-use Bio::ViennaNGS  qw(bed2bigBed);
-use Bio::ViennaNGS::SpliceJunc qw(bed6_ss_to_bed12);
+use Path::Class;
+use Bio::ViennaNGS  qw(bed_or_bam2bw);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-my ($bam_in);
+my ($bam_in,$lf,$bwfile);
+my $logfile = "bam_to_bigwig.log";
 my $outdir = "./";
 my $want_bigbed = 0;
-my $cs_in = '-';
+my $cs_in = "-";
 my $strand = "+";
-my @result = ();
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
@@ -50,8 +49,9 @@ my @result = ();
 
 Getopt::Long::config('no_ignore_case');
 pod2usage(-verbose => 1) unless GetOptions("b|bam=s"    => \$bam_in,
-					   "c=s"        => \$cs_in,
+					   "c|cs=s"     => \$cs_in,
 					   "o=s"        => \$outdir,
+					   "l|log=s"    => \$logfile,
 					   "s|strand=s" => \$strand,
 					   "man"        => sub{pod2usage(-verbose => 2)},
 					   "help|h"     => sub{pod2usage(1)}
@@ -63,26 +63,25 @@ unless (-f $bam_in){
   warn "Could not find input file $bam_in given via --bam option";
   pod2usage(-verbose => 0);
 }
-
-unless ($cs_in =~ /^\//) {$cs_in = "./".$cs_in;}
 unless (-f $cs_in){
-  warn "Could not find input file $cs_in given via -c option";
+  warn "Could not find input file $cs_in given via --cs option";
   pod2usage(-verbose => 0);
 }
-
 unless ($strand =~ /[\+\-]/) { 
   warn "Invalid value '$strand' given via -s option. Please specify
   either '+' or '-' for positive or negative strand, respectively";
   pod2usage(-verbose => 0);
  }
 
+$lf = file($outdir,$logfile);
+
 #TODO check if we are allowed to write to $outdir
 unless ($outdir =~ /\/$/){$outdir .= "/";}
 unless (-d $outdir){mkdir $outdir or die $!;}
 
-@result = bam_or_bed2bw("bam",$bam_in,$cs_in,$strand,$outdir,0,0,1.,undef);
+$bwfile = bed_or_bam2bw("bam",$bam_in,$cs_in,$strand,$outdir,0,0,1.,$lf);
 
-print Dumper(\@result);
+print "$bwfile\n";
 
 __END__
 
@@ -93,7 +92,7 @@ bam_to_bigWig.pl - Make bigWig coverage profiles from BAM files
 
 =head1 SYNOPSIS
 
-bam_to_bigWig.pl [--bam I<FILE>] [-c I<FILE>] [options]
+bam_to_bigWig.pl [--bam I<FILE>] [--cs I<FILE>] [--strand I<+/->] [options]
 
 =head1 DESCRIPTION
 
@@ -106,15 +105,15 @@ browser visualization.
 
 =over
 
-=item B<-b|--bam>
+=item B<--bam -b>
 
 Input file in BAM format
 
-=item B<-c>
+=item B<--cs -c>
 
-Chromosome sizes files
+Chromosome sizes file
 
-=item B<-s|--strand>
+=item B<--strand -s>
 
 Use this option if the input BAM file is strictly strand-specific,
 ie. contains B<only> reads mapped to either the positive or negative
@@ -123,11 +122,20 @@ is '+', the interim bedGraph file will be created with positive
 values. A '-' given here will create the inerim bedGraph file with
 negative values, which is required for proper visualization of bigWig
 files holding coverage profiles of reads mapped to the negative strand
-in the UCSC genome browser.
+in the UCSC genome browser. If the input BAM file is not
+strand-specific, ie contains reads mapped to both positive and
+negative strand, then the default value '+' will be used, resulting in
+bigWig coverage profiles rendered in positive (y-axis direction) in
+the UCSC genome browser.
 
 =item B<-o>
 
-Relative output path
+Output directory
+
+=item B<--log -l>
+
+Name of the log file. Unless specified, the default log file will be
+"bam_to_bigwig.log" in the given output directory.
 
 
 =item B<--help -h>
