@@ -69,7 +69,7 @@ Revision history for Perl extension ViennaNGS.
 	- removed get_stranded_subsequence (now lives in Bio::ViennaNGS::Fasta)
 	- updated POD
 
-0.11
+0.11_02
 	- integrated Bio::DB::Fasta 
 	- removed obsolete bam2bw()
 	- added scripts/bam_to_bigwig.pl
