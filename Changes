@@ -70,6 +70,7 @@ Revision history for Perl extension ViennaNGS.
 	- updated POD
 
 0.11
+	- integrated Bio::DB::Fasta 
 	- removed obsolete bam2bw()
 	- added scripts/bam_to_bigwig.pl
 	- renamed bed2bw() to bam_or_bed2bw() and refactored it accordingly to
