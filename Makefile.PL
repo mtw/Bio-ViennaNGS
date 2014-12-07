@@ -6,7 +6,7 @@ WriteMakefile(
     VERSION_FROM      => 'lib/Bio/ViennaNGS.pm',
     PREREQ_PM         => {
 			  "Getopt::Long" => 2.0,
-			  "Bio::Perl" => 1.6,
+			  "Bio::Root::Version" => 1.00690001,
 			  "Bio::DB::Sam"  => 1.39,
 			  "Data::Dumper" => 0,
 			  "File::Basename" => 0,
