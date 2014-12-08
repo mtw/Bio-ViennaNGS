@@ -80,4 +80,5 @@ Revision history for Perl extension ViennaNGS.
 	- updated MakeMaker scripts (MANIFEST and Makefile.PL)
 	- minimum version of bio::Root::Version id 1.00690001
 	- added some tests
+	- ship demo files in share/ folder
 	- updatedPOD	
