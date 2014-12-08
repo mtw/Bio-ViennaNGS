@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-04 12:52:31 mtw>
+# Last changed Time-stamp: <2014-12-09 00:45:17 mtw>
 #
 # Split BAM files according to their strands, optionally filter unique
 # mappers
@@ -29,55 +29,67 @@
 
 use strict;
 use warnings;
-use Getopt::Long;
+use Getopt::Long qw( :config posix_default bundling no_ignore_case );
+use Pod::Usage;
 use Data::Dumper;
 use File::Basename;
+use Path::Class;
 use Bio::ViennaNGS qw(split_bam bed_or_bam2bw);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
-my ($bam_p,$bam_n,$bed_p,$bed_n,$size_p,$size_n,$basename,$bamdir,$bamext,$cmd);
+my ($bam_p,$bam_n,$bed_p,$bed_n,$size_p,$size_n,$basename,$bamdir,$bamext,$lf);
 my ($rev,$wantuniq,$wantbed,$wantnorm,$bw) = (0)x5;
-my $logfile = "bam_split.log";
-my $chromsi = undef;
-my $fullbam = undef;
-my $destdir = "./";
+my $logext = ".bam_split.log";
+my $cs_in = "-";
+my $bam_in = "-";
+my $outdir = "./";
 my $scale   = 1000000;
 my @result  = ();
-my $this_function = (caller(0))[3];
-
-Getopt::Long::config('no_ignore_case');
-&usage() unless GetOptions("bam=s"           => \$fullbam,
-			   "bed"             => sub{$wantbed = 1},
-			   "bw"              => sub{$bw = 1},
-			   "c=s"             => \$chromsi,
-			   "norm"            => sub{$wantnorm = 1},
-			   "o=s"             => \$destdir,
-			   "r"               => sub{$rev = 1},
-			   "s=s"             => \$scale,
-			   "u"               => sub{$wantuniq = 1},
-			   "log=s"           => \$logfile,
-                           "-help"           => \&usage,
-                           "v");
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-die "ERROR [$this_function] No BAM file provided" unless (defined $fullbam);
+Getopt::Long::config('no_ignore_case');
+pod2usage(-verbose => 1) unless GetOptions("bam=s"      => \$bam_in,
+					   "bed"        => sub{$wantbed = 1},
+					   "bw"         => sub{$bw = 1},
+					   "cs=s"       => \$cs_in,
+					   "norm"       => sub{$wantnorm = 1},
+					   "o|out=s"    => \$outdir,
+					   "r|reverse"  => sub{$rev = 1},
+					   "scale=s"    => \$scale,
+					   "uniq"       => sub{$wantuniq = 1},
+					   "l|log=s"    => \$logext,
+					   "man"        => sub{pod2usage(-verbose => 2)},
+					   "help|h"     => sub{pod2usage(1)}
+					  );
+
+unless ($bam_in =~ /^\// || $bam_in =~ /\.\//){$bam_in = "./".$bam_in;}
+unless (-f $bam_in){
+  warn "Could not find input file $bam_in given via --bam option";
+  pod2usage(-verbose => 0);
+}
+
 if ($bw == 1) {
-  die "ERROR [$this_function] chrom_sizes file needed for generating BigWig coverage profiles\n"
-    unless (defined $chromsi);
+  unless (-f $cs_in){
+    warn "Could not find input file $cs_in given via --cs option";
+    pod2usage(-verbose => 0);
+  }
   unless ($wantbed == 1){$wantbed = 1;}
 }
-unless ($destdir =~ /\/$/){$destdir .= "/";}
-unless (-d $destdir){$cmd = "mkdir -p $destdir"; system($cmd);}
-unless ($fullbam =~ /^\// || $fullbam =~ /\.\//){$fullbam = "./".$fullbam;}
-($basename,$bamdir,$bamext) = fileparse($fullbam,qr/\.[^.]*/);
 
-$logfile = $destdir.$basename.".bam_split.log";
-@result = split_bam($fullbam,$rev,$wantuniq,$wantbed,$destdir,$logfile);
+#TODO check if we are allowed to write to $outdir
+#unless ($outdir =~ /\/$/){$outdir .= "/";}
+unless (-d $outdir){mkdir $outdir or die $!;}
+
+($basename,$bamdir,$bamext) = fileparse($bam_in,qr/\..*/);
+
+$lf = file($outdir,$basename.$logext);
+
+@result = split_bam($bam_in,$rev,$wantuniq,$wantbed,$outdir,$lf);
 $bam_p  = $result[0]; # BAM file containing fragments of [+] strand
 $bam_n  = $result[1]; # BAM file containing fragments of [-] strand
 $size_p = $result[2]; # of alignments on [+] strand
@@ -86,40 +98,98 @@ $bed_p  = $result[4]; # BED file containing fragments of [+] strand
 $bed_n  = $result[5]; # BED file containing fragments of [-] strand
 
 if ($bw == 1) {
-  $destdir = $destdir."vis";
-  $cmd = "mkdir -p $destdir"; system($cmd);
-  bed_or_bam2bw("bed",$bed_p,$chromsi,"+",$destdir,$wantnorm,$size_p,$scale,$logfile);
-  bed_or_bam2bw("bed",$bed_n,$chromsi,"-",$destdir,$wantnorm,$size_n,$scale,$logfile);
+  my $od = dir($outdir,"vis");
+  mkdir $od or die $!;
+  bed_or_bam2bw("bed",$bed_p,$cs_in,"+",$od,$wantnorm,$size_p,$scale,$lf);
+  bed_or_bam2bw("bed",$bed_n,$cs_in,"-",$od,$wantnorm,$size_n,$scale,$lf);
 }
 
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
-#^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-sub usage {
- print <<EOF;
+__END__
 
-bam_split.pl:  Split a BAM file according to strands.
 
-Optionally filter unique alignments by inspecting NH:i SAM attribute
+=head1 NAME
+
+bam_split.pl - Split a BAM file by strands
+
+=head1 SYNOPSIS
+
+bam_split.pl [--bam I<FILE>] [options]
+
+=head1 DESCRIPTION
+
+Split a BAM file by strands and create two new BAM file: One
+containing all reads that map to the positive strand and another one
+with all reads mapped to the negative strand. Optionally filter unique
+alignments by inspecting NH:i SAM attribute.
+
 Optionally create bedGraph and (stranded |normalized) bigWig coverage
 for UCSC visualization
 
-usage: $0 -bam <BAMFILE> [options]
-program specific options:                                   default:
- -bam   <file>   specify BAM file                           ($fullbam)
- -bed            create BED file for each split BAM         ($wantbed)
- -bw             create BedGraph and bigWig files           ($bw)
- -c     <file>   chrom_sizes for generating bigWig files    ($chromsi)
- -norm           normalize resulting bigWig files           ($wantnorm)
- -o     <path>   output directory                           ($destdir)
- -r              reverse +/- strand mapping (according      ($rev)
-                 to RNA-seq library preparation protocol)
- -s     <int>    scale bigWig files to this number          ($scale)
- -u              filter unique alignemnts                   ($wantuniq)
- -log   <file>   log file                                   ($logfile)
- -help           print this information
+=head1 OPTIONS
 
-EOF
-exit;
-}
+=over
+
+=item B<--bam>
+
+Input file in BAM format
+
+=item B<--bed>
+
+Create a BED6 file for each split BAM file
+
+=item B<--bw>
+
+Create BedGraph and bigWig coverage files for e.g. genome browser
+visualization.
+
+=item B<--cs>
+
+Chromosome sizes file (required if B<--bw> is given).
+
+=item B<--norm>
+
+Normalize resulting bigWig files
+
+=item B<--out -o>
+
+Output directory
+
+=item B<--reverse -r>
+
+Reverse the +/- strand mapping. This is required to achieve proper
+strand assignments for certain RNA-seq library preparation protocol.
+
+=item B<--scale>
+
+If B<--bw> is given, scale bigWig files to this number. Default is 1000000.
+
+=item B<--uniq>
+
+Filter uniquely mapped reads by inspecting the NH:i: SAM
+attribute. See also the I<bam_uniq.pl> utility, which extracts both
+uniquely and multiply mapped reads from BAM files without
+strand-splitting.
+
+=item B<--log -l>
+
+Log file extension. Default is ".bam_split.log". The log file is
+created in the directory given via B<-o> and its name is constructed
+from the base name of the input BAM file and the log filename extension.
+
+=item B<--help -h>
+
+Print short help
+
+=item B<--man>
+
+Prints the manual page and exits
+
+=back
+
+=head1 AUTHOR
+
+Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+
+=cut
+
