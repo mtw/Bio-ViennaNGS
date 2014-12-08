@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-09 23:44:47 mtw>
+# Last changed Time-stamp: <2014-12-08 23:22:29 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -29,7 +29,6 @@ use warnings;
 use Getopt::Long qw( :config posix_default bundling no_ignore_case );
 use Pod::Usage;
 use Data::Dumper;
-use IPC::Cmd qw(can_run);
 use Bio::ViennaNGS  qw(bed2bigBed);
 use Bio::ViennaNGS::SpliceJunc qw(bed6_ss_from_bed12 bed6_ss_from_rnaseq intersect_sj);
 use Bio::ViennaNGS::Fasta;
@@ -101,8 +100,6 @@ if($want_bigbed==1){
     warn "Could not find input file $cs_in given via -c option";
     pod2usage(-verbose => 0);
   }
-  my $bedTobigBed = can_run('bedToBigBed') or
-    die 'bedToBigBed utility not found!';
 }
 
 #TODO check if we are allowed to write to $outdir

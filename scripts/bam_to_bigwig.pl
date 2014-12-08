@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-04 14:22:31 mtw>
+# Last changed Time-stamp: <2014-12-08 23:52:55 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -73,11 +73,10 @@ unless ($strand =~ /[\+\-]/) {
   pod2usage(-verbose => 0);
  }
 
-$lf = file($outdir,$logfile);
-
 #TODO check if we are allowed to write to $outdir
 unless ($outdir =~ /\/$/){$outdir .= "/";}
 unless (-d $outdir){mkdir $outdir or die $!;}
+$lf = file($outdir,$logfile);
 
 $bwfile = bed_or_bam2bw("bam",$bam_in,$cs_in,$strand,$outdir,0,0,1.,$lf);
 
