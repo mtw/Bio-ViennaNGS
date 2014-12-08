@@ -8,9 +8,15 @@
 use strict;
 use warnings;
 use IPC::Cmd qw(can_run);
+use File::Share ':all';
+use Test::More;
+use Data::Dumper;
 
-use Test::More tests => 8;
+my $data1_fa  = dist_file('Bio-ViennaNGS','NC_000913.3.30k.fa');
+my $data1_gff = dist_file('Bio-ViennaNGS','NC_000913.3.30k.gff');
+
 BEGIN { use_ok('Bio::ViennaNGS') };
+BEGIN { use_ok('Bio::ViennaNGS::Fasta') };
 
 ok( defined(can_run('cat')), 'cat not found');
 ok( defined(can_run('awk')), 'awk not found');
@@ -18,9 +24,23 @@ ok( defined(can_run('bedToBigBed')), 'bedToBigBed not found');
 ok( defined(can_run('genomeCoverageBed')), 'genomeCoverageBed not found');
 ok( defined(can_run('bedGraphToBigWig')), 'bedGraphToBigWig not found');
 ok( defined(can_run('bedtools')), 'bedtools not found');
-ok( defined(can_run('sortBed')), 'sortBed not found')
+ok( defined(can_run('sortBed')), 'sortBed not found');
 #########################
+
+my $f = Bio::ViennaNGS::Fasta->new( fa => $data1_fa, );
+ok($f);
+my $dump=Dumper(\$f);
+ok($dump);
+#my @data1_ids = $f->fastaids;
+#ok (scalar @data1_ids, 1);
+#my $ps = $f->primaryseq;
+
+
+
+
+
 
 # Insert your test code below, the Test::More module is use()ed here so read
 # its man page ( perldoc Test::More ) for help writing this test script.
 
+done_testing;

@@ -1,17 +1,43 @@
 Bio::ViennaNGS
 ==============
 
-Bio::ViennaNGS is a collection of Perl modules for Next-Generation
-Sequencng (NGS) analysis. It comes with a set of utility programs for
-accomplishing routine tasks often required in NGS data processing. The
-utilities serve as reference implementation of the routines implemented in
-the library and reside within the 'scripts' folder:
+Bio::ViennaNGS is a collection of Perl modules and utilities for building
+efficient Next-Generation Sequencing (NGS) analysis pipelines. It covers
+various aspects of NGS data analysis, including (but not limited to)
+conversion of sequence annotation, evaluation of mapped data, expression
+quantification and visualization.
+
+Bio::ViennaNGS comes with the following (sub)modules: 
+
+- Bio::ViennaNGS::Fasta
+  Routines for accessing genomic sequences implemented through a Moose
+  interface to Bio::DB::Fasta.
+
+- Bio::ViennaNGS::AnnoC
+  A Moose interface for storage and conversion of sequence annotation data.
+  
+- Bio::ViennaNGS::SpliceJunc
+  A collection of routines for alternative splicing analysis.  
+
+- Bio::ViennaNGS::UCSC (will be provided in an upcoming release)
+  Routines for visualization of genomics data with the UCSC genome browser.
+
+In addition, Bio::ViennaNGS ships with a set of utility programs for
+accomplishing routine tasks often required in NGS data processing. These
+utilities serve as reference implementation of the routines implemented
+within the (sub)modules.
 
 bam_split.pl: 
 Split (paired-end and single-end) BAM alignment files by strand and compute
 statistics. Optionally create BED output, as well as normalized bedGraph
 and bigWig files for coverage visualization in genome browsers (see
 dependencies on third-patry tools below).
+
+bam_to_bigWig.pl
+Produce bigWig coverage profiles from (aligned) BAM files, explicitly
+considering strandedness. The most natural use case of this tool is to
+create strand-aware coverage profiles in bigWig format for genome browser
+visualization.
 
 bam_uniq.pl
 Extract unique and multi mapping reads from BAM alignment files and create
@@ -22,25 +48,22 @@ Convert RefSeq GFF3 annotation files to BED12 format. Individual BED12
 files are created for each feature type (CDS/tRNA/rRNA/etc.). Tested with
 RefSeq bacterial GFF3 annotation.  
 
-motiffinda.pl:
-Find motifs in annotated sequences. The motif can be provied as regex.
-
-DEXSeq_gff2bed.pl: 
-Convert flat GFF file produced by DEXSeq's dexseq_prepare_annotation.py to
-BED6 for easy UCSC integration.
+motiffinda.pl: 
+Find motifs in annotated sequence features. The motif can be provied as
+regular expression.
 
 normalize_multicov.pl:
 Compute normalized expression data in TPM/RPKM from (raw) read counts in
 bedtools multicov format. TPM reference: Wagner et al, Theory
 Biosci. 131(4), pp 281-85 (2012)
 
-splice_site_summary.pl:
-Identify and characterize splice junctions from RNA-seq data by
-intersecting them with annotated splice junctions.
-
 sj_visualizer.pl:
 Convert splice junctions from mapped RNA-seq data in segemehl BED6 splice
 junction format to BED12 for easy visualization in genome Browsers.
+
+splice_site_summary.pl:
+Identify and characterize splice junctions from RNA-seq data by
+intersecting them with annotated splice junctions.
 
 newUCSCdb.pl:
 Create a new genome database for a locally installed instance of the UCSC
@@ -57,9 +80,11 @@ To install this module type the following:
    make test
    make install
 
+
 DEPENDENCIES
 
-This module requires these other modules and libraries:
+Bio::ViennaNGS and its submodules require a set of third-party libraries
+and packages that are not part of the Perl core distribution:
 
   Bio::Perl >= 1.006924
   Bio::DB::Sam >= 1.39
@@ -68,28 +93,30 @@ This module requires these other modules and libraries:
   IPC::Cmd
   Pod::Usage
   Carp
-
-The following modules are required for the utility programs inside the
-'scripts' folder:
-
-  Bio::ViennaNGS::AnnoC
-  Bio::ViennaNGS::SpliceJunc
-  Bio::ViennaNGS::UCSC
+  Moose
+  namespace::autoclean
 
 Computation of BigWig files from BAM is accomplished via two calls to
-third-party tools internally. genomeCoverageBed from the BEDtools suite
+third-party tools: 'genomeCoverageBed' from the BEDtools suite
 (http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html) is
 used to create a BedGraph coverage file at first place. In a second step,
-the BedGraph is converted to BigWig by bedGraphToBig, a UCSC Genome Browser
-utility (http://hgdownload.cse.ucsc.edu/admin/exe/).  Make sure that both
-third-party utilities (genomeCoverageBed and bedGraphToBigWig) are
-available on your system.
- 
+the BedGraph is converted to BigWig by 'bedGraphToBig', a UCSC Genome Browser
+utility (http://hgdownload.cse.ucsc.edu/admin/exe/). Please ensure that all
+third-party utilities are available on your system and accessible to the
+Perl interpreter.
+
+SOURCE AVAILABILITY
+
+This source is available on Github: 
+              https://github.com/mtw/Bio-ViennaNGS
+
+
 AUTHORS
 
 Michael T. Wolfinger <michael@wolfinger.eu>
-Florian Eggenhofer <egg@tbi.univie.ac.at>
 Joerg Fallmann <fall@tbi.univie.ac.at>
+Florian Eggenhofer <florian.eggenhofer@tbi.univie.ac.at>
+
 
 COPYRIGHT AND LICENCE
 

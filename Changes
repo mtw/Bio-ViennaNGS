@@ -69,7 +69,8 @@ Revision history for Perl extension ViennaNGS.
 	- removed get_stranded_subsequence (now lives in Bio::ViennaNGS::Fasta)
 	- updated POD
 
-0.11
+0.11_02
+	- integrated Bio::DB::Fasta 
 	- removed obsolete bam2bw()
 	- added scripts/bam_to_bigwig.pl
 	- renamed bed2bw() to bam_or_bed2bw() and refactored it accordingly to
@@ -77,4 +78,6 @@ Revision history for Perl extension ViennaNGS.
 	- added '-split' option to 'genomeCoverageBed' call in
 	  bam_or_bed2bw()
 	- updated MakeMaker scripts (MANIFEST and Makefile.PL)
+	- minimum version of bio::Root::Version id 1.00690001
+	- added some tests
 	- updatedPOD	
