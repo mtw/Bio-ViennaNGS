@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-09 15:16:44 mtw>
+# Last changed Time-stamp: <2014-12-10 00:44:45 mtw>
 
 package Bio::ViennaNGS;
 
@@ -804,7 +804,7 @@ output file.
 
 =over 7
 
-=item  L<Bio::Perl> >= 1.006924
+=item  L<Bio::Perl> >= 1.00690001
 
 =item  L<BIO::DB::Sam> >= 1.39
 
