@@ -1,8 +1,8 @@
 package Bio::ViennaNGS::Fasta;
 
 use 5.12.0;
-use version; our $VERSION = qv('0.02_01');
-use Bio::Perl 1.006924;
+use version; our $VERSION = qv('0.12');
+use Bio::Perl 1.00690001;
 use Bio::DB::Fasta;
 use Moose;
 use Carp;
