@@ -1,4 +1,5 @@
 use 5.012004;
+use lib 'inc';
 use ExtUtils::MakeMaker;
 use strict;
 use warnings;

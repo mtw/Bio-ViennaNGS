@@ -1,6 +1,7 @@
 AUTHORS
 Changes
 Doxyfile
+inc/File/ShareDir/Install.pm
 lib/Bio/ViennaNGS.pm
 lib/Bio/ViennaNGS/Fasta.pm
 Makefile.PL
@@ -15,4 +16,6 @@ scripts/newUCSCdb.pl
 scripts/normalize_multicov.pl
 scripts/sj_visualizer.pl
 scripts/splice_site_summary.pl
+share/data1/NC_000913.3.30k.fa
+share/data1/NC_000913.3.30k.gff
 t/Bio-ViennaNGS.t
