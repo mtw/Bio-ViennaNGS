@@ -1,11 +1,11 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-22 09:18:24 mtw>
+# Last changed Time-stamp: <2014-12-10 00:34:41 mtw>
 #
 # Convert GFF3 to BED12; produce separate BED files for each gbkey
-# (CDS/tRNA/etc)
+# (CDS/tRNA/rRNA/ncRNA etc.)
 #
-# usage: gff2bed.pl -i input.gff
+# usage: gff2bed.pl --gff input.gff
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -32,60 +32,108 @@
 
 use strict;
 use warnings;
-use Getopt::Long;
+use Getopt::Long qw( :config posix_default bundling no_ignore_case );
+use Pod::Usage;
 use Data::Dumper;
 use File::Basename;
+use Path::Class;
 use Bio::ViennaNGS::AnnoC;
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-my $chr_name      = '';
 my $feature       = undef; # look for all features per default
-my $infile        = '';
-my $workdir       = undef;
-my $ext           = ".gff";
-my ($bn,$obj);
+my $gff_in        = '-';
+my $outdir       = './';
+my ($basename,$gffdir,$gffext,$obj);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 Getopt::Long::config('no_ignore_case');
-&usage() unless GetOptions("chr=s"      => \$chr_name,
-			   "i=s"        => \$infile,
-			   "wd=s"       => \$workdir,
-			   "feat=s"     => \$feature,
-                           "-help"      => \&usage,
-                           "v");
-unless (defined $workdir) {
-  $workdir = "./";
-}
-$workdir .= "/" unless ($workdir =~ /\/$/);
+pod2usage(-verbose => 1) unless GetOptions("gff=s"       => \$gff_in,
+					   "o|out=s"     => \$outdir,
+					   "f|feature=s" => \$feature,
+					   "man"         => sub{pod2usage(-verbose => 2)},
+					   "help|h"      => sub{pod2usage(1)}
+					  );
 
-$bn = basename($infile, $ext);
-$infile = $workdir.$infile;
-print "gff2bed INFO: processing $infile\n";
+unless ($gff_in =~ /^\// || $gff_in =~ /\.\//){$gff_in = "./".$gff_in;}
+unless (-f $gff_in){
+  warn "Could not find input file $gff_in given via --gff option";
+  pod2usage(-verbose => 0);
+}
+
+#TODO check if we are allowed to write to $outdir
+unless ($outdir =~ /\/$/){$outdir .= "/";}
+unless (-d $outdir){mkdir $outdir or die $!;}
+
+($basename,$gffdir,$gffext) = fileparse($gff_in,qr/\..*/);
 
 $obj = Bio::ViennaNGS::AnnoC->new();
-$obj->parse_gff($infile);
+$obj->parse_gff($gff_in);
 $obj->featstat;
-$obj->feature_summary($workdir);
-$obj->features2bed($feature,$workdir,$bn,undef);
+$obj->feature_summary($outdir);
+$obj->features2bed($feature,$outdir,$basename,undef);
 
 
-sub usage {
-  print <<EOF;
-Convert GFF3 to BED12
+__END__
 
-usage: $0 [options]
-program specific options:                                     default:
- -chr     <string>  specify chromosome name (1st GFF column)  ($chr_name)
- -feat    <string>  specify feature to extract                ($feature)
- -i       <string>  input file (GFF3)
- -wd      <string>  working directory (path to GFF file)      ($workdir)
- -help              rint this information
-EOF
-exit;
-}
+
+=head1 NAME
+
+gff2bed.pl - Convert (non-spliced) GFF3 to BED12
+
+=head1 SYNOPSIS
+
+gff2bed.pl [--gff I<FILE>] [options]
+
+=head1 DESCRIPTION
+
+Convert feature annotation of non-spliced organisms in GFF3 format to
+BED12. A separate BED12 file will be created for each genomic feature
+type (eg CDS, tRNA, rRNA, ncRNA, etc.).
+
+This script serves as a reference implementation of code fragments
+from bio::ViennaNGS::AnnoC and has been successfully tested with
+NCBI's bacterial annotation in GFF3 format.
+
+Please note that this script is NOT meant to be run on GFF genome
+annotation other than bacteria since it DOES NOT consider splice
+events present in most higher organisms.
+
+=head1 OPTIONS
+
+=over
+
+=item B<--gff>
+
+Input GFF file.
+
+=item B<--feature -f>
+
+Specify feature type (eg. CDS,tRNA,rRNA,SBS, etc) to be extracted from GFF3.
+
+=item B<--out -o>
+
+Output path.
+
+=item B<--help -h>
+
+Print short help
+
+=item B<--man>
+
+Prints the manual page and exits
+
+=back
+
+=head1 AUTHOR
+
+Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+
+=cut
+
+
