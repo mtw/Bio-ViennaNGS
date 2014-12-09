@@ -170,7 +170,7 @@ This module provides a L<Moose> interface to L<Bio::DB::Fasta>.
 
 =over 5
 
-=item L<Bio::Perl> >= 1.006924
+=item L<Bio::Perl> >= 1.00690001
 
 =item L<Bio::DB::Fasta>
 
