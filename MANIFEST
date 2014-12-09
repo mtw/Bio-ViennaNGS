@@ -3,6 +3,7 @@ Changes
 Doxyfile
 inc/File/ShareDir/Install.pm
 lib/Bio/ViennaNGS.pm
+lib/Bio/ViennaNGS/AnnoC.pm
 lib/Bio/ViennaNGS/Fasta.pm
 Makefile.PL
 MANIFEST			This list of files
