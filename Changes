@@ -77,6 +77,7 @@ Revision history for Perl extension ViennaNGS.
 	- refactored scripts/bam_to_bigwig.pl
 	- refactored scripts/splice_site_summary.pl
 	- refactored scripts/bam_split.pl
+	- refactored scripts/gff2bed.pl
 	- renamed bed2bw() to bam_or_bed2bw() and refactored it accordingly to
 	  properly handle BAM files
 	- added '-split' option to 'genomeCoverageBed' call in
