@@ -86,7 +86,7 @@ DEPENDENCIES
 Bio::ViennaNGS and its submodules require a set of third-party libraries
 and packages that are not part of the Perl core distribution:
 
-  Bio::Perl >= 1.006924
+  Bio::Perl >= 1.00690001
   Bio::DB::Sam >= 1.39
   File::Basename
   File::Temp
