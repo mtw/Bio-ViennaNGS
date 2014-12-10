@@ -69,7 +69,7 @@ Revision history for Perl extension ViennaNGS.
 	- removed get_stranded_subsequence (now lives in Bio::ViennaNGS::Fasta)
 	- updated POD
 
-0.11_05
+0.11_06
 	- integrated Bio::ViennaNGS::AnnoC
 	- integrated Bio::ViennaNGS::Fasta 
 	- removed obsolete bam2bw()
@@ -87,5 +87,5 @@ Revision history for Perl extension ViennaNGS.
 	- minimum version of Bio::Root::Version is now 1.00690001
 	- added some tests
 	- ship demo files in share/ folder
-	- updatedPOD	
+	- updated POD and README	
 
