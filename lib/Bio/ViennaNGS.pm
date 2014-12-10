@@ -1,11 +1,11 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-10 13:31:45 mtw>
+# Last changed Time-stamp: <2014-12-10 15:45:12 mtw>
 
 package Bio::ViennaNGS;
 
 use 5.12.0;
 use Exporter;
-use version; our $VERSION = qv('0.11_06');
+use version; our $VERSION = qv('0.11');
 use strict;
 use warnings;
 use Bio::Perl 1.00690001;
@@ -1007,6 +1007,8 @@ L<BEDtools|https://github.com/arq5x/bedtools2> on your system.
 
 =item L<Bio::ViennaNGS::Fasta>
 
+=item L<Bio::ViennaNGS::FeatureChain>
+
 =back
 
 =head1 AUTHORS
@@ -1018,6 +1020,8 @@ L<BEDtools|https://github.com/arq5x/bedtools2> on your system.
 =item Jörg Fallmann E<lt>fall@tbi.univie.ac.atE<gt>
 
 =item Florian Eggenhofer E<lt>florian.eggenhofer@tbi.univie.ac.atE<gt>
+
+=item Fabian Amman E<lt>fabian@tbi.univie.ac.at<gt>
 
 
 =back
