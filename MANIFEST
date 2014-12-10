@@ -5,24 +5,28 @@ inc/File/ShareDir/Install.pm
 lib/Bio/ViennaNGS.pm
 lib/Bio/ViennaNGS/AnnoC.pm
 lib/Bio/ViennaNGS/Fasta.pm
+lib/Bio/ViennaNGS/Feature.pm
+lib/Bio/ViennaNGS/FeatureChain.pm
+lib/Bio/ViennaNGS/MinimalFeature.pm
 Makefile.PL
 MANIFEST			This list of files
 README
 scripts/bam_split.pl
 scripts/bam_to_bigwig.pl
 scripts/bam_uniq.pl
+scripts/bed2bedGraph.pl
+scripts/extendBed.pl
+scripts/feature_test.pl
 scripts/gff2bed.pl
+scripts/kmer_analysis.pl
+scripts/MEME_XML_motif_extractor.pl
 scripts/motiffinda.pl
 scripts/newUCSCdb.pl
 scripts/normalize_multicov.pl
 scripts/sj_visualizer.pl
 scripts/splice_site_summary.pl
+scripts/trim_fastq.pl
 share/data1/NC_000913.3.30k.fa
 share/data1/NC_000913.3.30k.gff
 share/data1/NC_000913.3.chrom.sizes
 t/Bio-ViennaNGS.t
-<<<<<<< HEAD
-=======
-lib/Bio/ViennaNGS.pm
-lib/Bio/ViennaNGS/Feature.pm
->>>>>>> newfeatures
