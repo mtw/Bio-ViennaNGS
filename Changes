@@ -69,16 +69,21 @@ Revision history for Perl extension ViennaNGS.
 	- removed get_stranded_subsequence (now lives in Bio::ViennaNGS::Fasta)
 	- updated POD
 
-0.11_06
+0.11 Wed Dec 10 2014
 	- integrated Bio::ViennaNGS::AnnoC
 	- integrated Bio::ViennaNGS::Fasta 
 	- removed obsolete bam2bw()
 	- added scripts/bam_to_bigwig.pl
+	- added scripts/bed2bedGraph.pl
+	- added scripts/extend_bed.pl
+	- added scripts/kmer_analysis.pl
+	- added scripts/MEME_XML_motif_extractor.pl
+	- added scripts/trim_fastq.pl
 	- refactored scripts/bam_to_bigwig.pl
 	- refactored scripts/splice_site_summary.pl
 	- refactored scripts/bam_split.pl
 	- refactored scripts/gff2bed.pl
-	- added Moose classes for Feature handling	
+	- added Moose-based classes for feature handling	
 	- renamed bed2bw() to bam_or_bed2bw() and refactored it accordingly to
 	  properly handle BAM files
 	- added '-split' option to 'genomeCoverageBed' call in
