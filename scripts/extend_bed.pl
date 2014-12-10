@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2014-12-10 13:02:26 mtw>
+# Last changed Time-stamp: <2014-12-10 14:24:24 mtw>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -100,11 +100,11 @@ __END__
 
 =head1 NAME
 
-extendBed.pl - Extends bed entries strand specific one- or two-sided.
+extend_bed.pl - Extends bed entries strand specific one- or two-sided.
 
 =head1 SYNOPSIS
 
-extendBed.pl [-g I<FILE>] [-b I<FILE>] [-o I<FILE>] [-e I<Interger>]
+extend_bed.pl [-g I<FILE>] [-b I<FILE>] [-o I<FILE>] [-e I<Interger>]
 [-l I<Interger>] [-r I<Interger>] [-u I<Interger>] [-d I<Interger>]
 [options]
 
