@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-09-22 17:01:47 mtw>
+# Last changed Time-stamp: <2014-12-10 20:39:47 egg>
 
 package Bio::ViennaNGS::UCSC;
 
@@ -268,6 +268,7 @@ ViennaNGS::UCSC is a Perl extension for managing routine tasks with the
 UCSC Genome Browser. It comes with a set of utilities that serve as
 reference implementation of the routines implemented in the library. All
 utilities are located in the 'scripts' folder.
+The main functionality is provided by the make_assembly_hub function.
 
 =head2 EXPORT
 
@@ -277,10 +278,14 @@ Routines:
 Variables:
   none
 
-
 =head3 make_assembly_hub()
 
-Documentation for this routine goes here.
+Build assembly hubs for the UCSC genome browser.
+This function takes 4 parameters:
+1. absolute path of input fasta file(e.g. /home/user/input.fa)
+2. path to the ouput directory (e.g. /home/user/assemblyhubs/)
+3. base URL where the output folder will be placed for upload to the UCSC genome browser (e.g. http://www.foo.com/folder/)
+4. path for the log file (/home/user/logs/assemblyhubconstructionlog)
 
 =head1 SEE ALSO
 
