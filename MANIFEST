@@ -19,4 +19,5 @@ scripts/sj_visualizer.pl
 scripts/splice_site_summary.pl
 share/data1/NC_000913.3.30k.fa
 share/data1/NC_000913.3.30k.gff
+share/data1/NC_000913.3.chrom.sizes
 t/Bio-ViennaNGS.t
