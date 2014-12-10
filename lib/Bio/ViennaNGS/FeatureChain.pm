@@ -1,7 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-10 13:37:43 mtw>
+# Last changed Time-stamp: <2014-12-10 15:53:45 mtw>
 
 package Bio::ViennaNGS::FeatureChain;
+
+use 5.12.0;
+use version; our $VERSION = qv('0.11');
 
 #use namespace::autoclean;
 use Moose;
@@ -23,7 +26,9 @@ has 'chain' => (
 
 sub build_chain {
   my $self = shift;
-  my $featurelist = shift; ## We expect features to be pre-sorted, So I simply read in an arrayref of Feature Objects
+  my $featurelist = shift; ## We expect features to be pre-sorted, So
+                           ## I simply read in an arrayref of Feature
+                           ## Objects
   return ($featurelist);
 }
 
@@ -32,7 +37,13 @@ sub print_chain{
   return 0 if (!$self->chain);
   my $out;
   foreach my $feature (@{$self->chain}){
-    $out .= join("\t","chr".$feature->chromosome,$feature->start,$feature->end,$feature->name,$feature->score,$feature->strand);
+    $out .= join("\t",
+		 "chr".$feature->chromosome,
+		 $feature->start,
+		 $feature->end,
+		 $feature->name,
+		 $feature->score,
+		 $feature->strand);
     $out .= "\t".$feature->extension if ($feature->extension);
     $out .= "\n";
   }
