@@ -1,12 +1,6 @@
-#!/bin/perl
-
-#Script TrimFastq.pl;
-#Last changed Time-stamp: <2014-12-03 15:40:24 fall> by Joerg Fallmann <joerg.fallmann@univie.ac.at>
-
-##############
-###Library for Testing, remove before delivery
-##############
-use lib '/scratch/fall/Work/ViennaNGS/viennangs/lib';
+#!/usr/bin/env perl
+# Last changed Time-stamp: <2014-12-10 13:10:50 mtw>
+# AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
 ###Use stuff
@@ -29,12 +23,12 @@ my ($file, $five, $three);
 
 Getopt::Long::config('no_ignore_case');
 pod2usage(-verbose => 0) unless GetOptions(
-    "fastq|f=s" => \$file,
-    "up|u=s"    => \$five,
-    "down|d=s"  => \$three,
-    "man"       => sub{pod2usage(-verbose => 2)},
-    "help|h"    => sub{pod2usage(-verbose => 1)},
-    "verbose"   => sub{ $VERBOSE++ }
+					   "fastq|f=s" => \$file,
+					   "up|u=s"    => \$five,
+					   "down|d=s"  => \$three,
+					   "man"       => sub{pod2usage(-verbose => 2)},
+					   "help|h"    => sub{pod2usage(-verbose => 1)},
+					   "verbose"   => sub{ $VERBOSE++ }
 					  );
 
 ###############
@@ -71,12 +65,19 @@ __END__
 
 =head1 NAME
 
-TrimFastq.pl - Trims sequence and quality string of fastq files on the fly
+trim_fastq.pl - Trims sequence and quality string of fastq files on the fly
 
 =head1 SYNOPSIS
 
-Trimfastq.pl [-f I<FILE>] [-u I<INTEGER>] [-d I<INTEGER>]
+trim_fastq.pl [-f I<FILE>] [-u I<INTEGER>] [-d I<INTEGER>]
 [options]
+
+=head1 DESCRIPTION
+
+This program trims the sequence and qualitystring fields from a fastq
+file by user defined length, for example to allow re-mapping if
+mapping quality is not sufficient without trimming.
+
 
 =head1 OPTIONS
 
@@ -103,10 +104,6 @@ Print short help
 Prints the manual page and exits
 
 =back
-
-=head1 DESCRIPTION
-
-This program trims the sequence and qualitystring fields from a fastq file by user defined length, for example to allow re-mapping if mapping quality is not sufficient without trimming.
 
 =head1 AUTHOR
 

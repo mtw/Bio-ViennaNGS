@@ -1,10 +1,5 @@
-#!/usr/bin/perl
-# Last changed Time-stamp: <2014-12-03 15:39:03 fall>
-
-##############
-###Library for Testing, remove before delivery
-##############
-use lib '/scratch/fall/Work/ViennaNGS/viennangs/lib';
+#!/usr/bin/env perl
+# Last changed Time-stamp: <2014-12-10 12:18:26 mtw>
 
 ###############
 ###Use stuff
@@ -16,7 +11,7 @@ use Cwd;
 use File::Path qw (make_path);
 use Pod::Usage;
 use Getopt::Long qw( :config posix_default bundling no_ignore_case );
-use Bio::ViennaNGSutil qw(unique_array);
+use Bio::ViennaNGS qw(unique_array);
 
 ###############
 ###Variables
@@ -36,18 +31,19 @@ pod2usage(-verbose => 0)
 	"chrom|c=s"	=> \$chromsize,
 	"anno|a=s"	=> \$anno,
 	"help|h"	=> sub{pod2usage(-verbose => 1)},
-	"man|m"		=> sub{pod2usage(-verbose => 2)},      
+	"man|m"		=> sub{pod2usage(-verbose => 2)},
 	"verbose"	=> sub{ $VERBOSE++ }
     );
 
 
 my $dir = cwd();
 
-if (!-d "Bedgraph/$file"){
-    make_path("Bedgraph/$file");
-}
+my $file = file("Bedgraph", $file);
 
-die "You must provide filename and cell-type, and file with chrom-sizes\n" unless ($file && $type && $chromsize);
+make_path($file) unless (-d $file);
+
+die "You must provide filename and cell-type, and file with chrom-sizes\n"
+  unless ($file && $type && $chromsize);
 
 ###############
 ###MAIN
@@ -149,11 +145,20 @@ __END__
 
 =head1 NAME
 
-Bed2Bedgraph.pl - Converts bed files or extended bed files to bedgraphfiles
+bed2bedgraph.pl - Convert BED or extended BED files to
+bedGraph format
 
 =head1 SYNOPSIS
-Bed2Bedgraph.pl [-f I<FILE>] [-c I<FILE>] [-t I<STRING>] [-a I<STRING>]
-[options]
+
+bed2bedgraph.pl [-f I<FILE>] [-c I<FILE>] [-t I<STRING>] [-a
+I<STRING>] [options]
+
+=head1 DESCRIPTION
+
+This program converts BED files to strand specific bedGraph files,
+allowing additional annotation and automatic generation of bedGraph
+files which can easily be converted to big-type files for UCSC
+visualization.
 
 =head1 OPTIONS
 
@@ -161,7 +166,7 @@ Bed2Bedgraph.pl [-f I<FILE>] [-c I<FILE>] [-t I<STRING>] [-a I<STRING>]
 
 =item B<-f>
 
-Bed file for conversion
+BED file for conversion.
 
 =item B<-c>
 
@@ -185,9 +190,7 @@ Prints the manual page and exits
 
 =back
 
-=head1 DESCRIPTION
 
-This program converts bed files to strand specific bedgraph files, allowing additional annotation and automatic generation of bedgraph files which can easily be converted to UCSC conform big-type files.
 
 =head1 AUTHOR
 
