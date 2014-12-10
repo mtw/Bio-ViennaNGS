@@ -21,3 +21,8 @@ share/data1/NC_000913.3.30k.fa
 share/data1/NC_000913.3.30k.gff
 share/data1/NC_000913.3.chrom.sizes
 t/Bio-ViennaNGS.t
+<<<<<<< HEAD
+=======
+lib/Bio/ViennaNGS.pm
+lib/Bio/ViennaNGS/Feature.pm
+>>>>>>> newfeatures
