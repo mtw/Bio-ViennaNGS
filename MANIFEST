@@ -18,7 +18,6 @@ scripts/bam_to_bigwig.pl
 scripts/bam_uniq.pl
 scripts/bed2bedGraph.pl
 scripts/extend_bed.pl
-scripts/feature_test.pl
 scripts/gff2bed.pl
 scripts/kmer_analysis.pl
 scripts/MEME_XML_motif_extractor.pl

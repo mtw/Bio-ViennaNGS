@@ -96,3 +96,4 @@ Revision history for Perl extension ViennaNGS.
 0.12
 	- integrated Bio::ViennaNGS::UCSC
 	- added scripts/assembly_hub_generator.pl
+	- added static templates for the Assembly Hub generator
