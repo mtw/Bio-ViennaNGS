@@ -1,11 +1,9 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-11 15:42:36 mtw>
+# Last changed Time-stamp: <2014-12-11 23:41:52 mtw>
 #
-# Construct UCSC assembly hub
-# Display of novel genome sequences on the UCSC Genome Hub.
-#
-# usage: assembly_hub_constructer.pl -i file.fa -a /output/path -b http://www.test.com/test/
+# Construct UCSC genome browser Assembly Hub and display various
+# genomic sequence annotation data within the Hub
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -44,10 +42,10 @@ use Bio::ViennaNGS::UCSC qw( make_assembly_hub );
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 my ($assembly_hub_return_value,$lf);
-my $logname = "assembly_hub_constructor.log";
+my $logname = "log.txt";
 my $fasta_in = '-';
 my $folder_in = '-';
-my $dest = '-';
+my $dest = '.';
 my $base_URL = '-';
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
@@ -79,7 +77,7 @@ unless (-d $dest){
 }
 $lf = file($dest,$logname);
 
-$assembly_hub_return_value = make_assembly_hub($fasta_in,$dest,$base_URL,$lf);
+$assembly_hub_return_value = make_assembly_hub($fasta_in,$folder_in,$dest,$base_URL,$lf);
 
 
 __END__
