@@ -1,17 +1,21 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-10 20:39:47 egg>
+# Last changed Time-stamp: <2014-12-11 16:55:27 mtw>
 
 package Bio::ViennaNGS::UCSC;
 
 use Exporter;
-use version; our $VERSION = qv('0.01');
+use version; our $VERSION = qv('0.12');
 use strict;
 use warnings;
 use Template;
 use Cwd;
 use File::Basename;
-use IPC::Cmd qw[can_run run run_forked];
-use Bio::ViennaNGS::AnnoC qw(&parse_gff &feature_summary &features2bed $fstat $feat);
+use IPC::Cmd qw[can_run];
+use File::Share ':all';
+use Path::Class;
+use Data::Dumper;
+use Carp;
+
 
 our @ISA = qw(Exporter);
 
@@ -19,45 +23,61 @@ our @EXPORT_OK = qw( make_assembly_hub  );
 
 our @EXPORT = ();
 
+
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
+#^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
+
 sub make_assembly_hub{
-  my ($fasta_file_path, $assembly_hub_destination_path, $base_URL, $log_path) = @_;
+  my ($fasta_path, $assembly_hub_destination_path, $base_URL, $log) = @_;
+  my ($basename,$basedir,$ext);
+  my $this_function = (caller(0))[3];
+
   #check arguments
-  die("ERROR [Bio::ViennaNGS::UCSC] \$fasta_file_path does not exist\n") unless (-e $fasta_file_path);
-  die("ERROR [Bio::ViennaNGS::UCSC] \$assembly_hub_destination_path does not exist\n") unless (-d $assembly_hub_destination_path);
-  die "ERROR [Bio::ViennaNGS::UCSC]: no URL (network location for upload to UCSC) provided" unless(defined $base_URL);
-  die("ERROR [Bio::ViennaNGS::UCSC] \$log_path does not exist\n") unless (-e $log_path);
-  #ensure that base_URL ends with slash
-  $base_URL =~ s!/*$!/!;  
-  my $mode = "novel";
-  
-  #check program dependencies
-  my $module_path = $INC{"Bio/ViennaNGS/UCSC.pm"};
-  my $template_path = $module_path;
-  $template_path =~ s/UCSC.pm/template\//;
-  die("ERROR [Bio::ViennaNGS::UCSC] template directory not found\n") unless (-d $template_path);
-  my $faToTwoBit_path = can_run('faToTwoBit') or die 'ERROR [ViennaNGS::UCSC] faToTwoBit is not installed!';
-  my $big_bed_info_path = can_run('bigBedInfo') or die 'bigBedInfo is not installed!';
-  
-  #bedfiles path
-  my $bedFileDirectory = dirname($fasta_file_path);
-  my @parsedHeader = parse_fasta_header($fasta_file_path);
+  croak ("ERROR [$this_function] \$fasta_path does not exist\n") 
+    unless (-e $fasta_path);
+  croak ("ERROR [$this_function] \$assembly_hub_destination_path does not exist\n") 
+    unless (-d $assembly_hub_destination_path);
+  croak ("ERROR [$this_function]: no URL (network location for upload to UCSC) provided") 
+    unless(defined $base_URL);
+
+  if (defined $log){
+    open(LOG, ">>", $log) or croak $!;
+  }
+
+  unless ($base_URL =~ /\/$/) { $base_URL .= "/";}
+
+  my $tmp_path = dist_file('Bio-ViennaNGS', "hub.txt" );
+  ($basename,$basedir,$ext) = fileparse($tmp_path,qr/\..*/);
+  my $template_path = dir($basedir,"template-AssemblyHub");
+
+  croak ("ERROR [$this_function] template directory not found\n") 
+    unless (-d $template_path);
+  my $faToTwoBit_path = can_run('faToTwoBit') or
+    croak ("ERROR [$this_function] faToTwoBit is not installed!");
+  my $big_bed_info_path = can_run('bigBedInfo') or
+    croak ("ERROR [$this_function] bigBedInfo is not installed!");
+
+  # bedfiles path
+  my $bedFileDirectory = dirname($fasta_path);
+  my @parsedHeader = parse_fasta_header($fasta_path);
   my $unchecked_accession = $parsedHeader[0];
-  print $unchecked_accession;
+  #print $unchecked_accession;
   my $scientificName = $parsedHeader[1];
-  print $scientificName;
+  #print $scientificName;
   my $accession = valid_ncbi_accession($unchecked_accession);
 
   #create assembly hub directory structure
   my $assembly_hub_name = "assemblyHub";
-  my $assembly_hub_directory = $assembly_hub_destination_path . $assembly_hub_name;
-  my $genome_assembly_name = "$accession";
-  my $genome_assembly_directory = $assembly_hub_directory ."/" . $genome_assembly_name;
+  my $assembly_hub_directory = dir($assembly_hub_destination_path, $assembly_hub_name);
+  my $genome_assembly_name = $accession;
+  my $genome_assembly_directory = dir($assembly_hub_directory,$genome_assembly_name);
   mkdir $assembly_hub_directory;
   mkdir $genome_assembly_directory;
 
   #2-bit fasta file conversion
   my $modified_fasta_path = $assembly_hub_directory."/".$accession."fa";
-  modify_fasta_header($fasta_file_path,$modified_fasta_path,$accession);
+  modify_fasta_header($fasta_path,$modified_fasta_path,$accession);
   my $twoBitFastaFilePath = $genome_assembly_directory ."/" . "$accession" . ".2bit";
   my $full_path = can_run('faToTwoBit') or die 'faToTwoBit is not installed!';
   my $fastaToTwobit_cmd = $faToTwoBit_path . " " . $modified_fasta_path . " " . $twoBitFastaFilePath;
@@ -152,6 +172,10 @@ sub make_assembly_hub{
      tracks  => "$tracksList"
     };
   $template->process($trackDb_txt_file,$trackDb_txt_vars,$trackDb_txt_path) || die "Template process failed: ", $template->error(), "\n";
+
+  if (defined $log){
+    close(LOG);
+  }
 }
 
 sub retrieve_tracks{
@@ -218,13 +242,16 @@ sub parse_fasta_header{
   my $filepath = shift;
   open my $file, '<', "$filepath";
   my $fastaheader = <$file>;
-  print $fastaheader;
+  chomp $fastaheader;
   close $file;
   #>gi|556503834|ref|NC_000913.3| Escherichia coli str. K-12 substr. MG1655
   my @headerfields = split(/\|/, $fastaheader);
   my $accession = $headerfields[3];
-  my $scientificName = chomp($headerfields[4]);
-  return ($accession,$scientificName);
+  my $scientificName = $headerfields[4];
+  my @ids;
+  push(@ids,$accession);
+  push(@ids,$scientificName);
+  return @ids;
 }
 
 sub modify_fasta_header{
