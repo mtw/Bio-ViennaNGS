@@ -8,14 +8,17 @@ lib/Bio/ViennaNGS/Fasta.pm
 lib/Bio/ViennaNGS/Feature.pm
 lib/Bio/ViennaNGS/FeatureChain.pm
 lib/Bio/ViennaNGS/MinimalFeature.pm
+lib/Bio/ViennaNGS/UCSC.pm
 Makefile.PL
 MANIFEST			This list of files
 README
+scripts/assembly_hub_constructer.pl
 scripts/bam_split.pl
 scripts/bam_to_bigwig.pl
 scripts/bam_uniq.pl
 scripts/bed2bedGraph.pl
 scripts/extend_bed.pl
+scripts/feature_test.pl
 scripts/gff2bed.pl
 scripts/kmer_analysis.pl
 scripts/MEME_XML_motif_extractor.pl
@@ -28,4 +31,14 @@ scripts/trim_fastq.pl
 share/data1/NC_000913.3.30k.fa
 share/data1/NC_000913.3.30k.gff
 share/data1/NC_000913.3.chrom.sizes
+share/template-AssemblyHub/description.html
+share/template-AssemblyHub/genome.txt
+share/template-AssemblyHub/groups.txt
+share/template-AssemblyHub/hub.txt
+share/template-AssemblyHub/trackDb.txt
+share/template/description.html
+share/template/genome.txt
+share/template/groups.txt
+share/template/hub.txt
+share/template/trackDb.txt
 t/Bio-ViennaNGS.t
