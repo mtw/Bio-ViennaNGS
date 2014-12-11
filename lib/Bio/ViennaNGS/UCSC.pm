@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-11 16:55:27 mtw>
+# Last changed Time-stamp: <2014-12-12 00:21:35 mtw>
 
 package Bio::ViennaNGS::UCSC;
 
@@ -10,78 +10,83 @@ use warnings;
 use Template;
 use Cwd;
 use File::Basename;
-use IPC::Cmd qw[can_run];
+use IPC::Cmd qw(can_run run);
 use File::Share ':all';
 use Path::Class;
 use Data::Dumper;
 use Carp;
 
-
 our @ISA = qw(Exporter);
 
-our @EXPORT_OK = qw( make_assembly_hub  );
+our @EXPORT_OK = qw( make_assembly_hub );
 
 our @EXPORT = ();
-
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 sub make_assembly_hub{
-  my ($fasta_path, $assembly_hub_destination_path, $base_URL, $log) = @_;
-  my ($basename,$basedir,$ext);
+  my ($fasta_path, $filesdir, $basedir, $baseURL, $log) = @_;
+  my ($basename,$dir,$ext);
   my $this_function = (caller(0))[3];
 
   #check arguments
   croak ("ERROR [$this_function] \$fasta_path does not exist\n") 
     unless (-e $fasta_path);
-  croak ("ERROR [$this_function] \$assembly_hub_destination_path does not exist\n") 
-    unless (-d $assembly_hub_destination_path);
+  croak ("ERROR [$this_function] \$basedir does not exist\n") 
+    unless (-d $basedir);
   croak ("ERROR [$this_function]: no URL (network location for upload to UCSC) provided") 
-    unless(defined $base_URL);
+    unless(defined $baseURL);
 
   if (defined $log){
     open(LOG, ">>", $log) or croak $!;
   }
 
-  unless ($base_URL =~ /\/$/) { $base_URL .= "/";}
+  unless ($baseURL =~ /\/$/) { $baseURL .= "/"; }
 
   my $tmp_path = dist_file('Bio-ViennaNGS', "hub.txt" );
-  ($basename,$basedir,$ext) = fileparse($tmp_path,qr/\..*/);
-  my $template_path = dir($basedir,"template-AssemblyHub");
+  ($basename,$dir,$ext) = fileparse($tmp_path,qr/\..*/);
+  my $template_path = dir($dir,"template-AssemblyHub");
 
   croak ("ERROR [$this_function] template directory not found\n") 
     unless (-d $template_path);
-  my $faToTwoBit_path = can_run('faToTwoBit') or
+  my $faToTwoBit = can_run('faToTwoBit') or
     croak ("ERROR [$this_function] faToTwoBit is not installed!");
-  my $big_bed_info_path = can_run('bigBedInfo') or
-    croak ("ERROR [$this_function] bigBedInfo is not installed!");
 
   # bedfiles path
-  my $bedFileDirectory = dirname($fasta_path);
   my @parsedHeader = parse_fasta_header($fasta_path);
   my $unchecked_accession = $parsedHeader[0];
-  #print $unchecked_accession;
   my $scientificName = $parsedHeader[1];
-  #print $scientificName;
   my $accession = valid_ncbi_accession($unchecked_accession);
 
-  #create assembly hub directory structure
+  # create assembly hub directory structure
   my $assembly_hub_name = "assemblyHub";
-  my $assembly_hub_directory = dir($assembly_hub_destination_path, $assembly_hub_name);
+  my $assembly_hub_directory = dir($basedir, $assembly_hub_name);
   my $genome_assembly_name = $accession;
   my $genome_assembly_directory = dir($assembly_hub_directory,$genome_assembly_name);
   mkdir $assembly_hub_directory;
   mkdir $genome_assembly_directory;
+  if (defined $log){
+    print LOG "LOG Base directory:          $assembly_hub_directory\n";
+    print LOG "LOG Assembly Hub directory:  $genome_assembly_directory\n";
+  }
 
   #2-bit fasta file conversion
-  my $modified_fasta_path = $assembly_hub_directory."/".$accession."fa";
-  modify_fasta_header($fasta_path,$modified_fasta_path,$accession);
-  my $twoBitFastaFilePath = $genome_assembly_directory ."/" . "$accession" . ".2bit";
-  my $full_path = can_run('faToTwoBit') or die 'faToTwoBit is not installed!';
-  my $fastaToTwobit_cmd = $faToTwoBit_path . " " . $modified_fasta_path . " " . $twoBitFastaFilePath;
-  system($fastaToTwobit_cmd);
+  my $fa_modified = file($assembly_hub_directory, $accession.".fa");
+  modify_fasta_header($fasta_path,$fa_modified,$accession);
+  my $twoBit = file($genome_assembly_directory, $accession.".2bit");
+  my $fastaToTwobit_cmd = "$faToTwoBit $fa_modified $twoBit";
+  if (defined $log){  print LOG "LOG [$this_function] $fastaToTwobit_cmd\n";}
+
+  my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) =
+    run( command => $fastaToTwobit_cmd, verbose => 0 );
+  if( !$success ) {
+    print STDERR "ERROR [$this_function] External command call unsuccessful\n";
+    print STDERR "ERROR: this is what the command printed:\n";
+    print join "", @$full_buf;
+    croak $!;
+  }
 
   #template definition
   my $template = Template->new({
@@ -90,40 +95,42 @@ sub make_assembly_hub{
   });
 
   #construct hub.txt
-  my $hubtxt_path = $assembly_hub_directory . "/hub.txt";
-  my $hubtxt_file = 'hub.txt';
+  my $hubtxt_path = file($assembly_hub_directory,"hub.txt")->stringify;
+  my $hubtxt_file = "hub.txt";
   my $hubtxt_vars =
     {
-     hubName => "$accession",
-     shortLabel => "$accession",
-     longLabel => "$accession",
+     hubName => $accession,
+     shortLabel => $accession,
+     longLabel => $accession,
      genomesFile => "genome.txt",
-     email => "email",
-     descriptionURL => $base_URL . "description.html"
+     email => 'email',
+     descriptionURL => "$baseURL" . "description.html"
     };
-  $template->process($hubtxt_file,$hubtxt_vars,$hubtxt_path) || die "Template process failed: ", $template->error(), "\n";
+  $template->process($hubtxt_file,$hubtxt_vars,"$hubtxt_path") ||
+    croak "Template process failed: ", $template->error(), "\n";
 
   #construct genome.txt
-  my $genometxt_path = $assembly_hub_directory . "/genome.txt";
-  my $genometxt_file = 'genome.txt';
+  my $genometxt_path = file($assembly_hub_directory, "genome.txt")->stringify;
+  my $genometxt_file = "genome.txt";
   my $genometxt_vars =
     {
-     genome => "$accession",
-     trackDb => "$accession/trackDb.txt",
-     groups => "$accession/groups.txt",
+     genome => $accession,
+     trackDb => file($accession, "trackDb.txt"),
+     groups => file($accession, "groups.txt"),
      description => "$accession",
-     twoBitPath => "$accession/$accession.2bit",
+     twoBitPath => file($accession,$accession.".2bit"),
      organism => "organism",
      defaultPos => $accession,
      orderKey => "10",
      scientificName => "$scientificName",
-     htmlPath => "$accession/description.html"
+     htmlPath => file($accession,"description.html")
     };
-  $template->process($genometxt_file,$genometxt_vars,$genometxt_path) || die "Template process failed: ", $template->error(), "\n";
+  $template->process($genometxt_file,$genometxt_vars,$genometxt_path) or
+    croak "Template process failed: ", $template->error(), "\n";
 
   #construct description.html
-  my $description_html_path = $genome_assembly_directory . "/description.html";
-  my $description_html_file = 'description.html';
+  my $description_html_path = file($genome_assembly_directory, "description.html")->stringify;
+  my $description_html_file = "description.html";
   my $description_html_vars =
     {
      imageLink  => "imageLink",
@@ -144,20 +151,22 @@ sub make_assembly_hub{
      bioProjectInformationDescription => "bioProjectInformationDescription",
      sequenceAnnotationLink => "sequenceAnnotationLink"
     };
-  $template->process($description_html_file,$description_html_vars,$description_html_path) || die "Template process failed: ", $template->error(), "\n";
+  $template->process($description_html_file,$description_html_vars,$description_html_path) or
+    croak "Template process failed: ", $template->error(), "\n";
 
   my $groups = make_group("annotation", "Annotation", "1", "0");
 
   #construct group.txt
-  my $group_txt_path = $genome_assembly_directory . "/groups.txt";
+  my $group_txt_path = file($genome_assembly_directory, "groups.txt")->stringify;
   my $group_txt_file = 'groups.txt';
   my $group_txt_vars = 
     {
      groups  => "$groups",
     };
-  $template->process($group_txt_file,$group_txt_vars,$group_txt_path) || die "Template process failed: ", $template->error(), "\n";
+  $template->process($group_txt_file,$group_txt_vars,$group_txt_path) or
+    croak "Template process failed: ", $template->error(), "\n";
 
-  my @trackfiles = retrieve_tracks("$bedFileDirectory", $base_URL, $assembly_hub_name);
+  my @trackfiles = retrieve_tracks($filesdir, $baseURL, $assembly_hub_name);
   my $tracksList;
   foreach my $track (@trackfiles){
     my $trackString = make_track(@$track);
@@ -165,23 +174,25 @@ sub make_assembly_hub{
   }
 
   #construct trackDb.txt
-  my $trackDb_txt_path = $genome_assembly_directory . "/trackDb.txt";
+  my $trackDb_txt_path = file($genome_assembly_directory, "trackDb.txt")->stringify;
   my $trackDb_txt_file = 'trackDb.txt';
-  my $trackDb_txt_vars = 
+  my $trackDb_txt_vars =
     {
      tracks  => "$tracksList"
     };
-  $template->process($trackDb_txt_file,$trackDb_txt_vars,$trackDb_txt_path) || die "Template process failed: ", $template->error(), "\n";
+  $template->process($trackDb_txt_file,$trackDb_txt_vars,$trackDb_txt_path) or
+    croak "Template process failed: ", $template->error(), "\n";
 
   if (defined $log){
+    print LOG "LOG Assembly Hub created\n";
     close(LOG);
   }
 }
 
 sub retrieve_tracks{
-  my ($directoryPath,$base_URL,$assembly_hub_name) = @_;
+  my ($directoryPath,$baseURL,$assembly_hub_name) = @_;
   my $currentDirectory = getcwd;
-  chdir $directoryPath or die $!;
+  chdir $directoryPath or croak $!;
   my @trackfiles = <*.bb>;
   my @tracks;
   foreach my $trackfile (@trackfiles){
@@ -192,7 +203,8 @@ sub retrieve_tracks{
     my $tag = $filenameSplit[1];
     my $id = lc($tag);
     my $track = "refseq_" . $id;
-    my $bigDataUrl = $base_URL . $assembly_hub_name ."/". $trackfile;
+    my $dir = dir($baseURL, $assembly_hub_name);
+    my $bigDataUrl = file($dir, $trackfile);
     my $shortLabel = "RefSeq " . $tag;
     my $longLabel = "RefSeq " . $tag;
     my $type = "bigBed 12 .";
@@ -207,7 +219,7 @@ sub retrieve_tracks{
     my $trackreference = \@track;
     push(@tracks, $trackreference);
   }
-  chdir $currentDirectory or die $!;
+  chdir $currentDirectory or croak $!;
   return @tracks;
 }
 
