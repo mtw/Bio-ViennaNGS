@@ -36,9 +36,4 @@ share/template-AssemblyHub/genome.txt
 share/template-AssemblyHub/groups.txt
 share/template-AssemblyHub/hub.txt
 share/template-AssemblyHub/trackDb.txt
-share/template/description.html
-share/template/genome.txt
-share/template/groups.txt
-share/template/hub.txt
-share/template/trackDb.txt
 t/Bio-ViennaNGS.t
