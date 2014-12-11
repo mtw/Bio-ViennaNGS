@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2014-12-10 14:24:24 mtw>
+# Last changed Time-stamp: <2014-12-11 14:36:18 fall>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -13,8 +13,9 @@ use Pod::Usage;
 use PerlIO::gzip;
 use Cwd;
 use File::Path qw(make_path remove_tree);
+use File::Basename qw(fileparse);
 use Math::Round;
-use Bio::ViennaNGS;
+use Bio::ViennaNGSutil qw(extend_chain parse_bed6);
 use Bio::ViennaNGS::Feature;
 use Bio::ViennaNGS::FeatureIO;
 ###############
@@ -66,10 +67,29 @@ $r=0 unless $r;
 $d=0 unless $d;
 $u=0 unless $u;
 
-print STDERR "Using $g to extend $b by $l and $r and save it to $o\n";
-
 open (my $Genome, "<:gzip(autopop)",$g) or die "$!";
-#open (my $Bed, "<:gzip(autopop)",$b) or die "$!";
+
+my $filextension;
+if ($d){
+    $filextension .= "_".$d."_fromEnd";
+}
+if ($u){
+    $filextension .= "_".$u."_fromStart";
+}
+if ($l){
+    $filextension .= "_".$l."_upstream";
+}
+if ($r){
+    $filextension .= "_".$r."_downstream";
+}
+if ($e){
+    $filextension = "_".$e."_equal";
+}
+
+my($filename, $dirs, $suffix) = fileparse($b,'.bed');
+print STDERR "fil:$filename\tdir:$dirs\tsuf:$suffix\n";
+$o = $filename.$filextension.$suffix;
+
 open (my $Out, ">",$o) or die "$!";
 
 my %sizes;
@@ -85,7 +105,6 @@ my @featurelist = @{parse_bed6($b)};
 my $chain = Bio::ViennaNGS::FeatureChain->new('type'=>'original','chain'=>\@featurelist);
 
 ### This chain is now processed, and all features are extended and stored into a separate chain
-print STDERR "Extending with $l and $r\n";
 my $extended_chain = extend_chain(\%sizes,$chain,$l,$r,$u,$d);
 
 print STDERR "Creating Output";
