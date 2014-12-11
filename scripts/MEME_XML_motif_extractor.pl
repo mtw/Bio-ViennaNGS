@@ -1,6 +1,6 @@
-#!/usr/bin/env perl
-#Last changed Time-stamp: <2014-12-10 12:03:12 mtw>
-
+#!/bin/perl
+#Script MEMExmlMotifExtractor.pl;
+#Last changed Time-stamp: <2014-12-11 14:22:43 fall> by joerg
 ###############
 ###Use stuff
 ###############
@@ -10,11 +10,12 @@ use Data::Dumper;
 use Getopt::Long qw( :config posix_default bundling no_ignore_case );
 use Pod::Usage;
 use PerlIO::gzip;
+use Storable;
 use Cwd;
+use All::Misc;
 use File::Path qw(make_path remove_tree);
 use XML::Simple;
 use Statistics::R;
-
 ###############
 ###Variables
 ###############
@@ -47,11 +48,11 @@ $dir	 =~ s/ //g;
 $odir	 =~ s/ //g;
 $outname =  "" unless (defined $outname);
 $outname =~ s/\.[bed|fa]*//g if ($outname);
-$acid    = 'RNA' unless (defined $acid && $acid eq 'DNA');
+$acid    = 'DNA' unless (defined $acid && $acid eq 'RNA');
 ($dir) or die "No working directory chosen!\n";
 
-die 'No R-library path defined!\n' unless ($rlibpath);
-
+die 'No R-library path defined! Find out using the comman \'.libPaths()\' from an R shell!\n' unless ($rlibpath);
+die 'No xml file defined! Please provide a valid meme.xml file with the -f option!\n' unless ($file);
 if (defined $discard){
     @matches=split(/,/,$discard);
 }
@@ -84,7 +85,8 @@ my %startpos;
 my %motif = %{$meme->{motifs}};
 foreach my $mo ( keys %{$motif{motif}} ){
     (my $regtmp = $motif{motif}{$mo}{regular_expression}) =~ s/\n//g;
-    ($regex{$mo} = $regtmp) =~ s/T/U/g if ($acid eq 'RNA');
+    $regex{$mo} = $regtmp;
+    $regex{$mo} =~ s/T/U/g if ($acid eq 'RNA');
     my $regx = $regex{$mo};
     my @sites = @{$motif{motif}{$mo}{contributing_sites}{contributing_site}};
     my $evalue = $motif{motif}{$mo}{e_value};
@@ -142,7 +144,7 @@ $R->run(q`site<-data$Sites`);
 $R->run(q`eval<-data$Evalue`);
 $R->run(q`colourSig = length(unique(regex))`);
 $R->run(q`getPalette = colorRampPalette(brewer.pal(30, "Set1"))`);
-$R->run(q`p <- ggplot(data, aes(x=reorder(regex, site), y=site, fill=regex),guide=FALSE) + geom_bar(stat = "identity", position = "stack", guide=FALSE) + scale_fill_manual(values = getPalette(colourSig),guide=FALSE) + coord_flip() + geom_text(aes(label=eval), position=position_dodge(width=2), size=4, hjust=0) + scale_y_continuous(expand=c(0.1,0))`);
+$R->run(q`p <- ggplot(data, aes(x=reorder(regex, site), y=site, fill=regex),guide=FALSE) + geom_bar(stat = "identity", position = "stack", guide=FALSE) + scale_fill_manual(values = getPalette(colourSig),guide=FALSE) + coord_flip() + geom_text(aes(label=eval), position=position_dodge(width=2), size=4, hjust=0) + scale_y_continuous(expand=c(0.15,0))`);
 $R->run(q`p <- p + theme(aspect.ratio=1)`);
 $R->run(q`p <- p + theme(axis.text=element_text(size=8), axis.title=element_text(size=10,face="bold"))`);
 $R->run(q`p <- p + theme(axis.text.x=element_text(angle=45, hjust=1, vjust=1))`);
@@ -171,23 +173,14 @@ __END__
 
 =head1 NAME
 
-MEME_XML_motif_extractor.pl - Compute sequence coverage statistics of
-motifs from MEME standard XML output
+MEME_xml_motif_extractor.pl - Generates a simple statistic with ggplots about the sequence coverage of motifs from MEME standard xml output
 
 =head1 SYNOPSIS
-
-MEME_XML_motif_extractor.pl [-f FILE] [-d STRING] [-o STRING] [-t
-STRING] [-x String] [-a STRING] [-r STRING]
-
-=head1 DESCRIPTION
-
-This program computes simple statistics from MEME XML output. It
-returns a list of found motifs with the number of sequences containing
-those motifs and produces nice ggplot graphs.
+MEME_xml_motif_extractor.pl [-f I<FILE>] [-d I<STRING>] [-o I<STRING>] [-t I<STRING>] [-x I<String>] [-a I<STRING>] [-r I<STRING>]
 
 =head1 OPTIONS
 
-=over
+=over 
 
 =item B<-f>
 
@@ -207,14 +200,11 @@ Name of output files
 
 =item B<-x>
 
-If annotation is found in the sequence name fields, items that should
-not be analyzed (e.g. annnotion like miscRNA, ncRNA, predicted_gene)
-can be defined here
+If annotation is found in the sequence name fields, items that should not be analyzed (e.g. annnotion like miscRNA, ncRNA, predicted_gene) can be defined here
 
 =item B<-a>
 
-Defined the type of nucleic acid in MEME input, defaults to DNA, can
-be ignored if protein sequences were used
+Defined the type of nucleic acid in MEME input, defaults to DNA, can be ignored if protein sequences were used
 
 =item B<-r>
 
@@ -229,6 +219,10 @@ Print short help
 Prints the manual page and exits
 
 =back
+
+=head1 DESCRIPTION
+
+This program digests MEME xml output and returns a list of found motifs with the number of sequences containing those motifs
 
 =head1 AUTHOR
 
