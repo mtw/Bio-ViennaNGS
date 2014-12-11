@@ -93,4 +93,6 @@ Revision history for Perl extension ViennaNGS.
 	- added some tests
 	- ship demo files in share/ folder
 	- updated POD and README	
-
+0.12
+	- integrated Bio::ViennaNGS::UCSC
+	- added scripts/assembly_hub_generator.pl
