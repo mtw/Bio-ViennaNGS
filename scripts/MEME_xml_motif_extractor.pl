@@ -1,6 +1,7 @@
-#!/bin/perl
-#Script MEMExmlMotifExtractor.pl;
-#Last changed Time-stamp: <2014-12-11 14:22:43 fall> by joerg
+#!/usr/bin/env perl
+#Last changed Time-stamp: <2014-12-11 14:38:29 fall>
+# AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
+
 ###############
 ###Use stuff
 ###############
