@@ -104,8 +104,6 @@ constructs Assembly Hubs from genomic sequence and annotation data.
 
 =over
 
-=item B<--bam>
-
 =item B<--fa -f>
 
 Input file in Fasta format.
