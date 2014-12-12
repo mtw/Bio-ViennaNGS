@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-11-27 15:38:43 mtw>
+# Last changed Time-stamp: <2014-12-12 11:59:04 mtw>
 
 package Bio::ViennaNGS::SpliceJunc;
 
 use Exporter;
-use version; our $VERSION = qv('0.05');
+use version; our $VERSION = qv('0.12');
 use strict;
 use warnings;
 use Data::Dumper;
@@ -454,9 +454,9 @@ be processed if they are formatted as described above.
 This routine writes a BED6 file for each splice junction provided in
 the input to C<$dest>. Output splice junctions can be flanked by a
 window of +/- C<$window> nt. Canonical splice junctions are reported
-in the 'name' field of the output BED6 file if C<$can> is 1 nad
+in the 'name' field of the output BED6 file if C<$can> is 1 and
 C<$featO> is a L<Bio::ViennaNGS::Fasta> object. Each splice junction
-is represented as two bed lines in the output BED6. Only splice
+is represented as two BED lines in the output BED6. Only splice
 junctions that are supported by at least C<$mcov> reads are reported.
 
 =item bed6_ss_to_bed12($bed_in,$dest,$window,$mcov,$circ)
