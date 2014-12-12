@@ -23,8 +23,7 @@ ok( defined(can_run('awk')), 'awk not found');
 ok( defined(can_run('bedToBigBed')), 'bedToBigBed not found'); 
 ok( defined(can_run('genomeCoverageBed')), 'genomeCoverageBed not found');
 ok( defined(can_run('bedGraphToBigWig')), 'bedGraphToBigWig not found');
-ok( defined(can_run('faToTwoBit1')), 'faToTwoBit not found');
-ok( defined(can_run('qqq')), 'qqq not found');
+ok( defined(can_run('faToTwoBit')), 'faToTwoBit not found');
 ok( defined(can_run('bedtools')), 'bedtools not found');
 ok( defined(can_run('sortBed')), 'sortBed not found');
 #########################
