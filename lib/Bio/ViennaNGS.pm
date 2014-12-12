@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-10 15:45:12 mtw>
+# Last changed Time-stamp: <2014-12-12 16:32:52 fall>
 
 package Bio::ViennaNGS;
 
@@ -17,6 +17,7 @@ use IPC::Cmd qw(can_run run);
 use Path::Class;
 use Carp;
 use Bio::ViennaNGS::FeatureChain;
+use Math::Round;
 
 our @ISA = qw(Exporter);
 our @EXPORT = ();
@@ -669,6 +670,7 @@ sub extend_chain{
     my $right  = 0;
     my $left   = 0;
     my $width  = nearest(1,($end-$start)/2);
+
     $width = 0 if ($d > 0 || $u > 0);
 
     if ($strand eq "+"){
