@@ -165,8 +165,12 @@ sub make_assembly_hub{
     };
   $template->process($group_txt_file,$group_txt_vars,$group_txt_path) or
     croak "Template process failed: ", $template->error(), "\n";
+  
+  my @trackfiles = retrieve_tracks($filesdir, $baseURL, $assembly_hub_name, $accession);
+  my $chromosome_size = retrieve_chromosome_size($fasta_path);
+  my $chromosome_size_filepath = file($basedir,$assembly_hub_name,$accession,"$accession.chrom.sizes");
+  write_chromosome_sizes_file($chromosome_size_filepath,$accession,$chromosome_size);
 
-  my @trackfiles = retrieve_tracks($filesdir, $baseURL, $assembly_hub_name);
   my $tracksList;
   foreach my $track (@trackfiles){
     my $trackString = make_track(@$track);
@@ -190,7 +194,7 @@ sub make_assembly_hub{
 }
 
 sub retrieve_tracks{
-  my ($directoryPath,$baseURL,$assembly_hub_name) = @_;
+  my ($directoryPath,$baseURL,$assembly_hub_name,$accession) = @_;
   my $currentDirectory = getcwd;
   chdir $directoryPath or croak $!;
   my @trackfiles = <*.bb>;
@@ -203,7 +207,7 @@ sub retrieve_tracks{
     my $tag = $filenameSplit[1];
     my $id = lc($tag);
     my $track = "refseq_" . $id;
-    my $dir = dir($baseURL, $assembly_hub_name);
+    my $dir = dir($baseURL, $assembly_hub_name,$accession);
     my $bigDataUrl = file($dir, $trackfile);
     my $shortLabel = "RefSeq " . $tag;
     my $longLabel = "RefSeq " . $tag;
@@ -264,6 +268,17 @@ sub parse_fasta_header{
   push(@ids,$accession);
   push(@ids,$scientificName);
   return @ids;
+}
+
+sub write_chromosome_sizes_file{
+  my $filepath = shift;
+  my $chromosome_name = shift;
+  my $chromosome_size = shift;
+  my $entry = $chromosome_name . "\t" . $chromosome_size . "\n";
+  open CHROMFILE, '>', "$filepath";
+  print CHROMFILE $entry;
+  close CHROMFILE;
+  return 1;
 }
 
 sub retrieve_chromosome_size{
