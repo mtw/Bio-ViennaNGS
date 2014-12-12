@@ -266,6 +266,24 @@ sub parse_fasta_header{
   return @ids;
 }
 
+sub retrieve_chromosome_size{
+  my $inputFilepath = shift;
+  open INFILE, '<', "$inputFilepath";
+  my @newfasta;
+  my $chromosome_size = 0;
+  my $header_skipped = 0;
+  while (<INFILE>) {
+    if($header_skipped){
+      chomp;
+      $chromosome_size += length($_);
+    }else{
+      $header_skipped = 1;
+    }
+  }
+  close INFILE;
+  return $chromosome_size;
+}
+
 sub modify_fasta_header{
   my $inputFilepath = shift;
   my $outputFilepath = shift;
