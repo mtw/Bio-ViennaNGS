@@ -4,6 +4,7 @@ Doxyfile
 inc/File/ShareDir/Install.pm
 lib/Bio/ViennaNGS.pm
 lib/Bio/ViennaNGS/AnnoC.pm
+lib/Bio/ViennaNGS/Bam.pm
 lib/bio/ViennaNGS/Bam.pm
 lib/Bio/ViennaNGS/Fasta.pm
 lib/Bio/ViennaNGS/Feature.pm
