@@ -10,12 +10,15 @@ quantification and visualization.
 The main Bio::ViennaNGS module is shipped with a complementary set of 
 (sub)modules:
 
+- Bio::ViennaNGS::AnnoC
+  A Moose interface for storage and conversion of sequence annotation data.
+
+- Bio::ViennaNGS::Bam
+  Routines for high-level manipulation of BAM files.
+
 - Bio::ViennaNGS::Fasta
   Routines for accessing genomic sequences implemented through a Moose
   interface to Bio::DB::Fasta.
-
-- Bio::ViennaNGS::AnnoC
-  A Moose interface for storage and conversion of sequence annotation data.
   
 - Bio::ViennaNGS::SpliceJunc
   A collection of routines for alternative splicing analysis.  
