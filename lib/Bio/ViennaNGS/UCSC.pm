@@ -39,8 +39,10 @@ sub make_assembly_hub{
   croak ("ERROR [$this_function]: no URL (network location for upload to UCSC) provided") 
     unless(defined $baseURL);
 
+  print "$log \n";
+
   if (defined $log){
-    open(LOG, ">>", $log) or croak $!;
+    open(LOG, ">>", $log) or croak "$!";
   }
 
   unless ($baseURL =~ /\/$/) { $baseURL .= "/"; }
@@ -173,8 +175,8 @@ sub make_assembly_hub{
   my $chromosome_size = retrieve_chromosome_size($fasta_path);
   my $chromosome_size_filepath = file($genome_assembly_directory,"$accession.chrom.sizes");
   write_chromosome_sizes_file($chromosome_size_filepath,$accession,$chromosome_size);
-  convert_tracks($filesdir, $genome_assembly_directory, $accession);
-  my @trackfiles = retrieve_tracks($filesdir, $baseURL, $assembly_hub_name, $accession);
+  convert_tracks($filesdir, $genome_assembly_directory, $accession, $bedToBigBed, $chromosome_size_filepath);
+  my @trackfiles = retrieve_tracks($genome_assembly_directory, $baseURL, $assembly_hub_name, $accession);
 
   my $tracksList;
   foreach my $track (@trackfiles){
@@ -199,20 +201,20 @@ sub make_assembly_hub{
 }
 
 sub convert_tracks{
-  my ($filesdir,$genome_assembly_directory,$accession) = @_;
-  chdir $directoryPath or croak $!;
+  my ($filesdir,$genome_assembly_directory,$accession,$bedToBigBed,$chromosome_size_filepath) = @_;
+  my $currentDirectory = getcwd;
+  chdir $filesdir or croak $!;
   my @bedfiles = <*.bed>;
   foreach my $bedfile (@bedfiles){
     my $bed_file_path = file($filesdir,$bedfile);
     my $filename = $bedfile;
     $filename =~ s/.bed$//;
-    my $bigbed_file = filename . ".bb";
-    my $bigbed_file_path = file($genome_assembly_directory,$bigbed_file)
-    `$bedToBigBed $bed_file_path $bigbed_file_path`;
-    push(@tracks, $trackreference);
+    my $bigbed_file = $filename . ".bb";
+    my $bigbed_file_path = file($genome_assembly_directory,$bigbed_file);
+    `$bedToBigBed $bed_file_path $chromosome_size_filepath $bigbed_file_path`;
   }
   chdir $currentDirectory or croak $!;
-  return @tracks;
+  return 1;
 }
 
 sub retrieve_tracks{
