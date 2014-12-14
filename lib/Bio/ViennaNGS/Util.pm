@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-13 23:40:42 mtw>
+# Last changed Time-stamp: <2014-12-14 23:49:36 mtw>
 
 package Bio::ViennaNGS::Util;
 
@@ -23,8 +23,8 @@ our @EXPORT = ();
 
 our @EXPORT_OK = qw ( bed_or_bam2bw sortbed bed2bigBed computeTPM
 		      featCount_data parse_multicov write_multicov
-		      totalreads unique_array kmer_enrichment
-		      extend_chain parse_bed6);
+		      unique_array kmer_enrichment extend_chain
+		      parse_bed6);
 
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -203,6 +203,7 @@ sub computeTPM {
   my ($i,$features,$meanTPM);
 
   $features = keys %$featCount_sample; # of of features in hash
+  print Dumper(\%$featCount_sample);print ">>$rl<<\n";
 
   # iterate through $featCount_sample twice:
   # 1. for computing T (denominator in TPM formula)
@@ -224,8 +225,10 @@ sub parse_multicov {
   my ($file) = @_;
   my @mcData = ();
   my ($mcSamples,$i);
+  my $this_function = (caller(0))[3];
 
-  croak "ERROR: multicov file $file not available\n" unless (-e $file);
+  croak "ERROR [$this_function] multicov file $file not available\n"
+    unless (-e $file);
   open (MULTICOV_IN, "< $file") or croak $!;
 
   while (<MULTICOV_IN>){
@@ -252,13 +255,13 @@ sub parse_multicov {
 }
 
 sub write_multicov {
-  my ($item,$dest_dir,$base_name) = @_;
+  my ($item,$dest,$base_name) = @_;
   my ($outfile,$mcSamples,$nrFeatures,$feat,$i);
   my $this_function = (caller(0))[3];
 
-  croak "ERROR [$this_function]: $dest_dir does not exist\n"
-    unless (-d $dest_dir);
-  $outfile = $dest_dir.$base_name.".".$item.".multicov.csv";
+  croak "ERROR [$this_function]: $dest does not exist\n"
+    unless (-d $dest);
+  $outfile = file($dest,$base_name.".".$item.".multicov.csv");
   open (MULTICOV_OUT, "> $outfile") or croak $!;
 
   $mcSamples = scalar @featCount; # of samples in %{$featCount}
@@ -297,10 +300,6 @@ sub write_multicov {
     print MULTICOV_OUT join("\t",@mcLine)."\n";
   }
   close(MULTICOV_OUT);
-}
-
-sub totalreads {
-  return 1;
 }
 
 sub unique_array{
@@ -591,13 +590,13 @@ file, into an Array of Hash of Hashes data structure
 samples present in the multicov file, ie. the numner of columns
 extending the canonical BED6 columns in the input multicov file.
 
-=item write_multicov($item,$dest_dir,$base_name)
+=item write_multicov($item,$dest,$base_name)
 
 Write C<@featCount> data to a bedtools multicov (multiBamCov)-type
 file. C<$item> specifies the type of information from C<@featCount>
 HoH entries, e.g. TPM or RPKM. These values must have been computed
 and inserted into C<@featCount> beforehand by
-e.g. C<computeTPM()>. C<$dest_dir> gives the absolute path and
+e.g. C<computeTPM()>. C<$dest> gives the absolute path and
 C<$base_name> the basename (will be extended by C<$item>.csv) of the
 output file.
 
