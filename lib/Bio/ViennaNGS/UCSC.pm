@@ -54,6 +54,9 @@ sub make_assembly_hub{
   my $faToTwoBit = can_run('faToTwoBit') or
     croak ("ERROR [$this_function] faToTwoBit is not installed!");
 
+  my $bedToBigBed = can_run('bedToBigBed') or
+    croak ("ERROR [$this_function] bedToBigBed is not installed!");
+  
   # bedfiles path
   my @parsedHeader = parse_fasta_header($fasta_path);
   my $unchecked_accession = $parsedHeader[0];
@@ -165,11 +168,13 @@ sub make_assembly_hub{
     };
   $template->process($group_txt_file,$group_txt_vars,$group_txt_path) or
     croak "Template process failed: ", $template->error(), "\n";
-  
-  my @trackfiles = retrieve_tracks($filesdir, $baseURL, $assembly_hub_name, $accession);
+
+
   my $chromosome_size = retrieve_chromosome_size($fasta_path);
-  my $chromosome_size_filepath = file($basedir,$assembly_hub_name,$accession,"$accession.chrom.sizes");
+  my $chromosome_size_filepath = file($genome_assembly_directory,"$accession.chrom.sizes");
   write_chromosome_sizes_file($chromosome_size_filepath,$accession,$chromosome_size);
+  convert_tracks($filesdir, $genome_assembly_directory, $accession);
+  my @trackfiles = retrieve_tracks($filesdir, $baseURL, $assembly_hub_name, $accession);
 
   my $tracksList;
   foreach my $track (@trackfiles){
@@ -191,6 +196,23 @@ sub make_assembly_hub{
     print LOG "LOG Assembly Hub created\n";
     close(LOG);
   }
+}
+
+sub convert_tracks{
+  my ($filesdir,$genome_assembly_directory,$accession) = @_;
+  chdir $directoryPath or croak $!;
+  my @bedfiles = <*.bed>;
+  foreach my $bedfile (@bedfiles){
+    my $bed_file_path = file($filesdir,$bedfile);
+    my $filename = $bedfile;
+    $filename =~ s/.bed$//;
+    my $bigbed_file = filename . ".bb";
+    my $bigbed_file_path = file($genome_assembly_directory,$bigbed_file)
+    `$bedToBigBed $bed_file_path $bigbed_file_path`;
+    push(@tracks, $trackreference);
+  }
+  chdir $currentDirectory or croak $!;
+  return @tracks;
 }
 
 sub retrieve_tracks{
