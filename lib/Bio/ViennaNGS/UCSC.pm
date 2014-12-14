@@ -64,7 +64,6 @@ sub make_assembly_hub{
   my $unchecked_accession = $parsedHeader[0];
   my $scientificName = $parsedHeader[1];
   my $accession = valid_ncbi_accession($unchecked_accession);
-
   # create assembly hub directory structure
   my $assembly_hub_name = "assemblyHub";
   my $assembly_hub_directory = dir($basedir, $assembly_hub_name);
@@ -227,12 +226,13 @@ sub retrieve_tracks{
     my $filename = $trackfile;
     $filename =~ s/.bb$//;
     my @filenameSplit = split(/\./, $filename);
-    my $accession = $filenameSplit[0];
+    my $fileaccession = $filenameSplit[0];
     my $tag = $filenameSplit[1];
     my $id = lc($tag);
     my $track = "refseq_" . $id;
-    my $dir = dir($baseURL, $assembly_hub_name,$accession);
-    my $bigDataUrl = file($dir, $trackfile);
+    my $dir = dir($baseURL,$assembly_hub_name,$accession);
+    #my $bigDataUrl = file($dir, $trackfile);
+    my $bigDataUrl = file($trackfile);
     my $shortLabel = "RefSeq " . $tag;
     my $longLabel = "RefSeq " . $tag;
     my $type = "bigBed 12 .";
@@ -243,7 +243,7 @@ sub retrieve_tracks{
     my $visibility = "pack";
     my $group = "annotation";
     my $priority = "10";
-    my @track = ($tag,$track, $bigDataUrl,$shortLabel,$longLabel,$type,$autoScale,$bedNameLabel,$searchIndex,$colorByStrand,$visibility,$group,$priority);
+    my @track = ($tag,$track,$bigDataUrl,$shortLabel,$longLabel,$type,$autoScale,$bedNameLabel,$searchIndex,$colorByStrand,$visibility,$group,$priority);
     my $trackreference = \@track;
     push(@tracks, $trackreference);
   }
