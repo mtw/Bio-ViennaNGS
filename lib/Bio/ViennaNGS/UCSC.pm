@@ -222,6 +222,7 @@ sub retrieve_tracks{
   chdir $directoryPath or croak $!;
   my @trackfiles = <*.bb>;
   my @tracks;
+  my $counter = 0;
   foreach my $trackfile (@trackfiles){
     my $filename = $trackfile;
     $filename =~ s/.bb$//;
@@ -239,16 +240,52 @@ sub retrieve_tracks{
     my $autoScale = "off";
     my $bedNameLabel = "Gene Id";
     my $searchIndex = "name";
-    my $colorByStrand = "100,205,255 55,155,205";
+    #my $colorByStrand = "100,205,255 55,155,205";
+    my $colorByStrand = retrieve_color($counter );
     my $visibility = "pack";
     my $group = "annotation";
     my $priority = "10";
     my @track = ($tag,$track,$bigDataUrl,$shortLabel,$longLabel,$type,$autoScale,$bedNameLabel,$searchIndex,$colorByStrand,$visibility,$group,$priority);
     my $trackreference = \@track;
     push(@tracks, $trackreference);
+    $counter++;
   }
   chdir $currentDirectory or croak $!;
   return @tracks;
+}
+
+sub retrieve_color{
+  my $counter = shift;
+  my $digitnumber = length($counter);
+  my $colorcode;
+  if($digitnumber>1){
+    $colorcode = $counter % 10;
+  }else{
+    $colorcode = $counter;
+  }
+  my @color;
+  #green
+  $color[0] = "133,154,0 133,154,0";
+  #cyan
+  $color[1] = "42,162,152 42,162,152";
+  #blue
+  $color[2] = "38,140,210 38,140,210";
+  #violet
+  $color[3] = "108,114,196 108,114,196";
+  #magenta
+  $color[4] = "211,55,130 211,55,130";
+  #red
+  $color[5] = "220,51,47 220,51,47";
+  #orange
+  $color[6] = "203,76,22 203,76,22";
+  #yellow
+  $color[7] = "181,138,0 181,138,0";
+  #black
+  $color[8] = "0,44,54 0,44,54";
+  #grey
+  $color[9] = "88,111,117 88,111,117";
+
+  return $color[$colorcode];
 }
 
 sub make_group{
