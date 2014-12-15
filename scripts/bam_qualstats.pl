@@ -1,21 +1,91 @@
 #!/usr/bin/perl
-# Last changed Time-stamp: <2014-12-12 15:02:14 fabian>
-
-
-
-# Extracts quality information from bam/sam files
-# Usage ./quality.pl <bam.file>
+# Last changed Time-stamp: <2014-12-15 13:13:39 fabian>
+#usage: perl bam_qualstats.pl -verbose -dir  ~/Work/ViennaNGS/Data/sinlge-end/ -odir /home/mescalin/fabian/Work/ViennaNGS/Progs/OuT
 
 
 use strict;
 use warnings;
 use Getopt::Long;
+use Pod::Usage;
 use Data::Dumper;
 use Bio::Perl;
 use Bio::DB::Sam;
+use Statistics::R;
+
+###########################
+## # #   Variables   # # ##
+###########################
+
+my $bam_dir  = '';           # keeps path to directory with bams
+my $odir     = '';           # keeps path to dir where results are stored
+my $rlibpath = '/usr/bin/R'; # path to R installation (`which R`)
+my %data     = ();           # stores all results from single bam files
+my $VERBOSE  = 0;
+
+my $match_control = 1;   # provids stats how many mapped bases match the reference genome
+my $clip_control  = 1;   # provids stats how many bases are soft or hard clipped
+my $split_control = 1;   # provids stats how many mapped reads are splitted (and how often); condideres CIGAR string, not good for segemehl)
+my $qual_control  = 1;   # provids stats on quality of the match
+my $edit_control  = 1;   # provids stats on the edit distance between read and mapped reference position
+my $flag_control  = 1;   # analyses the sam bit flag for quality/strandedness/pair_vs_single end reads (must be =1)
+my %raw_flag_data = ();
+my $score_control = 0;   # provids stats on per-base quality scores
+my $uniq_control  = 1;   # gives number and stats of multiplicity of readaligments (must be =1)
 
 
 
+
+
+
+##################################
+## # # Command-line Options # # ##
+##################################
+
+pod2usage(-verbose => 0)
+        unless GetOptions(
+	  "dir|d=s"     => \$bam_dir,
+	  "odir|o=s"    => \$odir,
+	  "rlib|r=s"    => \$rlibpath,
+	  "match!"      => \$match_control,
+	  "clip!"       => \$clip_control,
+	  "qual!"       => \$qual_control,
+	  "edit!"       => \$edit_control,
+	  "help|h"      => sub{pod2usage(-verbose => 1)},
+	  "man|m"       => sub{pod2usage(-verbose => 2)},
+	  "verbose"     => sub{ $VERBOSE++ }
+    );
+
+
+## check/clean parameter and options
+$bam_dir     =~ s/ /_/g;
+$odir        =~ s/ /_/g;
+
+unless ( -d "$bam_dir" ) {
+  print STDERR "Directory $bam_dir not found\nEXIT\n";
+  exit;
+}
+
+unless ( -e "$rlibpath" ) {
+  print STDERR "Path to R ($rlibpath) not found\nEXIT\n";
+  exit;
+}
+
+if ( -d "$odir" ) {
+  my $expand_odir=`readlink -f $odir`;
+  chomp($expand_odir);
+  print STDERR "$expand_odir is used to store results. Existing files are overwritten.\n";
+} else {
+  print STDERR "Directory $odir not found\nEXIT\n";
+  exit;
+}
+
+print STDERR "\nFollowing feature/attributes will be analysed:\n";
+print STDERR "\t<sam flag>\t(paired- and single-end read counts; strand distribution)\n" if ($flag_control);
+print STDERR "\t<uniqueness>\t(NH:i attribute; otherwise uniqueness is set to 1)\n" if ($uniq_control); 
+print STDERR "\t<match>\t\t(distribution of percentage of read which matches refernce)\n" if ($match_control);
+print STDERR "\t<clip>\t\t(distribution of percentage of read which are clipped during mapping)\n" if ($clip_control);
+print STDERR "\t<edit>\t\t(distribution of edit distance between read and reference)\n" if ($edit_control);
+print STDERR "\n";
 
 
 
@@ -23,19 +93,180 @@ use Bio::DB::Sam;
 ## # #     MAIN     # # ##
 ##########################
 
-my $bam_dir = shift;
+##########################
+## globs all bam files in $bam_dir
 opendir(my $dh, $bam_dir) || die "can't opendir $bam_dir: $!";
 my @bams = grep { /\.bam$/ && -f "$bam_dir/$_" } readdir($dh);
 
-my %data = ();
-
-print join("\t", @bams)."\n";
+##########################
+## make stat of single bam files
 foreach my $bam (@bams){
-  print "\n################\n## $bam\n\n";
   %{$data{$bam}}=&qual_singleBam("${bam_dir}/${bam}");
 }
 
-print Dumper(%data);
+##########################
+## print master results table
+if ($uniq_control && $flag_control){
+  print join("\t", 'sample', 'total alignments',  'mapped paires', 'unmapped paires', 'mapped singles', 'fwd strand',  'rev strand', 'mapped reads', 'uniq mapped reads')."\n";
+  foreach my $sample (sort keys %data){
+    print join("\t",
+	       $sample,
+	       $data{$sample}->{'aln_count'}->{'total'},
+	       $data{$sample}->{'aln_count'}->{'mapped_pair'},
+	       $data{$sample}->{'aln_count'}->{'unmapped_pair'},
+	       $data{$sample}->{'aln_count'}->{'mapped_single'},
+	       $data{$sample}->{'strand'}->{'forward'},
+	       $data{$sample}->{'strand'}->{'reverse'},
+	       $data{$sample}->{'uniq'}->{'mapped_reads'},
+	       $data{$sample}->{'uniq'}->{'uniq_mapped_reads'})."\n";
+  }
+}
+
+##########################
+## plot boxplot for match
+if ($match_control){
+  my @Rstat_values_match = ();
+  my @Rstat_names_match  = ();
+  my @Rstat_ns_match     = ();
+  my $Rstat_mcol_match   = 0;
+  
+  foreach my $sample (sort keys %data) {
+    push @Rstat_values_match, $data{$sample}->{'match'}->{'min'};
+    push @Rstat_values_match, $data{$sample}->{'match'}->{'1q'};
+    push @Rstat_values_match, $data{$sample}->{'match'}->{'med'};
+    push @Rstat_values_match, $data{$sample}->{'match'}->{'3q'};
+    push @Rstat_values_match, $data{$sample}->{'match'}->{'max'};
+    push @Rstat_names_match,  "'$sample'";
+    push @Rstat_ns_match,     $data{$sample}->{'aln_count'}->{'total'};
+    $Rstat_mcol_match++;
+  }
+
+  my $data_string_match = "list(stats=matrix(c(".join(",",@Rstat_values_match)."),5,$Rstat_mcol_match), n=c(".join(",",@Rstat_ns_match)."), names=c(".join(",",@Rstat_names_match)."))";
+  &plot_boxplot("${odir}/match_stats", "match [%]", $data_string_match);
+}
+
+###########################
+## plot barplot for counts
+if ($flag_control){
+  my @Rstat_data_count = ();
+  
+  # collect data for read.table string
+  push @Rstat_data_count, 'samples', sort keys %data;                       # first line with sample names
+  $Rstat_data_count[-1]="$Rstat_data_count[-1]\n";                          # ad new line to last column entry
+  push @Rstat_data_count, 'mapped_single';               
+  foreach my $sample (sort keys %data) {                                    # second line with all mapped_single count values
+    push @Rstat_data_count, $data{$sample}->{'aln_count'}->{'mapped_single'};
+  }
+  $Rstat_data_count[-1]="$Rstat_data_count[-1]\n";                          # ad new line to last column entry
+  push @Rstat_data_count, 'mapped_pair';
+  foreach my $sample (sort keys %data) {                                    # third line with all mapped_pair count values
+    push @Rstat_data_count, $data{$sample}->{'aln_count'}->{'mapped_pair'};
+  }
+  $Rstat_data_count[-1]="$Rstat_data_count[-1]\n";                          # ad new line to last column entry
+  push @Rstat_data_count, 'unmapped_pair';
+  foreach my $sample (sort keys %data) {                                    # fourth line with all unmapped_pair count values
+    push @Rstat_data_count, $data{$sample}->{'aln_count'}->{'unmapped_pair'};
+  }
+  $Rstat_data_count[-1]="$Rstat_data_count[-1]\n";                          # ad new line to last column entry
+  my $data_string_count = join(" ", @Rstat_data_count);                     # make read.table string
+  &plot_barplot("${odir}/count_stats", "mapped reads", $data_string_count); # produce plot with read.table string input
+}
+
+##########################
+## plot boxplot hard clip
+if($clip_control){
+  my @Rstat_values_clipH = ();
+  my @Rstat_names_clipH  = ();
+  my @Rstat_ns_clipH     = ();
+  my $Rstat_mcol_clipH   = 0;
+  
+  foreach my $sample (sort keys %data) {
+    push @Rstat_values_clipH, $data{$sample}->{'clip'}->{'hardclip'}->{'min'};
+    push @Rstat_values_clipH, $data{$sample}->{'clip'}->{'hardclip'}->{'1q'};
+    push @Rstat_values_clipH, $data{$sample}->{'clip'}->{'hardclip'}->{'med'};
+    push @Rstat_values_clipH, $data{$sample}->{'clip'}->{'hardclip'}->{'3q'};
+    push @Rstat_values_clipH, $data{$sample}->{'clip'}->{'hardclip'}->{'max'};
+    push @Rstat_names_clipH,  "'$sample'";
+    push @Rstat_ns_clipH,     $data{$sample}->{'aln_count'}->{'total'};
+    $Rstat_mcol_clipH++;
+  }
+
+  my $data_string_clipH = "list(stats=matrix(c(".join(",",@Rstat_values_clipH)."),5,$Rstat_mcol_clipH), n=c(".join(",",@Rstat_ns_clipH)."), names=c(".join(",",@Rstat_names_clipH)."))";
+  &plot_boxplot("${odir}/hardclipped_stats", "hard clipped [nt]", $data_string_clipH);
+}
+
+##########################
+## plot boxplot soft clip
+if($clip_control){
+  my @Rstat_values_clipS = ();
+  my @Rstat_names_clipS  = ();
+  my @Rstat_ns_clipS     = ();
+  my $Rstat_mcol_clipS   = 0;
+  
+  foreach my $sample (sort keys %data) {
+    push @Rstat_values_clipS, $data{$sample}->{'clip'}->{'softclip'}->{'min'};
+    push @Rstat_values_clipS, $data{$sample}->{'clip'}->{'softclip'}->{'1q'};
+    push @Rstat_values_clipS, $data{$sample}->{'clip'}->{'softclip'}->{'med'};
+    push @Rstat_values_clipS, $data{$sample}->{'clip'}->{'softclip'}->{'3q'};
+    push @Rstat_values_clipS, $data{$sample}->{'clip'}->{'softclip'}->{'max'};
+    push @Rstat_names_clipS,  "'$sample'";
+    push @Rstat_ns_clipS,     $data{$sample}->{'aln_count'}->{'total'};
+    $Rstat_mcol_clipS++;
+  }
+
+  my $data_string_clipS = "list(stats=matrix(c(".join(",",@Rstat_values_clipS)."),5,$Rstat_mcol_clipS), n=c(".join(",",@Rstat_ns_clipS)."), names=c(".join(",",@Rstat_names_clipS)."))";
+  &plot_boxplot("${odir}/softclipped_stats", "soft clipped [nt]", $data_string_clipS);
+}
+
+##########################
+## plot boxplot edit distance
+if($edit_control){
+  my @Rstat_values_edit = ();
+  my @Rstat_names_edit  = ();
+  my @Rstat_ns_edit     = ();
+  my $Rstat_mcol_edit   = 0;
+  
+  foreach my $sample (sort keys %data) {
+    push @Rstat_values_edit, $data{$sample}->{'edit'}->{'min'};
+    push @Rstat_values_edit, $data{$sample}->{'edit'}->{'1q'};
+    push @Rstat_values_edit, $data{$sample}->{'edit'}->{'med'};
+    push @Rstat_values_edit, $data{$sample}->{'edit'}->{'3q'};
+    push @Rstat_values_edit, $data{$sample}->{'edit'}->{'max'};
+    push @Rstat_names_edit,  "'$sample'";
+    push @Rstat_ns_edit,     $data{$sample}->{'aln_count'}->{'total'};
+    $Rstat_mcol_edit++;
+  }
+
+  my $data_string_edit = "list(stats=matrix(c(".join(",",@Rstat_values_edit)."),5,$Rstat_mcol_edit), n=c(".join(",",@Rstat_ns_edit)."), names=c(".join(",",@Rstat_names_edit)."))";
+  &plot_boxplot("${odir}/editdistance_stats", "edit distance", $data_string_edit);
+}
+
+##########################
+## plot boxplot quality score
+if($qual_control){
+  my @Rstat_values_qual = ();
+  my @Rstat_names_qual  = ();
+  my @Rstat_ns_qual     = ();
+  my $Rstat_mcol_qual   = 0;
+  
+  foreach my $sample (sort keys %data) {
+    push @Rstat_values_qual, $data{$sample}->{'qual'}->{'min'};
+    push @Rstat_values_qual, $data{$sample}->{'qual'}->{'1q'};
+    push @Rstat_values_qual, $data{$sample}->{'qual'}->{'med'};
+    push @Rstat_values_qual, $data{$sample}->{'qual'}->{'3q'};
+    push @Rstat_values_qual, $data{$sample}->{'qual'}->{'max'};
+    push @Rstat_names_qual,  "'$sample'";
+    push @Rstat_ns_qual,     $data{$sample}->{'aln_count'}->{'total'};
+    $Rstat_mcol_qual++;
+  }
+
+  my $data_string_qual = "list(stats=matrix(c(".join(",",@Rstat_values_qual)."),5,$Rstat_mcol_qual), n=c(".join(",",@Rstat_ns_qual)."), names=c(".join(",",@Rstat_names_qual)."))";
+  &plot_boxplot("${odir}/qualityscore_stats", "read quality score", $data_string_qual);
+}
+
+#print Dumper(%data) if($VERBOSE);
+
+
 
 ###########################
 ## # #  subroutines  # # ##
@@ -54,31 +285,14 @@ sub qual_singleBam{
   ## sets variables and contols if 
   ## feature should be considered
 
-  my $match_control = 1;   # provids stats how many mapped bases match the reference genome
-  my @match_data    = ();
-  
-  my $clip_control  = 1;   # provids stats how many bases are soft or hard clipped
-  my %clip_data     = ();
-  
-  my $split_control = 1;   # provids stats how many mapped reads are splitted (and how often); condideres CIGAR string, not good for segemehl)
-  my %split_data    = ();
-  
-  my $qual_control  = 1;   # provids stats on quality of the match
-  my @qual_data     = ();
-  
-  my $edit_control  = 1;   # provids stats on the edit distance between read and mapped reference position
+  my @match_data    = ();  
+  my %clip_data     = ();  
+  my %split_data    = ();  
+  my @qual_data     = ();  
   my @edit_data     = ();
-  
-  my $flag_control  = 1;   # analyses the sam bit flag for quality/strandedness/pair_vs_single end reads
-  my %raw_flag_data = ();
   my %flag_data     = ();
-  
-  my $score_control = 1;   # provids stats on per-base quality scores
   my @score_data    = ();
-  
-  my $uniq_control  = 1;   # gives number and stats of multiplicity of readaligments
   my %uniq_data     = ('uniq', 0, 'mapped', 0);
-  
   
   ## read in bam file using Bio::DB::Sam
   my $sam = Bio::DB::Sam->new(-bam   => "$bam_fh");
@@ -156,7 +370,6 @@ sub qual_singleBam{
           $uniq_data{'uniq'}++ if($attributes{'NH'} == 1);
           $uniq_data{'mapped'}+=1/$attributes{'NH'};
 	  $uniq_data{'multiplicity'}->{$attributes{'NH'}}++;
-	  #$uniq_data{'multiplicity'}->{'total'}++;
         }
 	else{
 	  $uniq_data{'uniq'}++;
@@ -324,7 +537,7 @@ sub qual_singleBam{
   #############################
   ###### flags
   if ($flag_control){
-        
+    
     $flag_data{'pairs'}->{'mapped_pair'}   = 0 unless ( defined($flag_data{'pairs'}->{'mapped_pair'})   );
     $flag_data{'pairs'}->{'unmapped_pair'} = 0 unless ( defined($flag_data{'pairs'}->{'unmapped_pair'}) );
     
@@ -334,13 +547,13 @@ sub qual_singleBam{
     
     $data_out{'aln_count'}->{'mapped_pair'}    = $flag_data{'pairs'}->{'mapped_pair'};
     $data_out{'aln_count'}->{'unmapped_pair'}  = $flag_data{'pairs'}->{'unmapped_pair'};
-    $data_out{'aln_count'}->{'mapped_single'}  = $flag_data{'pairs'}->{'single-end'};
+    $data_out{'aln_count'}->{'mapped_single'}  = $flag_data{'paired'}->{'single-end'};
     $data_out{'aln_count'}->{'total'}          = $total_mapped;
-
+    
     $flag_data{'strand'}->{'forward'}   = 0 unless ( defined($flag_data{'strand'}->{'forward'})   );
     $flag_data{'strand'}->{'reverse'}   = 0 unless ( defined($flag_data{'strand'}->{'reverse'})   );
     my $total_strands                   = $flag_data{'strand'}->{'forward'} + $flag_data{'strand'}->{'reverse'};
-
+    
     $data_out{'strand'}->{'forward'}    = $flag_data{'strand'}->{'forward'};
     $data_out{'strand'}->{'reverse'}    = $flag_data{'strand'}->{'reverse'};
   }
@@ -350,7 +563,8 @@ sub qual_singleBam{
   ###### split
   if ($split_control){
     foreach my $splits (sort {$a cmp $b} keys %split_data) {
-      $data_out{'split'}->{'distribution_of_multisplit'}->{"<$splits>"}=$split_data{'splits'};
+      my $split_counts=( defined($split_data{'splits'}) )?($split_data{'splits'}):(0);
+      $data_out{'split'}->{'distribution_of_multisplit'}->{"$splits"}=$split_counts;
     }
   }
 
@@ -435,4 +649,103 @@ sub cigarHclip { #usage: cigarHclip($cigarstring)
   return ($cigar_length==0)?(0):($cigar_clip/$cigar_length);
 }
 
-	
+sub plot_boxplot { #plot boxplot from min, 1q, median, 3q, max
+  my $filename    = shift;
+  my $ylab        = shift;
+  my $data_string = shift;
+
+  my $R = Statistics::R->new();
+  $R->startR;
+  $R->set('rlib', $rlibpath);
+  $R->set('log_dir', $odir);
+  $R->run("postscript('${filename}.eps')") ;
+  $R->run("summarydata<-$data_string") ;
+  $R->run("bxp(summarydata, medcol = 'red', ylab='$ylab', xlab='samples')") ;
+  $R->run("dev.off()") ;
+  $R->stopR;
+}
+
+sub plot_barplot { #plot barplot read.table text string
+  my $filename    = shift;
+  my $ylab        = shift;
+  my $data_string = shift;
+
+  my $R = Statistics::R->new();
+  $R->startR;
+  $R->set('rlib', $rlibpath);
+  $R->set('log_dir', $odir);
+  $R->run("postscript('${filename}.eps')") ;
+  $R->run("dat<-read.table(text = \"$data_string\", header = TRUE, row.names=1)") ;
+  $R->run("dat_m<-as.matrix(dat)") ;
+  $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)+3), col=1:nrow(dat_m), legend.text = TRUE, args.legend = list(x = ncol(dat_m) + 3, y=max(colSums(dat_m)), bty = 'n' ), ylab='$ylab', xlab='samples')") ;
+  $R->run("dev.off()") ;
+  $R->stopR;
+}
+
+###########################
+## # #   Variables   # # ##
+###########################
+__END__
+
+=head1 NAME
+
+bam_qualstats.pl -- Generates quality statistics from specified BAM input files.
+
+=head1 SYNOPSIS
+bam_qualstats.pl --dir <PATH> --odir <PATH> [--match] [--clip] [--qual] [--edit] [--rlib <PATH>] [[--help]
+
+=head1 OPTIONS
+
+=over
+    
+=item B<--dir>
+
+Path to directory with BAM files. All BAM files in this directory will be processed.
+    
+=item B<--odir>
+
+Path to output directory. In this directory several output files will be created. Existing files with identiacal names will be over written.
+
+=item B<--match>
+
+Provids stats how many mapped bases match the reference genome.
+
+=item B<--clip>
+
+Provids stats how many bases are soft or hard clipped.
+
+=item B<--qual>
+
+Provids stats on quality of the read match against the reference sequence.
+
+=item B<--edit>
+
+Provids stats on the edit distance between read and mapped reference position.
+    
+=item B<--rlib -r>
+
+Path to the R library.
+
+=item B<--help -h>
+
+Print short help.
+
+=item B<--man>
+
+Prints the manual page and exits.
+
+=item B<--verbose>
+
+Prints additional output.
+
+=back
+
+=head1 DESCRIPTION
+
+This program screens a given directory for bam files and returns veriouse statistics for the found samples.
+
+=head1 AUTHOR
+
+Fabian Amman E<lt>fabian@tbi.univie.ac.atE<gt>
+
+=cut
