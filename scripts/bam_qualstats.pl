@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Last changed Time-stamp: <2014-12-15 13:13:39 fabian>
+# Last changed Time-stamp: <2014-12-15 19:21:42 fabian>
 #usage: perl bam_qualstats.pl -verbose -dir  ~/Work/ViennaNGS/Data/sinlge-end/ -odir /home/mescalin/fabian/Work/ViennaNGS/Progs/OuT
 
 
@@ -22,16 +22,16 @@ my $rlibpath = '/usr/bin/R'; # path to R installation (`which R`)
 my %data     = ();           # stores all results from single bam files
 my $VERBOSE  = 0;
 
-my $match_control = 1;   # provids stats how many mapped bases match the reference genome
-my $clip_control  = 1;   # provids stats how many bases are soft or hard clipped
-my $split_control = 1;   # provids stats how many mapped reads are splitted (and how often); condideres CIGAR string, not good for segemehl)
-my $qual_control  = 1;   # provids stats on quality of the match
-my $edit_control  = 1;   # provids stats on the edit distance between read and mapped reference position
-my $flag_control  = 1;   # analyses the sam bit flag for quality/strandedness/pair_vs_single end reads (must be =1)
-my %raw_flag_data = ();
-my $score_control = 0;   # provids stats on per-base quality scores
-my $uniq_control  = 1;   # gives number and stats of multiplicity of readaligments (must be =1)
-
+my $match_control    = 1;   # provids stats how many mapped bases match the reference genome
+my $clip_control     = 1;   # provids stats how many bases are soft or hard clipped
+my $split_control    = 1;   # provids stats how many mapped reads are splitted (and how often);
+my $qual_control     = 1;   # provids stats on quality of the match
+my $edit_control     = 1;   # provids stats on the edit distance between read and mapped reference
+my $flag_control     = 1;   # analyses the sam bit flag for qual/strands/pair_vs_single reads
+my %raw_flag_data    = ();
+my $score_control    = 0;   # provids stats on per-base quality scores
+my $uniq_control     = 1;   # gives number and stats of multiplicity of readaligments (must be =1)
+my $segemehl_control = 0;   # toggles to consider segemehl specific bam feature
 
 
 
@@ -50,6 +50,7 @@ pod2usage(-verbose => 0)
 	  "clip!"       => \$clip_control,
 	  "qual!"       => \$qual_control,
 	  "edit!"       => \$edit_control,
+	  "segemehl!"   => \$segemehl_control,
 	  "help|h"      => sub{pod2usage(-verbose => 1)},
 	  "man|m"       => sub{pod2usage(-verbose => 2)},
 	  "verbose"     => sub{ $VERBOSE++ }
@@ -79,14 +80,15 @@ if ( -d "$odir" ) {
   exit;
 }
 
-print STDERR "\nFollowing feature/attributes will be analysed:\n";
-print STDERR "\t<sam flag>\t(paired- and single-end read counts; strand distribution)\n" if ($flag_control);
-print STDERR "\t<uniqueness>\t(NH:i attribute; otherwise uniqueness is set to 1)\n" if ($uniq_control); 
-print STDERR "\t<match>\t\t(distribution of percentage of read which matches refernce)\n" if ($match_control);
-print STDERR "\t<clip>\t\t(distribution of percentage of read which are clipped during mapping)\n" if ($clip_control);
-print STDERR "\t<edit>\t\t(distribution of edit distance between read and reference)\n" if ($edit_control);
-print STDERR "\n";
-
+if ($VERBOSE){
+  print STDERR "\nFollowing feature/attributes will be analysed:\n";
+  print STDERR "\t<sam flag>\t(paired- and single-end read counts; strand distribution)\n" if ($flag_control);
+  print STDERR "\t<uniqueness>\t(NH:i attribute; otherwise uniqueness is set to 1)\n" if ($uniq_control); 
+  print STDERR "\t<match>\t\t(distribution of percentage of read which matches refernce)\n" if ($match_control);
+  print STDERR "\t<clip>\t\t(distribution of percentage of read which are clipped during mapping)\n" if ($clip_control);
+  print STDERR "\t<edit>\t\t(distribution of edit distance between read and reference)\n" if ($edit_control);
+  print STDERR "\n";
+}
 
 
 ##########################
@@ -264,7 +266,7 @@ if($qual_control){
   &plot_boxplot("${odir}/qualityscore_stats", "read quality score", $data_string_qual);
 }
 
-#print Dumper(%data) if($VERBOSE);
+print Dumper(%data) if($VERBOSE);
 
 
 
@@ -301,7 +303,6 @@ sub qual_singleBam{
   ## get chromosomes name
   my @chromosomes    = $sam->seq_ids;
   
-  
   ## get single alignments and loop over each single alignment
   my @alignments = $sam->features();
   for my $a (@alignments) {
@@ -330,34 +331,39 @@ sub qual_singleBam{
         if( defined($flag) ){
           $raw_flag_data{$flag}++;
 	  $raw_flag_data{'total'}++;
+
+	  my $multisplit_weight = 1;
+	  if ($segemehl_control && defined($attributes{'XL'}) ) {
+	     $multisplit_weight = (1/($attributes{'XL'}))
+	  }
 	  
           if( defined($flags{'PAIRED'}) ){
-	    $flag_data{'paired'}->{'paired-end'}++;
+	    $flag_data{'paired'}->{'paired-end'}+=$multisplit_weight;
 	  }else{
-	    $flag_data{'paired'}->{'single-end'}++;
+	    $flag_data{'paired'}->{'single-end'}+=$multisplit_weight;
 	  }
 	  
 	  if( defined($flags{'REVERSED'}) ){
-            $flag_data{'strand'}->{'reverse'}++;
+            $flag_data{'strand'}->{'reverse'}+=$multisplit_weight;
           }else{
-            $flag_data{'strand'}->{'forward'}++;
+            $flag_data{'strand'}->{'forward'}+=$multisplit_weight;
           }
 	  
 	  if( defined($flags{'PAIRED'}) && defined($flags{'M_UNMAPPED'}) ){
-	    $flag_data{'pairs'}->{'mapped_pair'}++;
+	    $flag_data{'pairs'}->{'unmapped_pair'}+=$multisplit_weight;
 	  }
 	  elsif( defined($flags{'PAIRED'}) && !defined($flags{'M_UNMAPPED'}) ){
-	    $flag_data{'pairs'}->{'unmapped_pair'}++;
+	    $flag_data{'pairs'}->{'mapped_pair'}+=$multisplit_weight;
           }
 	  
 	  if( defined($flags{'DUPLICATE'}) ){
-	    $flag_data{'unmapped'}->{'duplicated'}++;
+	    $flag_data{'unmapped'}->{'duplicated'}+=$multisplit_weight;
 	  }
 	  if( defined($flags{'QC_FAILED'}) ){
-	    $flag_data{'unmapped'}->{'qual_failed'}++;
+	    $flag_data{'unmapped'}->{'qual_failed'}+=$multisplit_weight;
 	  }
 	  if( defined($flags{'UNMAPPED'}) ){
-	    $flag_data{'unmapped'}->{'unmapped'}++;
+	    $flag_data{'unmapped'}->{'unmapped'}+=$multisplit_weight;
 	  }
 	  
         }
@@ -366,15 +372,21 @@ sub qual_singleBam{
       #############################
       ### uniq
       if ($uniq_control){
+
+	my $multisplit_weight = 1;
+	if ($segemehl_control && defined($attributes{'XL'}) ) {
+	  $multisplit_weight = (1/($attributes{'XL'}))
+	}
+	
         if( defined($attributes{'NH'}) ){
-          $uniq_data{'uniq'}++ if($attributes{'NH'} == 1);
-          $uniq_data{'mapped'}+=1/$attributes{'NH'};
-	  $uniq_data{'multiplicity'}->{$attributes{'NH'}}++;
+          $uniq_data{'uniq'}+=$multisplit_weight if($attributes{'NH'} == 1);
+          $uniq_data{'mapped'}+=1/($attributes{'NH'}*$multisplit_weight);
+	  $uniq_data{'multiplicity'}->{$attributes{'NH'}}+=$multisplit_weight;
         }
 	else{
-	  $uniq_data{'uniq'}++;
-	  $uniq_data{'mapped'}++;
-	  $uniq_data{'multiplicity'}->{'1'}++;
+	  $uniq_data{'uniq'}+=$multisplit_weight;
+	  $uniq_data{'mapped'}+=$multisplit_weight;
+	  $uniq_data{'multiplicity'}->{'1'}+=$multisplit_weight;
 	}
       }
       
@@ -385,7 +397,7 @@ sub qual_singleBam{
 	  push @qual_data, $match_qual;
 	}
 	else{
-	  print STDERR "warnings: no matchqual for read $qname\nwarnings: Setting \$qual_control to zero\n";
+	  print STDERR "warning(s): no matchqual for read $qname\nwarnings: Setting \$qual_control to zero\n";
 	  $qual_control = 0;
 	}
       }
@@ -397,7 +409,7 @@ sub qual_singleBam{
 	  push @edit_data, $attributes{'NM'};
 	}
         else{
-          print STDERR "warnings: no <NM> attribute for read $qname\nwarnings: Setting \$edit_control to zero\n";
+          print STDERR "warning(s): no <NM> attribute for read $qname\nwarnings: Setting \$edit_control to zero\n";
           $edit_control = 0;
         }
       }
@@ -410,7 +422,7 @@ sub qual_singleBam{
           push @match_data, sprintf("%.2g", 100*(&cigarmatch($cigar))/(&cigarlength($cigar)));
         }
         else{
-          print STDERR "warnings: no CIGAR string for read $qname\nwarnings: Setting \$match_control to zero\n";
+          print STDERR "warning(s): no CIGAR string for read $qname\nwarnings: Setting \$match_control to zero\n";
           $match_control = 0;
         }
       }
@@ -423,7 +435,7 @@ sub qual_singleBam{
           push @{$clip_data{'S'}}, sprintf("%.2g", 100*(&cigarSclip($cigar)));
         }
         else{
-          print STDERR "warnings: no CIGAR string for read $qname\nwarnings: Setting \$clip_control to zero\n";
+          print STDERR "warning(s): no CIGAR string for read $qname\nwarnings: Setting \$clip_control to zero\n";
           $clip_control = 0;
         }
       }
@@ -432,16 +444,24 @@ sub qual_singleBam{
       #############################
       ### Split reads
       if($split_control){
-        if($cigar){
-          $split_data{&cigarsplit($cigar)}++;
-          $split_data{'total'}++;
-        }
-        else{
-          print STDERR "warnings: no CIGAR string for read $qname\nwarnings: Setting \$split_control to zero\n";
-          $split_control = 0;
-        }
+	if ($segemehl_control && defined($attributes{'XL'}) ) {
+	  my $split_counts = $attributes{'XL'};
+	  $split_data{$split_counts}+=1/($split_counts);
+	  $split_data{'total'}+=1/($split_counts);
+	  
+	}
+	else{
+	  if($cigar){
+	    my $split_counts = &cigarsplit($cigar);
+	    $split_data{$split_counts}++;
+	    $split_data{'total'}++;
+	  }
+	  else{
+	    print STDERR "warning(s): no CIGAR string for read $qname\nwarnings: Setting \$split_control to zero\n";
+	    $split_control = 0;
+	  }
+	}
       }
-      
     }
   }
   
@@ -467,7 +487,7 @@ sub qual_singleBam{
   if($qual_control){
     my %qual_stats=%{&stats(@qual_data)};
     if ($qual_stats{'min'} == 255 && $qual_stats{'max'} == 255){
-      print STDERR "warnings: no matchqual (all values set to 255)\nwarnings: Setting \$qual_control to zero\n";
+      print STDERR "warning(s): no matchqual (all values set to 255)\nwarnings: Setting \$qual_control to zero\n";
       $qual_control = 0;
     }
     else{
@@ -677,7 +697,7 @@ sub plot_barplot { #plot barplot read.table text string
   $R->run("postscript('${filename}.eps')") ;
   $R->run("dat<-read.table(text = \"$data_string\", header = TRUE, row.names=1)") ;
   $R->run("dat_m<-as.matrix(dat)") ;
-  $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)+3), col=1:nrow(dat_m), legend.text = TRUE, args.legend = list(x = ncol(dat_m) + 3, y=max(colSums(dat_m)), bty = 'n' ), ylab='$ylab', xlab='samples')") ;
+  $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)+2), col=1:nrow(dat_m), legend.text = TRUE, args.legend = list(x = ncol(dat_m) + 2, y=max(colSums(dat_m)), bty = 'n' ), ylab='$ylab', xlab='samples')") ;
   $R->run("dev.off()") ;
   $R->stopR;
 }
@@ -721,7 +741,11 @@ Provids stats on quality of the read match against the reference sequence.
 =item B<--edit>
 
 Provids stats on the edit distance between read and mapped reference position.
-    
+ 
+=item B<--segemehl>
+
+Toggles to specific segemehl bam file characteristics (e.g., mapped fragments per line).
+   
 =item B<--rlib -r>
 
 Path to the R library.
