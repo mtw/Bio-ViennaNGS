@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-11-27 14:21:53 mtw>
+# Last changed Time-stamp: <2014-12-13 23:44:07 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -29,7 +29,7 @@ use warnings;
 use Getopt::Long qw( :config posix_default bundling no_ignore_case );
 use Pod::Usage;
 use Path::Class;
-use Bio::ViennaNGS qw(uniquify_bam);
+use Bio::ViennaNGS::Bam qw(uniquify_bam);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#

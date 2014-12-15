@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2014-12-10 12:18:26 mtw>
+# -*-CPerl-*-
+# Last changed Time-stamp: <2014-12-13 01:03:41 mtw>
 
 ###############
 ###Use stuff
@@ -11,7 +12,7 @@ use Cwd;
 use File::Path qw (make_path);
 use Pod::Usage;
 use Getopt::Long qw( :config posix_default bundling no_ignore_case );
-use Bio::ViennaNGS qw(unique_array);
+use Bio::ViennaNGS::Util qw(unique_array);
 
 ###############
 ###Variables
@@ -145,12 +146,12 @@ __END__
 
 =head1 NAME
 
-bed2bedgraph.pl - Convert BED or extended BED files to
+bed2bedGraph.pl - Convert BED or extended BED files to
 bedGraph format
 
 =head1 SYNOPSIS
 
-bed2bedgraph.pl [-f I<FILE>] [-c I<FILE>] [-t I<STRING>] [-a
+bed2bedGraph.pl [-f I<FILE>] [-c I<FILE>] [-t I<STRING>] [-a
 I<STRING>] [options]
 
 =head1 DESCRIPTION

@@ -1,31 +1,50 @@
 Bio::ViennaNGS
 ==============
 
-Bio::ViennaNGS is a collection of Perl modules and utilities for building
+Bio::ViennaNGS is a distribution of Perl modules and utilities for building
 efficient Next-Generation Sequencing (NGS) analysis pipelines. It covers
 various aspects of NGS data analysis, including (but not limited to)
 conversion of sequence annotation, evaluation of mapped data, expression
 quantification and visualization.
 
-Bio::ViennaNGS is shipped with the following (sub)modules: 
+The main Bio::ViennaNGS module is shipped with a complementary set of 
+(sub)modules:
+
+- Bio::ViennaNGS::AnnoC
+  A Moose interface for storage and conversion of sequence annotation data.
+
+- Bio::ViennaNGS::Bam
+  Routines for high-level manipulation of BAM files.
 
 - Bio::ViennaNGS::Fasta
   Routines for accessing genomic sequences implemented through a Moose
   interface to Bio::DB::Fasta.
-
-- Bio::ViennaNGS::AnnoC
-  A Moose interface for storage and conversion of sequence annotation data.
   
 - Bio::ViennaNGS::SpliceJunc
   A collection of routines for alternative splicing analysis.  
 
-- Bio::ViennaNGS::UCSC (will be provided in an upcoming release)
+- Bio::ViennaNGS::UCSC
   Routines for visualization of genomics data with the UCSC genome browser.
 
-In addition, Bio::ViennaNGS comes with a set of utility programs for
-accomplishing routine tasks often required in NGS data processing. These
-utilities serve as reference implementation of the routines implemented in
-the (sub)modules:
+- Bio::ViennaNGS::MinimalFeature
+  A Moose interface for handling elementary gene annotation. 
+
+- Bio::ViennaNGS::Feature
+  A Moose-ish BED6 wrapper.  
+
+- Bio::ViennaNGS::FeatureChain
+  Yet another Moose class for chaining gene annotation features. 
+
+In addition, Bio::ViennaNGS comes with a collection of utility
+programs for accomplishing routine tasks often required in NGS data
+processing. These utilities serve as reference implementation of the
+routines implemented in the (sub)modules:
+
+assembly_hub_constructor.pl:
+The UCSC genome browser offers the possibility to visualize any
+organism (including organisms that are not included in the standard
+UCSC browser bundle) through hso called 'Assembly Hubs'. This script
+constructs Assembly Hubs from genomic sequence and annotation data.
 
 bam_split.pl: 
 Split (paired-end and single-end) BAM alignment files by strand and compute
@@ -115,6 +134,8 @@ and packages that are not part of the Perl core distribution:
   Bio::DB::Sam >= 1.39
   Bio::DB::Fasta
   Bio::Tools::GFF
+  File::Share	
+  Template
   Moose
   Moose::Util::TypeConstraints
   Path::Class

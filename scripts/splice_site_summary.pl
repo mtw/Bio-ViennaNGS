@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-08 23:22:29 mtw>
+# Last changed Time-stamp: <2014-12-13 01:05:02 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -29,7 +29,7 @@ use warnings;
 use Getopt::Long qw( :config posix_default bundling no_ignore_case );
 use Pod::Usage;
 use Data::Dumper;
-use Bio::ViennaNGS  qw(bed2bigBed);
+use Bio::ViennaNGS::Util  qw(bed2bigBed);
 use Bio::ViennaNGS::SpliceJunc qw(bed6_ss_from_bed12 bed6_ss_from_rnaseq intersect_sj);
 use Bio::ViennaNGS::Fasta;
 

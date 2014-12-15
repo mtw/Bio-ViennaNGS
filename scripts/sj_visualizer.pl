@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-01 23:30:45 mtw>
+# Last changed Time-stamp: <2014-12-13 01:04:39 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -30,7 +30,7 @@ use Getopt::Long qw( :config posix_default bundling no_ignore_case );
 use Pod::Usage;
 use Data::Dumper;
 use IPC::Cmd qw(can_run);
-use Bio::ViennaNGS  qw(bed2bigBed);
+use Bio::ViennaNGS::Util  qw(bed2bigBed);
 use Bio::ViennaNGS::SpliceJunc qw(bed6_ss_to_bed12);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
