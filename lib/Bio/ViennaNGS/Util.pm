@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-14 23:49:36 mtw>
+# Last changed Time-stamp: <2014-12-15 13:15:46 fall>
 
 package Bio::ViennaNGS::Util;
 
@@ -15,6 +15,7 @@ use File::Basename qw(basename fileparse);
 use File::Temp qw(tempfile);
 use IPC::Cmd qw(can_run run);
 use Path::Class;
+use Math::Round;
 use Carp;
 use Bio::ViennaNGS::FeatureChain;
 
@@ -347,7 +348,7 @@ sub extend_chain{
   my $d     = $_[5];
 
   ##return a new chain with extended coordinates
-  my $extendchain = $chain;
+  my $extendchain = $chain -> clone();
   ## got through all features in original chain, calculate new start and end and safe in extendchain
   my @featarray = @{$extendchain->chain};
   foreach my $feature (@featarray){
@@ -359,14 +360,13 @@ sub extend_chain{
     my $left   = 0;
     my $width  = nearest(1,($end-$start)/2);
     $width = 0 if ($d > 0 || $u > 0);
-
     if ($strand eq "+"){
       if ($d > 0){
-	$start = $end+1;
+	$start = $end;
 	$r = $d;
       }
       if ($u > 0){
-	$end = $start-1;
+	$end = $start;
 	$l = $u;
       }
       $right=$r;
@@ -374,17 +374,16 @@ sub extend_chain{
     }
     elsif ($strand eq "-"){
       if ($u > 0){
-	$start = $end+1;
+	$start = $end;
 	$l = $u;
       }
       if ($d > 0){
-	$end = $start-1;
+	$end = $start;
 	$r = $d;
       }
       $right=$l;
       $left=$r;
     }
-
     if (($right-$width) <= 0){
       $right = 0;
     }
@@ -397,7 +396,6 @@ sub extend_chain{
     else{
       $left-=$width;
     }
-
     if ( $start-$left >= 1 ){
       if ($end+$right >= $sizes{"chr".$chrom}){
 	$end = $sizes{"chr".$chrom};
@@ -405,7 +403,7 @@ sub extend_chain{
       else{
 	$end += $right;
       }
-      $start -= ($left+1); ## Because of Bed coordinates, we need to 0-base the result
+      $start -= $left;
     }
     elsif ( $start-$left <= 0 ){
       $start = 0;
@@ -437,7 +435,7 @@ sub parse_bed6{
     push @line, "\." if ( !$line[5] ); 
 
     (my $chromosome  = $line[0])=~ s/chr//g;
-    my $start	     = $line[1]+1;
+    my $start	     = $line[1];
     my $end	     = $line[2];
     my $name	     = $line[3];
     my $score	     = $line[4];

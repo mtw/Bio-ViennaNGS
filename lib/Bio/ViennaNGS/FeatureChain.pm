@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-10 15:53:45 mtw>
+# Last changed Time-stamp: <2014-12-15 13:00:18 fall>
 
 package Bio::ViennaNGS::FeatureChain;
 
@@ -8,7 +8,8 @@ use version; our $VERSION = qv('0.11');
 
 #use namespace::autoclean;
 use Moose;
-#use MooseX::InstanceTracking;
+with 'MooseX::Clone';
+use MooseX::InstanceTracking;
 
 has 'type' => (
 	       is => 'rw',
@@ -17,11 +18,11 @@ has 'type' => (
 
 has 'chain' => (
 		is => 'rw',
-		traits => ['Array'],
+		traits => ['Array', 'Clone' => {to=>'ArrayRef'}],
 		isa => 'ArrayRef[Bio::ViennaNGS::Feature]',
 		required => '1',
 		builder => 'build_chain',
-		auto_deref => 1,
+		auto_deref => 1
 		);
 
 sub build_chain {
@@ -49,6 +50,12 @@ sub print_chain{
   }
   return $out;
 }
+
+#sub clone {
+#  my ( $self, %params ) = @_;
+#  $self->meta->clone_object($self, %params);
+#  return $self;
+#}
 
 no Moose;
 

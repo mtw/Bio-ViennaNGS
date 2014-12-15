@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-10 15:47:05 mtw>
+# Last changed Time-stamp: <2014-12-15 12:59:23 fall>
 
 package Bio::ViennaNGS::MinimalFeature;
 
@@ -15,11 +15,13 @@ subtype 'PlusOrMinus',
 no Moose::Util::TypeConstraints;
 
 use Moose;
+with 'MooseX::Clone';
+
 has 'chromosome' => (
-	      is  => 'rw',
-	      isa => 'Str',
-	      required => 1,
-	      predicate => 'has_chromosome',
+		     is  => 'rw',
+		     isa => 'Str',
+		     required => 1,
+		     predicate => 'has_chromosome',
 	     );
 
 has 'start' => (

@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-10 15:51:32 mtw>
+# Last changed Time-stamp: <2014-12-15 12:59:28 fall>
 
 package Bio::ViennaNGS::Feature;
 
@@ -8,7 +8,9 @@ use version; our $VERSION = qv('0.11');
 
 #use namespace::autoclean;
 use Moose;
+with 'MooseX::Clone';
 use MooseX::InstanceTracking;
+
 extends 'Bio::ViennaNGS::MinimalFeature';
 
 has 'name' => (
@@ -24,10 +26,10 @@ has 'score' => (
 	       );
 
 has 'extension' => (
-	      is      => 'rw',
-	      isa     => 'Str',
-	      default => '',
-	     );
+		    is      => 'rw',
+		    isa     => 'Str',
+		    default => '',
+		   );
 
 sub set_Feature{
   my ($self,$chromosome,$start,$end,$name,$score,$strand,$extension) = @_;
