@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-#Last changed Time-stamp: <2014-12-15 20:04:03 fall>
+#Last changed Time-stamp: <2014-12-16 12:26:58 fall>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -162,8 +162,8 @@ $R->run(q`out<-paste(file,".jpg",sep="")`);
 $R->run(q`ggsave(filename=out, path="./", width=12, height=8)`);
 $R->stopR;
 
-if(-e Rplot.pdf){ ### Clean outdir
-    `rm Rplot.pdf`;
+if(-e "Rplots.pdf"){ ### Clean outdir
+    `rm Rplots.pdf`;
 }
 
 chdir($dir) or die "Directory $dir not found!\n";

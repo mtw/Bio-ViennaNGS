@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-15 13:15:46 fall>
+# Last changed Time-stamp: <2014-12-16 12:28:21 fall>
 
 package Bio::ViennaNGS::Util;
 
@@ -25,7 +25,7 @@ our @EXPORT = ();
 our @EXPORT_OK = qw ( bed_or_bam2bw sortbed bed2bigBed computeTPM
 		      featCount_data parse_multicov write_multicov
 		      unique_array kmer_enrichment extend_chain
-		      parse_bed6);
+		      parse_bed6 fetch_chrom_sizes);
 
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -458,6 +458,49 @@ sub parse_bed6{
     push @featurelist, $feat;
   }
   return (\@featurelist);
+}
+
+sub fetch_chrom_sizes{
+  my $species = shift;
+  my %sizes;
+  my @chromsize;
+  my $this_function = (caller(0))[3];
+
+  my $test_fetchChromSizes = can_run('fetchChromSizes') or
+    say "ERROR [$this_function] fetchChromSizes utility not found";
+
+  my $cmd = "fetchChromSizes $species";
+  my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run(command => $cmd, verbose => 0);
+  if ($success){
+    @chromsize = @{$stdout_buf};
+  }
+  else{
+    print STDERR "Using UCSCs fetchChromSizes failed, trying alternative mysql fetch!\n";
+    my $test_fetchChromSizes = can_run('mysql') or
+      die "ERROR [$this_function] mysql utility not found";
+    $cmd = "mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e \"select chrom, size from $species.chromInfo\"";  ### Alternative to UCSC fetchChromSizes, has mysql dependency
+    my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf )  = run(command => $cmd, verbose => 0);
+    if ($success){
+      @chromsize = @{$stdout_buf};
+    }
+    else{
+      print STDERR "ERROR [$this_function] External command call unsuccessful\n";
+      print STDERR "ERROR: this is what the command printed:\n";
+      print join "", @$full_buf;
+      croak $!;
+      die "Fetching of chromosome sizes failed, please either download fetchChromSizes from the UCSC script collection, or install mysql!\n";
+    }
+  }
+
+  foreach (@chromsize){
+    chomp($_);
+    foreach (split(/\n/,$_)){
+      my ($chr,$size)=split (/\t/,$_);
+      $sizes{$chr}=$size;
+    }
+  }
+
+  return(\%sizes);
 }
 
 1;
