@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Last changed Time-stamp: <2014-12-15 19:21:42 fabian>
+# Last changed Time-stamp: <2014-12-16 13:15:23 fabian>
 #usage: perl bam_qualstats.pl -verbose -dir  ~/Work/ViennaNGS/Data/sinlge-end/ -odir /home/mescalin/fabian/Work/ViennaNGS/Progs/OuT
 
 
@@ -8,6 +8,7 @@ use warnings;
 use Getopt::Long;
 use Pod::Usage;
 use Data::Dumper;
+use POSIX qw(floor);
 use Bio::Perl;
 use Bio::DB::Sam;
 use Statistics::R;
@@ -108,21 +109,24 @@ foreach my $bam (@bams){
 
 ##########################
 ## print master results table
+open MasterOut, "> ${odir}/mapping_stats.csv" or die "Error: can t write to file ${odir}/mapping_stats.csv: $!\n";
 if ($uniq_control && $flag_control){
-  print join("\t", 'sample', 'total alignments',  'mapped paires', 'unmapped paires', 'mapped singles', 'fwd strand',  'rev strand', 'mapped reads', 'uniq mapped reads')."\n";
+  print MasterOut join("\t", 'sample', '#total alignments', '#mapped reads', '#uniq mapped reads', '#multi mapped reads', '#complete pairs alignments', '#half pairs alignments', '#mapped singles alignments', '#fwd strand alignments',  'rev strand alignments')."\n";
   foreach my $sample (sort keys %data){
-    print join("\t",
+    print MasterOut join("\t",
 	       $sample,
-	       $data{$sample}->{'aln_count'}->{'total'},
-	       $data{$sample}->{'aln_count'}->{'mapped_pair'},
-	       $data{$sample}->{'aln_count'}->{'unmapped_pair'},
-	       $data{$sample}->{'aln_count'}->{'mapped_single'},
-	       $data{$sample}->{'strand'}->{'forward'},
-	       $data{$sample}->{'strand'}->{'reverse'},
-	       $data{$sample}->{'uniq'}->{'mapped_reads'},
-	       $data{$sample}->{'uniq'}->{'uniq_mapped_reads'})."\n";
+	       floor(0.5 + $data{$sample}->{'aln_count'}->{'total'}),
+	       floor(0.5 + $data{$sample}->{'uniq'}->{'mapped_reads'}),
+	       floor(0.5 + $data{$sample}->{'uniq'}->{'uniq_mapped_reads'}),
+	       floor(0.5 + ($data{$sample}->{'uniq'}->{'mapped_reads'} - $data{$sample}->{'uniq'}->{'uniq_mapped_reads'})),
+	       floor(0.5 + $data{$sample}->{'aln_count'}->{'mapped_pair'})/2,
+	       floor(0.5 + $data{$sample}->{'aln_count'}->{'unmapped_pair'}),
+	       floor(0.5 + $data{$sample}->{'aln_count'}->{'mapped_single'}),
+	       floor(0.5 + $data{$sample}->{'strand'}->{'forward'}),
+	       floor(0.5 + $data{$sample}->{'strand'}->{'reverse'}))."\n";
   }
 }
+close MasterOut;
 
 ##########################
 ## plot boxplot for match
@@ -375,18 +379,18 @@ sub qual_singleBam{
 
 	my $multisplit_weight = 1;
 	if ($segemehl_control && defined($attributes{'XL'}) ) {
-	  $multisplit_weight = (1/($attributes{'XL'}))
+	  $multisplit_weight = $attributes{'XL'};
 	}
 	
         if( defined($attributes{'NH'}) ){
-          $uniq_data{'uniq'}+=$multisplit_weight if($attributes{'NH'} == 1);
+          $uniq_data{'uniq'}+=(1/$multisplit_weight) if($attributes{'NH'} == 1);
           $uniq_data{'mapped'}+=1/($attributes{'NH'}*$multisplit_weight);
-	  $uniq_data{'multiplicity'}->{$attributes{'NH'}}+=$multisplit_weight;
+	  $uniq_data{'multiplicity'}->{$attributes{'NH'}}+=(1/$multisplit_weight);
         }
 	else{
-	  $uniq_data{'uniq'}+=$multisplit_weight;
-	  $uniq_data{'mapped'}+=$multisplit_weight;
-	  $uniq_data{'multiplicity'}->{'1'}+=$multisplit_weight;
+	  $uniq_data{'uniq'}+=(1/$multisplit_weight);
+	  $uniq_data{'mapped'}+=(1/$multisplit_weight);
+	  $uniq_data{'multiplicity'}->{'1'}+=(1/$multisplit_weight);
 	}
       }
       
@@ -697,7 +701,8 @@ sub plot_barplot { #plot barplot read.table text string
   $R->run("postscript('${filename}.eps')") ;
   $R->run("dat<-read.table(text = \"$data_string\", header = TRUE, row.names=1)") ;
   $R->run("dat_m<-as.matrix(dat)") ;
-  $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)+2), col=1:nrow(dat_m), legend.text = TRUE, args.legend = list(x = ncol(dat_m) + 2, y=max(colSums(dat_m)), bty = 'n' ), ylab='$ylab', xlab='samples')") ;
+  $R->run("colors<-terrain.colors(nrow(dat_m), alpha = 1)") ;
+  $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)+2), col=colors, legend.text = TRUE, args.legend = list(x = ncol(dat_m) + 2, y=max(colSums(dat_m)), bty = 'n' ), ylab='$ylab', xlab='samples')") ;
   $R->run("dev.off()") ;
   $R->stopR;
 }
@@ -728,8 +733,8 @@ Path to output directory. In this directory several output files will be created
 
 =item B<--match>
 
-Provids stats how many mapped bases match the reference genome.
-
+Provids stats how many bases match the reference genome in the alignment's CIGAR string. If sequence mismatchs are defined as alignment matches depends on the used read mapper. Some use the '=' and the 'X' symbol. In this case only sequencing matches are counted. If the aligner only reports 'M' no distinction between sequence match and mismatch can be done. In any case, clipped bases, deletions, insertions are excluded.
+    
 =item B<--clip>
 
 Provids stats how many bases are soft or hard clipped.
