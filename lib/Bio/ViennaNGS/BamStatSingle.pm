@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-17 18:24:36 mtw>
+# Last changed Time-stamp: <2014-12-18 00:26:12 mtw>
 
 package Bio::ViennaNGS::BamStatSingle;
 
@@ -351,6 +351,110 @@ sub stat_singleBam {
     foreach my $multiplicity (sort {$a cmp $b} keys %{${$self->data_uniq}{'multiplicity'}}) {
       ${$self->data_out}{'uniq'}->{'distribution_of_multimapper'}->{"<$multiplicity>"}=
 	(${$self->data_uniq}{'multiplicity'}->{$multiplicity}/$multiplicity);
+    }
+  }
+
+  #############################
+  ##### quality stats
+  if($self->has_control_qual){
+    my %qual_stats=%{stats(@${$self->data_qual})};
+    if ($qual_stats{'min'} == 255 && $qual_stats{'max'} == 255){
+      carp "WARN [$this_function] No matchqual (all values set to 255)";
+      carp "WARN [$this_function] Setting \$self->has_control_qual to zero";
+      $self->clear_control_qual;
+    }
+    else{
+      ${$self->data_out}{'qual'}->{'min'}  = $qual_stats{'min'};
+      ${$self->data_out}{'qual'}->{'1q'}   = $qual_stats{'1q'};
+      ${$self->data_out}{'qual'}->{'mean'} = $qual_stats{'mean'};
+      ${$self->data_out}{'qual'}->{'med'}  = $qual_stats{'med'};
+      ${$self->data_out}{'qual'}->{'3q'}   = $qual_stats{'3q'};
+      ${$self->data_out}{'qual'}->{'max'}  = $qual_stats{'max'};
+    }
+  }
+
+  #############################
+  ### Clip data
+  if($self->has_control_clip){
+    my %clip_stats=%{stats(@{$self->data_clip})};
+
+    ${$self->data_out}{'clip'}->{'min'}  = $clip_stats{'min'};
+    ${$self->data_out}{'clip'}->{'1q'}   = $clip_stats{'1q'};
+    ${$self->data_out}{'clip'}->{'mean'} = $clip_stats{'mean'};
+    ${$self->data_out}{'clip'}->{'med'}  = $clip_stats{'med'};
+    ${$self->data_out}{'clip'}->{'3q'}   = $clip_stats{'3q'};
+    ${$self->data_out}{'clip'}->{'max'}  = $clip_stats{'max'};
+  }
+
+  #############################
+  ##### Match data
+  if($self->has_control_match){
+    my %match_stats=%{stats(@{$self->data_match})};
+
+    ${$self->data_out}{'match'}->{'min'}  = $match_stats{'min'};
+    ${$self->data_out}{'match'}->{'1q'}   = $match_stats{'1q'};
+    ${$self->data_out}{'match'}->{'mean'} = $match_stats{'mean'};
+    ${$self->data_out}{'match'}->{'med'}  = $match_stats{'med'};
+    ${$self->data_out}{'match'}->{'3q'}   = $match_stats{'3q'};
+    ${$self->data_out}{'match'}->{'max'}  = $match_stats{'max'};
+  }
+
+  #############################
+  ##### Edit distance
+  if($self->has_control_edit){
+    my %edit_stats=%{stats(@{$self->data_edit})};
+
+    ${$self->data_out}{'edit'}->{'min'}  = $edit_stats{'min'};
+    ${$self->data_out}{'edit'}->{'1q'}   = $edit_stats{'1q'};
+    ${$self->data_out}{'edit'}->{'mean'} = $edit_stats{'mean'};
+    ${$self->data_out}{'edit'}->{'med'}  = $edit_stats{'med'};
+    ${$self->data_out}{'edit'}->{'3q'}   = $edit_stats{'3q'};
+    ${$self->data_out}{'edit'}->{'max'}  = $edit_stats{'max'};
+  }
+
+  #############################
+  ###### flags
+  if ($self->has_control_flag){
+
+    ${$self->data_flag}{'pairs'}->{'mapped_pair'}   = 0
+      unless ( defined(${$self->data_flag}{'pairs'}->{'mapped_pair'})   );
+    ${$self->data_flag}{'pairs'}->{'unmapped_pair'} = 0
+      unless ( defined(${$self->data_flag}{'pairs'}->{'unmapped_pair'}) );
+
+    ${$self->data_flag}{'paired'}->{'paired-end'}   = 0
+      unless ( defined(${$self->data_flag}{'paired'}->{'paired-end'})   );
+    ${$self->data_flag}{'paired'}->{'single-end'}   = 0
+      unless ( defined(${$self->data_flag}{'paired'}->{'single-end'})   );
+
+    my $total_mapped  = ${$self->data_flag}{'paired'}->{'paired-end'} +
+      ${$self->data_flag}{'paired'}->{'single-end'};
+
+    ${$self->data_out}{'aln_count'}->{'mapped_pair'} =
+      ${$self->data_flag}{'pairs'}->{'mapped_pair'};
+    ${$self->data_out}{'aln_count'}->{'unmapped_pair'} =
+      ${$self->data_flag}{'pairs'}->{'unmapped_pair'};
+    ${$self->data_out}{'aln_count'}->{'mapped_single'} =
+      ${$self->data_flag}{'paired'}->{'single-end'};
+    ${$self->data_out}{'aln_count'}->{'total'} = $total_mapped;
+
+    ${$self->data_flag}{'strand'}->{'forward'}   = 0
+      unless ( defined(${$self->data_flag}{'strand'}->{'forward'})   );
+    ${$self->data_flag}{'strand'}->{'reverse'}   = 0 
+      unless ( defined(${$self->data_flag}{'strand'}->{'reverse'})   );
+
+    my $total_strands = ${$self->data_flag}{'strand'}->{'forward'} + 
+      ${$self->data_flag}{'strand'}->{'reverse'};
+
+    ${$self->data_out}{'strand'}->{'forward'} = ${$self->data_flag}{'strand'}->{'forward'};
+    ${$self->data_out}{'strand'}->{'reverse'} = ${$self->data_flag}{'strand'}->{'reverse'};
+  }
+
+  #############################
+  ###### split
+  if ($self->has_control_split){
+    foreach my $splits (sort {$a cmp $b} keys %{$self->data_split}) {
+      my $split_counts=( defined(${$self->data_split}{$splits}) )?(${$self->data_split}{$splits}):(0);
+      ${$self->data_out}{'split'}->{'distribution_of_multisplit'}->{"$splits"}=$split_counts;
     }
   }
 
