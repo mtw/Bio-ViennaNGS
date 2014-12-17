@@ -199,6 +199,169 @@ sub make_assembly_hub{
   }
 }
 
+sub make_track_hub{
+  my ($genomeid, $filesdir, $basedir, $baseURL, $log) = @_;
+  my ($basename,$dir,$ext);
+  my $this_function = (caller(0))[3];
+
+  #check arguments
+  croak ("ERROR [$this_function] \$no genome id provided\n")
+    unless ($genome_id);
+  croak ("ERROR [$this_function] \$basedir does not exist\n")
+    unless (-d $basedir);
+  croak ("ERROR [$this_function]: no URL (network location for upload to UCSC) provided")
+    unless(defined $baseURL);
+
+  print "$log \n";
+
+  if (defined $log){
+    open(LOG, ">>", $log) or croak "$!";
+  }
+
+  unless ($baseURL =~ /\/$/) { $baseURL .= "/"; }
+
+  my $tmp_path = dist_file('Bio-ViennaNGS', "hub.txt" );
+  ($basename,$dir,$ext) = fileparse($tmp_path,qr/\..*/);
+  my $template_path = dir($dir,"template-AssemblyHub");
+
+  croak ("ERROR [$this_function] template directory not found\n") 
+    unless (-d $template_path);
+  my $faToTwoBit = can_run('faToTwoBit') or
+    croak ("ERROR [$this_function] faToTwoBit is not installed!");
+
+  my $bedToBigBed = can_run('bedToBigBed') or
+    croak ("ERROR [$this_function] bedToBigBed is not installed!");
+
+  # bedfiles path
+  my $accession = $genomeid;
+  # create assembly hub directory structure
+  my $assembly_hub_name = "assemblyHub";
+  my $assembly_hub_directory = dir($basedir, $assembly_hub_name);
+  my $genome_assembly_name = $accession;
+  my $genome_assembly_directory = dir($assembly_hub_directory,$genome_assembly_name);
+  mkdir $assembly_hub_directory;
+  mkdir $genome_assembly_directory;
+  if (defined $log){
+    print LOG "LOG Base directory:          $assembly_hub_directory\n";
+    print LOG "LOG Assembly Hub directory:  $genome_assembly_directory\n";
+  }
+
+  my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) =
+    run( command => $fastaToTwobit_cmd, verbose => 0 );
+  if( !$success ) {
+    print STDERR "ERROR [$this_function] External command call unsuccessful\n";
+    print STDERR "ERROR: this is what the command printed:\n";
+    print join "", @$full_buf;
+    croak $!;
+  }
+
+  #template definition
+  my $template = Template->new({
+                                INCLUDE_PATH => ["$template_path"],
+                                RELATIVE=>1,
+  });
+
+  #construct hub.txt
+  my $hubtxt_path = file($assembly_hub_directory,"hub.txt")->stringify;
+  my $hubtxt_file = "hub.txt";
+  my $hubtxt_vars =
+    {
+     hubName => $accession,
+     shortLabel => $accession,
+     longLabel => $accession,
+     genomesFile => "genome.txt",
+     email => 'email',
+     descriptionURL => "$baseURL" . "description.html"
+    };
+  $template->process($hubtxt_file,$hubtxt_vars,"$hubtxt_path") ||
+    croak "Template process failed: ", $template->error(), "\n";
+
+  #construct genome.txt
+  my $genometxt_path = file($assembly_hub_directory, "genome.txt")->stringify;
+  my $genometxt_file = "genome.txt";
+  my $genometxt_vars =
+    {
+     genome => $accession,
+     trackDb => file($accession, "trackDb.txt"),
+     groups => file($accession, "groups.txt"),
+     description => "$accession",
+     twoBitPath => file($accession,$accession.".2bit"),
+     organism => "organism",
+     defaultPos => $accession,
+     orderKey => "10",
+     scientificName => "$scientificName",
+     htmlPath => file($accession,"description.html")
+    };
+  $template->process($genometxt_file,$genometxt_vars,$genometxt_path) or
+    croak "Template process failed: ", $template->error(), "\n";
+
+  #construct description.html
+  my $description_html_path = file($genome_assembly_directory, "description.html")->stringify;
+  my $description_html_file = "description.html";
+  my $description_html_vars =
+    {
+     imageLink  => "imageLink",
+     imageSource => "imageSource",
+     imageAlternative => "imageAlternative",
+     taxonomicName => "taxonomicName",
+     imageOrigin => "imageOrigin",
+     imageOriginDescription => "imageOriginDescription",
+     ucscId => "ucscId",
+     sequencingId => "sequencingId",
+     assemblyDate => "assemblyDate",
+     genbankAccessionId => "genbankAccessionId",
+     ncbiGenomeInformationLink => "ncbiGenomeInformationLink",
+     ncbiGenomeInformationDescription => "ncbiGenomeInformationDescription",
+     ncbiAssemblyInformationLink => "ncbiAssemblyInformationLink",
+     ncbiAssemblyInformationDescription => "ncbiAssemblyInformationDescription",
+     bioProjectInformationLink => "bioProjectInformationLink",
+     bioProjectInformationDescription => "bioProjectInformationDescription",
+     sequenceAnnotationLink => "sequenceAnnotationLink"
+    };
+  $template->process($description_html_file,$description_html_vars,$description_html_path) or
+    croak "Template process failed: ", $template->error(), "\n";
+
+  my $groups = make_group("annotation", "Annotation", "1", "0");
+
+  #construct group.txt
+  my $group_txt_path = file($genome_assembly_directory, "groups.txt")->stringify;
+  my $group_txt_file = 'groups.txt';
+  my $group_txt_vars = 
+    {
+     groups  => "$groups",
+    };
+  $template->process($group_txt_file,$group_txt_vars,$group_txt_path) or
+    croak "Template process failed: ", $template->error(), "\n";
+
+
+  my $chromosome_size = retrieve_chromosome_size($fasta_path);
+  my $chromosome_size_filepath = file($genome_assembly_directory,"$accession.chrom.sizes");
+  write_chromosome_sizes_file($chromosome_size_filepath,$accession,$chromosome_size);
+  convert_tracks($filesdir, $genome_assembly_directory, $accession, $bedToBigBed, $chromosome_size_filepath);
+  my @trackfiles = retrieve_tracks($genome_assembly_directory, $baseURL, $assembly_hub_name, $accession);
+
+  my $tracksList;
+  foreach my $track (@trackfiles){
+    my $trackString = make_track(@$track);
+    $tracksList .= $trackString;
+  }
+
+  #construct trackDb.txt
+  my $trackDb_txt_path = file($genome_assembly_directory, "trackDb.txt")->stringify;
+  my $trackDb_txt_file = 'trackDb.txt';
+  my $trackDb_txt_vars =
+    {
+     tracks  => "$tracksList"
+    };
+  $template->process($trackDb_txt_file,$trackDb_txt_vars,$trackDb_txt_path) or
+    croak "Template process failed: ", $template->error(), "\n";
+
+  if (defined $log){
+    print LOG "LOG Assembly Hub created\n";
+    close(LOG);
+  }
+}
+
 sub convert_tracks{
   my ($filesdir,$genome_assembly_directory,$accession,$bedToBigBed,$chromosome_size_filepath) = @_;
   my $currentDirectory = getcwd;
@@ -406,7 +569,7 @@ The main functionality is provided by the make_assembly_hub function.
 =head2 EXPORT
 
 Routines: 
-  make_assembly_hub
+  make_assembly_hub, make_track_hub
 
 Variables:
   none
@@ -419,6 +582,16 @@ This function takes 4 parameters:
 2. path to the ouput directory (e.g. /home/user/assemblyhubs/)
 3. base URL where the output folder will be placed for upload to the UCSC genome browser (e.g. http://www.foo.com/folder/)
 4. path for the log file (/home/user/logs/assemblyhubconstructionlog)
+
+=head3 make_track_hub()
+
+Build track hubs for the UCSC genome browser.
+This function takes 4 parameters:
+1. chromosome id as used in existing ucsc assembly hub (e.g. chr1)
+2. path to the ouput directory (e.g. /home/user/assemblyhubs/)
+3. base URL where the output folder will be placed for upload to the UCSC genome browser (e.g. http://www.foo.com/folder/)
+4. path for the log file (/home/user/logs/assemblyhubconstructionlog)
+
 
 =head1 SEE ALSO
 
