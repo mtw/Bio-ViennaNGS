@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-09 00:45:17 mtw>
+# Last changed Time-stamp: <2014-12-13 23:41:06 mtw>
 #
 # Split BAM files according to their strands, optionally filter unique
 # mappers
@@ -34,7 +34,8 @@ use Pod::Usage;
 use Data::Dumper;
 use File::Basename;
 use Path::Class;
-use Bio::ViennaNGS qw(split_bam bed_or_bam2bw);
+use Bio::ViennaNGS::Bam qw(split_bam);
+use Bio::ViennaNGS::Util qw(bed_or_bam2bw);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#

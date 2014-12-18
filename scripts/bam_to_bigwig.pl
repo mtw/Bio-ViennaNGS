@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-08 23:52:55 mtw>
+# Last changed Time-stamp: <2014-12-13 01:01:55 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -30,7 +30,7 @@ use Getopt::Long qw( :config posix_default bundling no_ignore_case );
 use Pod::Usage;
 use Data::Dumper;
 use Path::Class;
-use Bio::ViennaNGS  qw(bed_or_bam2bw);
+use Bio::ViennaNGS::Util qw(bed_or_bam2bw);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#

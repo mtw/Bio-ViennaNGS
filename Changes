@@ -92,9 +92,16 @@ Revision history for Perl extension ViennaNGS.
 	- minimum version of Bio::Root::Version is now 1.00690001
 	- added some tests
 	- ship demo files in share/ folder
-	- updated POD and README	
+	- updated POD and README
+	
 0.12
 	- integrated Bio::ViennaNGS::SpliceJunc
 	- integrated Bio::ViennaNGS::UCSC
+	- added Bio::ViennaNGS::Bam;
+	- renamed Bio::ViennaNGS.pm to Bio::ViennaNGS::Util.pm
+	- migrated BAM specific code from Bio::ViennaNGS::Util 
+	  to Bio::ViennaNGS::Bam
 	- added scripts/assembly_hub_generator.pl
+	- refactored scripts/normalize_multicov.pl
 	- added static templates for the Assembly Hub generator
+	- updated POD and README 

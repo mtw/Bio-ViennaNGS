@@ -1,8 +1,8 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-10-02 15:01:25 mtw>
+# Last changed Time-stamp: <2014-12-14 23:42:49 mtw>
 #
-# Compute normalized expression data in TPM/RPKM from (raw) read
+# Compute normalized expression data in TPM from (raw) read
 # counts in multicov.
 # TPM reference: Wagner et al, Theory Biosci. 131(4), pp 281-85 (2012)
 #
@@ -35,32 +35,37 @@ use warnings;
 use Getopt::Long;
 use Data::Dumper;
 use File::Basename;
-use Bio::ViennaNGS qw( parse_multicov write_multicov featCount_data computeTPM);
+use Pod::Usage;
+use Cwd;
+use Path::Class;
+use Bio::ViennaNGS::Util qw( parse_multicov write_multicov featCount_data computeTPM);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
-my ($infile,$FC,$FC_sample,$conds,$totreads,$i,$sample,$basename,$dir,$ext,$cmd);
-my $readlength    = 100;
-my $debug         = 0;
-my $destdir       = "./";
+my ($infile,$FC,$FC_sample,$conds,$totreads,$i,$sample,$basename,$dir,$ext,$cwd);
+my $readlength  = 100;
+my $dest = getcwd();;
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 Getopt::Long::config('no_ignore_case');
-&usage() unless GetOptions("i=s"           => \$infile,
-			   "rl=s"          => \$readlength,
-			   "d"             => sub{$debug=1},
-			   "o=s"           => \$destdir,
-                           "-help"         => \&usage,
-                           "v");
+pod2usage(-verbose => 1) unless GetOptions("i=s"             => \$infile,
+					   "readlength|r=s"  => \$readlength,
+					   "out|o=s"         => \$dest,
+					   "man"             => sub{pod2usage(-verbose => 2)},
+					   "help|h"          => sub{pod2usage(1)}
+					  );
 
-die "ERROR in [normalize_multicov]: no input multicov file provided" unless(defined $infile);
-die "ERROR in [normalize_multicov]: input multicov file not found" unless (-e $infile);
-unless ($infile =~ /^\// || $infile =~ /^\.\//){$infile = "./".$infile;}
-unless ($destdir =~ /\/$/){$destdir .= "/";}
-unless (-d $destdir){$cmd = "mkdir -p $destdir"; system($cmd);}
+unless(-f $infile){
+  warn "Could not find input multicov file provided via -i option";
+  pod2usage(-verbose => 0);
+  }
+$cwd = getcwd();
+unless ($infile =~ /^\// || $infile =~ /^\.\//){$infile = file($cwd,$infile);}
+unless ($dest =~ /\/$/){$dest .= "/";}
+unless (-d $dest){mkdir $dest;}
 ($basename,$dir,$ext) = fileparse($infile,qr/\.[^.]*/);
 
 # parse multicov file; populate @featCount
@@ -74,34 +79,69 @@ for ($i=0;$i<$conds;$i++){
   my $meanTPM;
   $FC_sample = @$FC[$i];
   $meanTPM = computeTPM($FC_sample, $readlength);
-  if ($debug == 1) {
-    print "===> sample $i:\n";
-    # print Dumper($FC_sample);
-  }
-  #$totalreads = totalreads(%$FCsample);
-  if ($debug == 1){print  "\tmean TPM = $meanTPM\n";}
 }
 
 # write multicov file based on TPM data in @featCount
-write_multicov("TPM", $destdir, $basename);
+write_multicov("TPM", $dest, $basename);
 
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
-#^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
+__END__
 
 
-sub usage {
-  print <<EOF;
-Calculate normalized expression values (TPM/RPKM) for multicov data
+=head1 NAME
 
-usage: $0 [options]
-program specific options:                                default:
- -i      <file>                                          ($infile)
- -o      <path>   output directory                       ($destdir)
- -rl     <int>    read length                            ($readlength)
- -d               debug output                           ($debug)
- -help            print this information
+normalize_multicov.pl - Compute normalized expression data from read
+counts
 
-EOF
-exit;
-}
+=head1 SYNOPSIS
+
+normalize_multicov.pl [-i I<FILE>] [--readlength I<INT>] [options]
+
+=head1 DESCRIPTION
+
+This program computes normalized expression values in Transcript per
+Million (TPM) from read counts. The latter must be provided in the
+format produced by the 'bedtools multicov' utility, i.e. an extended
+BED6 file where each colum past the 6th lists the read counts for one
+sample/condition.
+
+=head1 OPTION
+
+=over
+
+=item B<-i>
+
+Input file in 'bedtools multicov' output format, i.e. an extended BED6
+file where each colum past the 6th lists the read counts for one
+sample/condition.
+
+=item B<--readlength -r>
+
+Read length of the RNA-seq experiment.
+
+=item B<--out -o>
+
+Output folder.
+
+=item B<--help -h>
+
+Print short help
+
+=item B<--man>
+
+Prints the manual page and exits
+
+=back
+
+=head1 SEE ALSO
+
+TPM reference: Wagner et al, Theory Biosci. 131(4), pp 281-85 (2012)
+
+=head1 AUTHOR
+
+Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+
+=cut
+
+
+
+
