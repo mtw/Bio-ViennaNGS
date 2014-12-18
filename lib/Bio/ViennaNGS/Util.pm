@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-14 23:49:36 mtw>
+# Last changed Time-stamp: <2014-12-16 12:28:21 fall>
 
 package Bio::ViennaNGS::Util;
 
@@ -15,6 +15,7 @@ use File::Basename qw(basename fileparse);
 use File::Temp qw(tempfile);
 use IPC::Cmd qw(can_run run);
 use Path::Class;
+use Math::Round;
 use Carp;
 use Bio::ViennaNGS::FeatureChain;
 
@@ -24,7 +25,7 @@ our @EXPORT = ();
 our @EXPORT_OK = qw ( bed_or_bam2bw sortbed bed2bigBed computeTPM
 		      featCount_data parse_multicov write_multicov
 		      unique_array kmer_enrichment extend_chain
-		      parse_bed6);
+		      parse_bed6 fetch_chrom_sizes);
 
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -347,7 +348,7 @@ sub extend_chain{
   my $d     = $_[5];
 
   ##return a new chain with extended coordinates
-  my $extendchain = $chain;
+  my $extendchain = $chain -> clone();
   ## got through all features in original chain, calculate new start and end and safe in extendchain
   my @featarray = @{$extendchain->chain};
   foreach my $feature (@featarray){
@@ -359,14 +360,13 @@ sub extend_chain{
     my $left   = 0;
     my $width  = nearest(1,($end-$start)/2);
     $width = 0 if ($d > 0 || $u > 0);
-
     if ($strand eq "+"){
       if ($d > 0){
-	$start = $end+1;
+	$start = $end;
 	$r = $d;
       }
       if ($u > 0){
-	$end = $start-1;
+	$end = $start;
 	$l = $u;
       }
       $right=$r;
@@ -374,17 +374,16 @@ sub extend_chain{
     }
     elsif ($strand eq "-"){
       if ($u > 0){
-	$start = $end+1;
+	$start = $end;
 	$l = $u;
       }
       if ($d > 0){
-	$end = $start-1;
+	$end = $start;
 	$r = $d;
       }
       $right=$l;
       $left=$r;
     }
-
     if (($right-$width) <= 0){
       $right = 0;
     }
@@ -397,7 +396,6 @@ sub extend_chain{
     else{
       $left-=$width;
     }
-
     if ( $start-$left >= 1 ){
       if ($end+$right >= $sizes{"chr".$chrom}){
 	$end = $sizes{"chr".$chrom};
@@ -405,7 +403,7 @@ sub extend_chain{
       else{
 	$end += $right;
       }
-      $start -= ($left+1); ## Because of Bed coordinates, we need to 0-base the result
+      $start -= $left;
     }
     elsif ( $start-$left <= 0 ){
       $start = 0;
@@ -437,7 +435,7 @@ sub parse_bed6{
     push @line, "\." if ( !$line[5] ); 
 
     (my $chromosome  = $line[0])=~ s/chr//g;
-    my $start	     = $line[1]+1;
+    my $start	     = $line[1];
     my $end	     = $line[2];
     my $name	     = $line[3];
     my $score	     = $line[4];
@@ -460,6 +458,49 @@ sub parse_bed6{
     push @featurelist, $feat;
   }
   return (\@featurelist);
+}
+
+sub fetch_chrom_sizes{
+  my $species = shift;
+  my %sizes;
+  my @chromsize;
+  my $this_function = (caller(0))[3];
+
+  my $test_fetchChromSizes = can_run('fetchChromSizes') or
+    say "ERROR [$this_function] fetchChromSizes utility not found";
+
+  my $cmd = "fetchChromSizes $species";
+  my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run(command => $cmd, verbose => 0);
+  if ($success){
+    @chromsize = @{$stdout_buf};
+  }
+  else{
+    print STDERR "Using UCSCs fetchChromSizes failed, trying alternative mysql fetch!\n";
+    my $test_fetchChromSizes = can_run('mysql') or
+      die "ERROR [$this_function] mysql utility not found";
+    $cmd = "mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e \"select chrom, size from $species.chromInfo\"";  ### Alternative to UCSC fetchChromSizes, has mysql dependency
+    my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf )  = run(command => $cmd, verbose => 0);
+    if ($success){
+      @chromsize = @{$stdout_buf};
+    }
+    else{
+      print STDERR "ERROR [$this_function] External command call unsuccessful\n";
+      print STDERR "ERROR: this is what the command printed:\n";
+      print join "", @$full_buf;
+      croak $!;
+      die "Fetching of chromosome sizes failed, please either download fetchChromSizes from the UCSC script collection, or install mysql!\n";
+    }
+  }
+
+  foreach (@chromsize){
+    chomp($_);
+    foreach (split(/\n/,$_)){
+      my ($chr,$size)=split (/\t/,$_);
+      $sizes{$chr}=$size;
+    }
+  }
+
+  return(\%sizes);
 }
 
 1;
