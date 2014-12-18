@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-#Last changed Time-stamp: <2014-12-11 14:38:29 fall>
+#Last changed Time-stamp: <2014-12-16 12:26:58 fall>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -150,7 +150,7 @@ $R->run(q`p <- p + theme(aspect.ratio=1)`);
 $R->run(q`p <- p + theme(axis.text=element_text(size=8), axis.title=element_text(size=10,face="bold"))`);
 $R->run(q`p <- p + theme(axis.text.x=element_text(angle=45, hjust=1, vjust=1))`);
 $R->run(q`p <- p + theme(axis.title.y = element_text(angle=90))`);
-$R->run(q`p <- p + ylab("Sites containing the motif")`);
+$R->run(q`p <- p + ylab("Number of sites")`);
 $R->run(q`p <- p + xlab("Motif regular expression")`);
 $R->run(q`p <- p + ggtitle(file)+theme(plot.title = element_text(size=12, face="bold"))`);
 $R->run(q`p`);
@@ -161,6 +161,10 @@ $R->run(q`ggsave(filename=out, path="./", width=12, height=8)`);
 $R->run(q`out<-paste(file,".jpg",sep="")`);
 $R->run(q`ggsave(filename=out, path="./", width=12, height=8)`);
 $R->stopR;
+
+if(-e "Rplots.pdf"){ ### Clean outdir
+    `rm Rplots.pdf`;
+}
 
 chdir($dir) or die "Directory $dir not found!\n";
 
