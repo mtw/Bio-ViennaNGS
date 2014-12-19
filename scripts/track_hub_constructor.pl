@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-17 10:15:53 egg>
+# Last changed Time-stamp: <2014-12-19 23:16:22 mtw>
 #
 # Construct UCSC genome browser Track Hub and display various
 # genomic sequence annotation data within the Hub
@@ -87,8 +87,8 @@ __END__
 
 =head1 NAME
 
-track_hub_constructor.pl - Build UCSC genome browser Track Hubs
-from genomic sequence and annotation
+track_hub_constructor.pl - Build UCSC genome browser Track Hubs from
+genomic sequence and annotation
 
 =head1 SYNOPSIS
 
@@ -97,9 +97,10 @@ I<PATH>] [--baseurl -I<URL>] [options]
 
 =head1 DESCRIPTION
 
-The UCSC genome browser offers the possibility to visualize additional tracks
-for organisms that are included in the standard UCSC browser bundle via so called
-'Track Hubs'. This script constructs Track Hubs from annotation data.
+The UCSC genome browser offers the possibility to visualize additional
+tracks for organisms that are included in the standard UCSC browser
+bundle via so called 'Track Hubs'. This script constructs Track Hubs
+from annotation data.
 
 =head1 OPTIONS
 
@@ -107,7 +108,8 @@ for organisms that are included in the standard UCSC browser bundle via so calle
 
 =item B<--gi -g>
 
-Genome id as used in UCSC assembly hub. Must be correct, otherwise the annotation cannot be mapped on the genome.
+Genome id as used in UCSC assembly hub. Must be correct, otherwise the
+annotation cannot be mapped on the genome.
 
 =item B<--infolder -i>
 
@@ -121,9 +123,9 @@ Destination folder for the output Track Hub.
 
 =item  B<--baseurl -b>
 
-BaseURL used within the Track Hub. This URL will be included
-verbatim in the resulting Track Hub. It is crucial that this URl is
-valid, else the resulting Track Hub will be broken.
+BaseURL used within the Track Hub. This URL will be included verbatim
+in the resulting Track Hub. It is crucial that this URl is valid, else
+the resulting Track Hub will be broken.
 
 =item B<--help -h>
 
@@ -139,9 +141,14 @@ Prints the manual page and exits.
 
 The L<UCSC Genome
 Wiki|http://genomewiki.ucsc.edu/index.php/Track_Hubs> has extensive
-documentation for Assembly Hubs.
+documentation for Assembly and Track Hubs.
 
 =head1 AUTHORS
 
-Florian Eggenhofer E<lt>florian.eggenhofer@univie.ac.atE<gt>
-Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+=over
+
+=item Florian Eggenhofer E<lt>florian.eggenhofer@univie.ac.atE<gt>
+
+=item Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+
+=back
