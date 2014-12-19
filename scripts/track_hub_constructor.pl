@@ -35,18 +35,19 @@ use Pod::Usage;
 use Data::Dumper;
 use File::Basename;
 use Path::Class;
-use Bio::ViennaNGS::UCSC qw( make_assembly_hub );
+use Bio::ViennaNGS::UCSC qw( make_assembly_hub make_track_hub );
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-my ($assembly_hub_return_value,$lf);
+my ($track_hub_return_value,$lf);
 my $logname = "log.txt";
-my $fasta_in = '-';
+my $genome_identifier = '-';
 my $folder_in = '-';
 my $dest = '.';
 my $base_URL = '-';
+my $chrom_size_file="-";
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -55,6 +56,7 @@ pod2usage(-verbose => 1) unless GetOptions("gi|g=s"       => \$genome_identifier
 					   "infolder|i=s" => \$folder_in,
 					   "out|o=s"      => \$dest,
 					   "baseurl|b=s"  => \$base_URL,
+                                           "chromsize|c=s"  => \$chrom_size_file,
 					   "man"          => sub{pod2usage(-verbose => 2)},
 					   "help|h"       => sub{pod2usage(1)}
 					  );
@@ -77,7 +79,7 @@ unless (-d $dest){
 }
 $lf = file($dest,$logname);
 
-$track_hub_return_value = make_track_hub($genome_identifier,$folder_in,$dest,$base_URL,$lf);
+$track_hub_return_value = make_track_hub($genome_identifier,$folder_in,$dest,$base_URL,$chrom_size_file,$lf);
 
 
 __END__
