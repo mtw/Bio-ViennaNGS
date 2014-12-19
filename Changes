@@ -97,6 +97,9 @@ Revision history for Perl extension ViennaNGS.
 0.12
 	- integrated Bio::ViennaNGS::SpliceJunc
 	- integrated Bio::ViennaNGS::UCSC
+	- integrated Bio::ViennaNGS::Tutorial
+	- integrated Bio::ViennaNGS::BamStat
+	- integrated Bio::ViennaNGS::BamStatSummary
 	- added Bio::ViennaNGS::Bam;
 	- renamed Bio::ViennaNGS.pm to Bio::ViennaNGS::Util.pm
 	- migrated BAM specific code from Bio::ViennaNGS::Util 
