@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-20 00:33:25 mtw>
+# Last changed Time-stamp: <2014-12-20 00:41:39 mtw>
 
 package Bio::ViennaNGS::Tutorial;
 
@@ -19,7 +19,7 @@ __END__
 
 =head1 NAME
 
-    Pipeline.pl - An example pipeline for the ViennaNGS toolbox
+    Tutorial_pipeline01.pl - An example pipeline for the ViennaNGS toolbox
 
 =head2 SYNOPSIS
  
