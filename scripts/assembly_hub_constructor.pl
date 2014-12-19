@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-11 23:41:52 mtw>
+# Last changed Time-stamp: <2014-12-19 23:14:44 mtw>
 #
 # Construct UCSC genome browser Assembly Hub and display various
 # genomic sequence annotation data within the Hub
@@ -142,5 +142,10 @@ documentation for Assembly Hubs.
 
 =head1 AUTHORS
 
-Florian Eggenhofer E<lt>florian.eggenhofer@univie.ac.atE<gt>
-Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+=over
+
+=item Florian Eggenhofer E<lt>florian.eggenhofer@univie.ac.atE<gt>
+
+=item Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+
+=back

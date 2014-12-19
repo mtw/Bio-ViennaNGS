@@ -7,7 +7,7 @@ use File::ShareDir::Install;
 
 install_share dist => 'share';
 
-my @scripts = qw (assembly_hub_constructer.pl bam_split.pl bam_to_bigwig.pl bam_uniq.pl bed2bedGraph.pl extend_bed.pl gff2bed.pl kmer_analysis.pl MEME_XML_motif_extractor.pl motiffinda.pl newUCSCdb.pl normalize_multicov.pl sj_visualizer.pl splice_site_summary.pl trim_fastq.pl);
+my @scripts = qw (assembly_hub_constructer.pl bam_quality_stat.pl bam_split.pl bam_to_bigwig.pl bam_uniq.pl bed2bedGraph.pl extend_bed.pl gff2bed.pl kmer_analysis.pl MEME_XML_motif_extractor.pl motiffinda.pl newUCSCdb.pl normalize_multicov.pl sj_visualizer.pl splice_site_summary.pl trim_fastq.pl Tutorial_pipeline01.pl);
 WriteMakefile(
 	      'NAME'            => 'Bio::ViennaNGS',
 	      'AUTHOR'          => q{Michael T. Wolfinger},
