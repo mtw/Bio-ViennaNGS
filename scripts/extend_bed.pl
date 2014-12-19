@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2014-12-11 14:36:18 fall>
+# Last changed Time-stamp: <2014-12-19 23:45:09 mtw>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -15,9 +15,10 @@ use Cwd;
 use File::Path qw(make_path remove_tree);
 use File::Basename qw(fileparse);
 use Math::Round;
-use Bio::ViennaNGSutil qw(extend_chain parse_bed6);
+use Bio::ViennaNGS::Util qw(extend_chain parse_bed6);
 use Bio::ViennaNGS::Feature;
-use Bio::ViennaNGS::FeatureIO;
+use Bio::ViennaNGS::FeatureChain;
+
 ###############
 ###Variables
 ###############
