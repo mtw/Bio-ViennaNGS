@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-18 14:36:07 mtw>
+# Last changed Time-stamp: <2014-12-19 13:31:14 fabian>
 
 package Bio::ViennaNGS::BamStat;
 
@@ -252,7 +252,7 @@ sub stat_singleBam {
     ### Quality Score read
     if($self->has_control_qual){
       if($self->has_is_segemehl && $match_qual == 255){
-	carp "WARN [$this_function] no match_qual for segemehl";
+	#carp "WARN [$this_function] no match_qual for segemehl";
 	$self->clear_control_qual;
       }
       elsif($match_qual){
