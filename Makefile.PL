@@ -27,6 +27,7 @@ WriteMakefile(
 				    "Path::Class" 	        => '0',
 				    "Math::Round"               => '0',
 				    "Pod::Usage" 	        => '0',
+				    "PerlIO::gzip"              => '0',
 				    "POSIX" 		        => '0',
 				    "Carp" 		        => '0',
 				    "Tie::Hash::Indexed"        => '0',
