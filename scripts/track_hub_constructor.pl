@@ -1,8 +1,8 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-11 23:41:52 mtw>
+# Last changed Time-stamp: <2014-12-17 10:15:53 egg>
 #
-# Construct UCSC genome browser Assembly Hub and display various
+# Construct UCSC genome browser Track Hub and display various
 # genomic sequence annotation data within the Hub
 #
 # ***********************************************************************
@@ -35,32 +35,34 @@ use Pod::Usage;
 use Data::Dumper;
 use File::Basename;
 use Path::Class;
-use Bio::ViennaNGS::UCSC qw( make_assembly_hub );
+use Bio::ViennaNGS::UCSC qw( make_assembly_hub make_track_hub );
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-my ($assembly_hub_return_value,$lf);
+my ($track_hub_return_value,$lf);
 my $logname = "log.txt";
-my $fasta_in = '-';
+my $genome_identifier = '-';
 my $folder_in = '-';
 my $dest = '.';
 my $base_URL = '-';
+my $chrom_size_file="-";
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 Getopt::Long::config('no_ignore_case');
-pod2usage(-verbose => 1) unless GetOptions("fa|f=s"       => \$fasta_in,
+pod2usage(-verbose => 1) unless GetOptions("gi|g=s"       => \$genome_identifier,
 					   "infolder|i=s" => \$folder_in,
 					   "out|o=s"      => \$dest,
 					   "baseurl|b=s"  => \$base_URL,
+                                           "chromsize|c=s"  => \$chrom_size_file,
 					   "man"          => sub{pod2usage(-verbose => 2)},
 					   "help|h"       => sub{pod2usage(1)}
 					  );
 
-unless (-e $fasta_in){
-  warn "Could not find input Fasta file given via --fa option";
+unless ($genome_identifier){
+  warn "Please provide genome identifier via --g option";
   pod2usage(-verbose => 0);
 }
 unless (-d $folder_in){
@@ -77,7 +79,7 @@ unless (-d $dest){
 }
 $lf = file($dest,$logname);
 
-$assembly_hub_return_value = make_assembly_hub($fasta_in,$folder_in,$dest,$base_URL,$lf);
+$track_hub_return_value = make_track_hub($genome_identifier,$folder_in,$dest,$base_URL,$chrom_size_file,$lf);
 
 
 __END__
@@ -85,44 +87,43 @@ __END__
 
 =head1 NAME
 
-assembly_hub_constructor.pl - Build UCSC genome browser Assembly Hubs
+track_hub_constructor.pl - Build UCSC genome browser Track Hubs
 from genomic sequence and annotation
 
 =head1 SYNOPSIS
 
-assembly_hub_constructor.pl [--fa I<FILE>] [--infolder I<PATH>] [--out
+track_hub_constructor.pl [--gi I<ID>] [--infolder I<PATH>] [--out
 I<PATH>] [--baseurl -I<URL>] [options]
 
 =head1 DESCRIPTION
 
-The UCSC genome browser offers the possibility to visualize any
-organism (including organisms that are not included in the standard
-UCSC browser bundle) through hso called 'Assembly Hubs'. This script
-constructs Assembly Hubs from genomic sequence and annotation data.
+The UCSC genome browser offers the possibility to visualize additional tracks
+for organisms that are included in the standard UCSC browser bundle via so called
+'Track Hubs'. This script constructs Track Hubs from annotation data.
 
 =head1 OPTIONS
 
 =over
 
-=item B<--fa -f>
+=item B<--gi -g>
 
-Input file in Fasta format.
+Genome id as used in UCSC assembly hub. Must be correct, otherwise the annotation cannot be mapped on the genome.
 
 =item B<--infolder -i>
 
 Directory which contains all track files in BED/bigBed format. The
-resulting Assembly Hub will contain these files in their respective
+resulting Track Hub will contain these files in their respective
 bigFile version.
 
 =item B<--out -o>
 
-Destination folder for the output Assembly Hub.
+Destination folder for the output Track Hub.
 
 =item  B<--baseurl -b>
 
-BaseURL used within the Assembly Hub. This URL will be included
-verbatim in the resulting Assembly Hub. It is crucial that this URl is
-valid, else the resulting Assembly Hub will be broken.
+BaseURL used within the Track Hub. This URL will be included
+verbatim in the resulting Track Hub. It is crucial that this URl is
+valid, else the resulting Track Hub will be broken.
 
 =item B<--help -h>
 
@@ -137,7 +138,7 @@ Prints the manual page and exits.
 =head1 SEE ALSO
 
 The L<UCSC Genome
-Wiki|http://genomewiki.ucsc.edu/index.php/Assembly_Hubs> has extensive
+Wiki|http://genomewiki.ucsc.edu/index.php/Track_Hubs> has extensive
 documentation for Assembly Hubs.
 
 =head1 AUTHORS

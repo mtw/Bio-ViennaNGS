@@ -1,0 +1,6 @@
+hub [% hubName %]
+shortLabel [% shortLabel %]
+longLabel [% longLabel %]
+genomesFile [% genomesFile %]
+email [% email %]
+descriptionUrl [% descriptionURL %]
