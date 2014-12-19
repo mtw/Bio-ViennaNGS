@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-19 13:26:17 fabian>
+# Last changed Time-stamp: <2014-12-19 23:37:35 mtw>
 
 use strict;
 use warnings;
@@ -23,14 +23,14 @@ my $rlibpath = '/usr/bin/R'; # path to R installation (`which R`)
 my %data     = ();           # stores all results from single bam files
 my $VERBOSE  = 0;
 
-my $match_control    = 0;   # provids stats how many mapped bases match the reference genome
-my $clip_control     = 0;   # provids stats how many bases are soft or hard clipped
-my $split_control    = 0;   # provids stats how many mapped reads are splitted (and how often);
-my $qual_control     = 0;   # provids stats on quality of the match
-my $edit_control     = 0;   # provids stats on the edit distance between read and mapped reference
+my $match_control    = 0;   # provides stats how many mapped bases match the reference genome
+my $clip_control     = 0;   # provides stats how many bases are soft or hard clipped
+my $split_control    = 0;   # provides stats how many mapped reads are splitted (and how often);
+my $qual_control     = 0;   # provides stats on quality of the match
+my $edit_control     = 0;   # provides stats on the edit distance between read and mapped reference
 my $flag_control     = 1;   # analyses the sam bit flag for qual/strands/pair_vs_single reads
 my %raw_flag_data    = ();
-my $score_control    = 1;   # provids stats on per-base quality scores
+my $score_control    = 1;   # provides stats on per-base quality scores
 my $uniq_control     = 1;   # gives number and stats of multiplicity of readaligments (must be =1)
 my $segemehl_control = 0;   # toggles to consider segemehl specific bam feature
 
@@ -116,10 +116,13 @@ __END__
 
 =head1 NAME
 
-bam_qualstats.pl -- Generates quality statistics from specified BAM input files.
+bam_quality_stats.pl -- Generates quality statistics from specified
+BAM input files.
 
 =head1 SYNOPSIS
-bam_qualstats.pl --dir <PATH> --bam <file1:file2:..> --odir <PATH> [--match] [--clip] [--qual] [--edit] [--rlib <PATH>] [[--help]
+
+bam_quality_stats.pl --dir <PATH> --bam <file1:file2:..> --odir <PATH>
+[--match] [--clip] [--qual] [--edit] [--rlib <PATH>] [[--help]
 
 =head1 OPTIONS
 
@@ -127,37 +130,45 @@ bam_qualstats.pl --dir <PATH> --bam <file1:file2:..> --odir <PATH> [--match] [--
     
 =item B<--dir>
 
-Path to directory with BAM files. All BAM files in this directory will be processed.
+Path to directory with BAM files. All BAM files in this directory will
+be processed.
 
 =item B<--bam>
 
-List seperated by ':'. Specifies bam files which schould be parsed and processd. Can be combined with --dir.
+List seperated by ':'. Specifies bam files which schould be parsed and
+processd. Can be combined with --dir.
 
 =item B<--odir>
 
-Path to output directory. In this directory several output files will be created. Existing files with identiacal names will be over written. Can be combined with --bam.
+Path to output directory. In this directory several output files will
+be created. Existing files with identiacal names will be over
+written. Can be combined with --bam.
 
 =item B<--match>
 
-Provids stats how many bases match the reference genome in the alignment's CIGAR string. If sequence mismatchs are defined as alignment matches depends on the used read mapper. Some use the '=' and the 'X' symbol. In this case only sequencing matches are counted. If the aligner only reports 'M' no distinction between sequence match and mismatch can be done. In any case, clipped bases, deletions, insertions are excluded.
-    
-=item B<--clip>
+Provides stats how many bases match the reference genome in the
+alignment's CIGAR string. If sequence mismatchs are defined as
+alignment matches depends on the used read mapper. Some use the '='
+and the 'X' symbol. In this case only sequencing matches are
+counted. If the aligner only reports 'M' no distinction between
+sequence match and mismatch can be done. In any case, clipped bases,
+deletions, insertions are excluded.  =item B<--clip>
 
-Provids stats how many bases are soft or hard clipped.
+Provides stats how many bases are soft or hard clipped.
 
 =item B<--qual>
 
-Provids stats on quality of the read match against the reference sequence.
+Provides stats on quality of the read match against the reference
+sequence.
 
 =item B<--edit>
 
-Provids stats on the edit distance between read and mapped reference position.
- 
-=item B<--segemehl>
+Provides stats on the edit distance between read and mapped reference position. 
 
-Toggles to specific segemehl bam file characteristics (e.g., mapped fragments per line).
-   
-=item B<--rlib -r>
+ =item B<--segemehl>
+
+Toggles to specific segemehl bam file characteristics (e.g., mapped
+fragments per line).  =item B<--rlib -r>
 
 Path to the R library. Default is '/usr/bin/R'.
 
@@ -177,7 +188,8 @@ Prints additional output.
 
 =head1 DESCRIPTION
 
-This program screens a given directory for bam files and returns veriouse statistics for the found samples.
+This program screens a given directory for BAM files and computes
+various statistics on them.
 
 =head1 AUTHOR
 
