@@ -198,6 +198,17 @@ This source is available on Github:
               https://github.com/mtw/Bio-ViennaNGS
 
 
+CITING VIENNANGS
+
+If the  ViennaNGS suite is useful for your work or if you use any component
+of ViennaNGS in a custom pipeline, please cite the following publication:
+
+"ViennaNGS - A toolbox for building efficient next-generation sequencing
+analysis pipelines"
+Michael T. Wolfinger, Joerg Fallmann, Florian Eggenhofer and Fabian Amman
+bioRxiv doi: http://dx.doi.org/10.1101/013011
+
+
 AUTHORS
 
 Michael T. Wolfinger <michael@wolfinger.eu>
@@ -208,7 +219,7 @@ Fabian Amman <fabian@tbi.univie.ac.at>
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2014 Michael T. Wolfinger <michael@wolfinger.eu>
+Copyright (C) 2014-2015 Michael T. Wolfinger <michael@wolfinger.eu>
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself, either Perl version 5.12.4 or, at your
