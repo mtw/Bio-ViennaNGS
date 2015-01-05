@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-20 00:31:16 mtw>
+# Last changed Time-stamp: <2015-01-05 15:47:13 mtw>
 
 package Bio::ViennaNGS::BamStat;
 
 use 5.12.0;
-use version; our $VERSION = qv('0.12_07');
+use version; our $VERSION = qv('0.12_08');
 use Bio::DB::Sam 1.39;
 use Moose;
 use Carp;
@@ -540,13 +540,13 @@ __END__
 
 =head1 NAME
 
-Bio::ViennaNGS::BamStatSingle - Moose interface to BAM mapping statistics
+Bio::ViennaNGS::BamStat - Moose interface to BAM mapping statistics
 
 =head1 SYNOPSIS
 
-  use Bio::ViennaNGS::BamStatSingle;
+  use Bio::ViennaNGS::BamStat;
 
-  my $bss1 = Bio::ViennaNGS::BamStatSingle->new(bam => "path/to/file.bam");
+  my $bss1 = Bio::ViennaNGS::BamStat->new(bam => "path/to/file.bam");
 
 =head1 DESCRIPTION
 
