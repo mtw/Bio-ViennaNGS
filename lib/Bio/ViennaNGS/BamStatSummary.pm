@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-20 00:31:30 mtw>
+# Last changed Time-stamp: <2015-01-05 15:49:29 mtw>
 
 package Bio::ViennaNGS::BamStatSummary;
 
 use 5.12.0;
-use version; our $VERSION = qv('0.12_07');
+use version; our $VERSION = qv('0.12_08');
 use Moose;
 use Carp;
 use POSIX qw(floor);
@@ -111,10 +111,6 @@ has 'is_segemehl' => ( # toggles to consider segemehl specific bam feature
 		      default => '0',
 		      predicate => 'has_is_segemehl',
 		     );
-
-
-
-#my $bss1 = Bio::ViennaNGS::BamStatSingle->new(bam => $bamfile);
 
 sub populate_data {
   my ($self) = @_;
@@ -223,7 +219,7 @@ sub plot_barplot { #plot barplot read.table text string
   my $rlibpath        = $self->rlib;
 
   $filename .= '.pdf' unless ($ext eq 'pdf');
-  
+
   my $R = Statistics::R->new();
   $R->startR;
   $R->set('rlib', $rlibpath);
