@@ -49,4 +49,5 @@ share/template-TrackHub/description.html
 share/template-TrackHub/genome.txt
 share/template-TrackHub/hub.txt
 share/template-TrackHub/trackDb.txt
-t/Bio-ViennaNGS.t
+t/01-basics.t
+t/02-thirdparty.t
