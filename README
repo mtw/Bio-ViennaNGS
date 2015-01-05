@@ -1,4 +1,4 @@
-Bio::ViennaNGS 0.12_07
+Bio::ViennaNGS 0.12_08
 ==============
 
 Bio::ViennaNGS is a distribution of Perl modules and utilities for
@@ -198,15 +198,32 @@ This source is available on Github:
               https://github.com/mtw/Bio-ViennaNGS
 
 
-CITING VIENNANGS
+PAPERS
 
-If the  ViennaNGS suite is useful for your work or if you use any component
-of ViennaNGS in a custom pipeline, please cite the following publication:
+If the Bio::ViennaNGS suite is useful for your work or if you use any
+component of ViennaNGS in a custom pipeline, please cite the following
+publication:
 
 "ViennaNGS - A toolbox for building efficient next-generation sequencing
 analysis pipelines"
 Michael T. Wolfinger, Joerg Fallmann, Florian Eggenhofer and Fabian Amman
 bioRxiv doi: http://dx.doi.org/10.1101/013011
+
+
+NOTES
+
+The Bio::ViennaNGS suite is actively developed and tested on different
+flavours of Linux and Mac OS X. We have taken care of writing
+platform-independent code that should run out of the box on most UNIX-based
+systems, however we do not have access to machines running Microsoft
+Windows. As such, we have not tested and will not test Windows
+compatibility.
+
+
+BUGS
+
+Please report bugs through the Github issue tracker at
+https://github.com/mtw/Bio-ViennaNGS/issues
 
 
 AUTHORS
