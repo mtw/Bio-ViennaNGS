@@ -1,19 +1,64 @@
+#!/usr/bin/env perl
 use strict;
 use warnings;
-use Test::More tests => 7;
+use Test::More tests => 9;
 use IPC::Cmd qw(can_run);
 
-
-ok( defined(can_run('cat')), 'cat not found');
-ok( defined(can_run('awk')), 'awk not found');
-ok( defined(can_run('bedToBigBed')), 'bedToBigBed not found'); 
-ok( defined(can_run('genomeCoverageBed')), 'genomeCoverageBed not found');
-ok( defined(can_run('bedGraphToBigWig')), 'bedGraphToBigWig not found');
-
-SKIP {
-     skip 'faToTwoBit is not available',1 unless {
-     defined(can_run('faToTwoBit')) };
-    #  ok( defined(can_run('faToTwoBit')), 'faToTwoBit not found');
+SKIP: {
+     skip 'cat seemingly not available',1 
+       unless defined(can_run('cat')) ;
+     ok( defined(can_run('cat')), 'cat available and executable');
 }
-ok( defined(can_run('bedtools')), 'bedtools not found');
-ok( defined(can_run('sortBed')), 'sortBed not found');
+
+SKIP: {
+     skip 'awk seemingly not available',1 
+       unless defined(can_run('awk')) ;
+     ok( defined(can_run('awk')), 'awk available and executable');
+}
+
+SKIP: {
+     skip 'bedToBigBed seemingly not available',1 
+       unless defined(can_run('bedToBigBed')) ;
+     ok( defined(can_run('bedToBigBed')), 'bedToBigBed available and executable');
+}
+
+SKIP: {
+     skip 'genomeCoverageBed seemingly not available',1 
+       unless defined(can_run('genomeCoverageBed')) ;
+     ok( defined(can_run('genomeCoverageBed')), 'genomeCoverageBed available and executable');
+}
+
+SKIP: {
+     skip 'bedGraphToBigWig seemingly not available',1 
+       unless defined(can_run('bedGraphToBigWig')) ;
+     ok( defined(can_run('bedGraphToBigWig')), 'bedGraphToBigWig available and executable');
+}
+
+SKIP: {
+     skip ('faToTwoBit seemingly is not available',1)
+       unless defined(can_run('faToTwoBit'));
+
+     ok( defined(can_run('faToTwoBit')), 'faToTwoBit available and executable') or
+       diag ("please install the 'faToTwoBit' utility"); 
+}
+
+SKIP: {
+     skip ('bedtools seemingly is not available',1)
+       unless defined(can_run('bedtools'));
+     ok( defined(can_run('bedtools')), 'bedtools available and executable');
+}
+
+SKIP: {
+     skip ('sortBed seemingly is not available',1)
+       unless defined(can_run('sortBed'));
+     ok( defined(can_run('sortBed')), 'sortBed available and executable');
+}
+
+SKIP: {
+     skip ('R seemingly is not available',1)
+       unless defined(can_run('R'));
+     ok( defined(can_run('R')), 'R available and executable');
+}
+
+
+
