@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-06 00:18:32 mtw>
+# Last changed Time-stamp: <2015-01-08 23:26:26 mtw>
 
 package Bio::ViennaNGS;
 
-use version; our $VERSION = qv('0.12_08');
+use version; our $VERSION = qv('0.12_09');
 
 1;
 
@@ -49,6 +49,8 @@ handling elementary gene annotation.
 chaining gene annotation features.
 
 =back
+
+=head1 UTILITIES
 
 L<Bio::ViennaNGS> comes with a collection of command line utilities
 for accomplishing routine tasks often required in NGS data
@@ -206,7 +208,7 @@ analysis pipelines">
 
 I<Michael T. Wolfinger, Joerg Fallmann, Florian Eggenhofer and Fabian Amman>
 
-bioRxiv L<doi:10.1101E<sol>013011|http://dx.doi.org/10.1101/013011>.
+bioRxiv L<doi:10.1101/013011|http://dx.doi.org/10.1101/013011>.
 
 =head1 NOTES
 
