@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-08 23:26:26 mtw>
+# Last changed Time-stamp: <2015-01-08 23:54:55 mtw>
 
 package Bio::ViennaNGS;
 
@@ -23,30 +23,42 @@ quantification and visualization.
 The main Bio::ViennaNGS module is shipped with a complementary set of 
 (sub)modules:
 
-=over 
-
-=item L<Bio::ViennaNGS::Fasta>: Routines for accessing genomic
-sequences implemented through a Moose interface to L<Bio::DB::Fasta>.
+=over
 
 =item L<Bio::ViennaNGS::AnnoC>: A Moose interface for storage and
-  conversion of sequence annotation data.
+conversion of sequence annotation data.
+
+=item L<Bio::ViennaNGS::BamStat>: A L<Moose> based class for
+collecting mapping statistics.
+
+=item L<Bio::ViennaNGS::BamStatSummary>: A L<Moose> interface for
+processing L<Bio::ViennaNGS::BamStat> objects on a set of BAM files.
+
+=item L<Bio::ViennaNGS::Fasta>: Routines for accessing genomic
+sequences implemented through a L<Moose> interface to
+L<Bio::DB::Fasta>.
+
+=item L<Bio::ViennaNGS::Feature>: A L<Moose> based BED6 wrapper.
+
+=item L<Bio::ViennaNGS::FeatureChain>: Yet another L <Moose> class for
+chaining gene annotation features.
+
+=item L<Bio::ViennaNGS::MinimalFeature>: A L<Moose> interface for
+handling elementary gene annotation.
 
 =item L<Bio::ViennaNGS::SpliceJunc>: A collection of routines for
-  alternative splicing analysis.
+alternative splicing analysis.
+
+=item L<Bio::ViennaNGS::Tutorial>: A comprehensive tutorial of the
+  L<Bio::ViennaNGS> core routines with real-world NGS data.
 
 =item L<Bio::ViennaNGS::UCSC>: Routines for visualization of genomics
 data with the UCSC genome browser.
 
-=item L<Bio::ViennaNGS::Util>: Commodity routines used throughout the
-    L<Bio::ViennaNGS> modules and utilities
-
-=item L<Bio::ViennaNGS::MinimalFeature>: A Moose interface for
-handling elementary gene annotation.
-
-=item L<Bio::ViennaNGS::Feature>: A Moose-ish BED6 wrapper.  
-
-=item L<Bio::ViennaNGS::FeatureChain>: Yet another Moose class for
-chaining gene annotation features.
+=item L<Bio::ViennaNGS::Util>: A collection of wrapper routines for
+commonly used third-party NGS utilities, code for normalization of
+gene expression values based on read count data and a set of utility
+functions.
 
 =back
 
