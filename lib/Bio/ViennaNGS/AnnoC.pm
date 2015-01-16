@@ -1,11 +1,11 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-20 00:30:51 mtw>
+# Last changed Time-stamp: <2015-01-16 15:47:04 mtw>
 
 package Bio::ViennaNGS::AnnoC;
 
 use 5.12.0;
-use version; our $VERSION = qv('0.12_07');
-use Bio::ViennaNGS qw(sortbed);
+use version; our $VERSION = qv('0.12_10');
+use Bio::ViennaNGS::Util qw(sortbed);
 use Bio::Tools::GFF;
 use Path::Class;
 use Carp;
