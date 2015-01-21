@@ -1,4 +1,4 @@
-use 5.012004;
+use 5.010000;
 use lib 'inc';
 use ExtUtils::MakeMaker;
 use strict;
@@ -33,6 +33,7 @@ WriteMakefile(
 				    "Tie::Hash::Indexed"        => '0',
 				    "Moose"      		=> '0',
 				    "MooseX::Clone"             => '0',
+				    "MooseX::InstanceTracking"  => '0',
 				    "Moose::Util::TypeConstraints" => 0,
 				    "namespace::autoclean"  => '0',
 				    "File::Share"           => '0',
