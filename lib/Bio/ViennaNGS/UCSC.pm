@@ -59,7 +59,7 @@ sub make_assembly_hub{
     croak ("ERROR [$this_function] bedToBigBed is not installed!");
 
   # bedfiles path
-  my @parsedHeader = parse_fasta_header($fasta_path);
+  my @parsedHeader = parse_fasta_header($fasta_path,$this_function);
   my $unchecked_accession = $parsedHeader[0];
   my $scientificName = $parsedHeader[1];
   my $accession = valid_ncbi_accession($unchecked_accession);
@@ -431,18 +431,35 @@ sub valid_ncbi_accession{
 
 sub parse_fasta_header{
   my $filepath = shift;
+  my $this_function = shift;
   open my $file, '<', "$filepath";
   my $fastaheader = <$file>;
   chomp $fastaheader;
   close $file;
   #>gi|556503834|ref|NC_000913.3| Escherichia coli str. K-12 substr. MG1655
-  my @headerfields = split(/\|/, $fastaheader);
-  my $accession = $headerfields[3];
-  my $scientificName = $headerfields[4];
-  my @ids;
-  push(@ids,$accession);
-  push(@ids,$scientificName);
-  return @ids;
+  if($fastaheader=~/^>gi|/){
+    print LOG "#NCBI fasta header detected\n";
+    my @headerfields = split(/\|/, $fastaheader);
+    my $accession = $headerfields[3];
+    my $scientificName = $headerfields[4];
+    my @ids;
+    push(@ids,$accession);
+    push(@ids,$scientificName);
+    return @ids;
+  }else{
+    my $fastaid = $fastaheader;
+    $fastaid=~s/^>//;
+    if(valid_ncbi_accession($fastaid)){
+      print LOG "#Header contains just valid NCBI accession number\n";
+      my @ids;
+      push(@ids,$fastaid);
+      push(@ids,"scientific name not set");
+      return @ids;
+    }else{
+      print LOG "#No valid accession/ ncbi header\n";
+      croak ("ERROR [$this_function] \$fasta_path does not contain a valid accession/ ncbi header\n");
+    }
+  }
 }
 
 sub write_chromosome_size_file{
