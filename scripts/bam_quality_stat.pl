@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-19 23:37:35 mtw>
+# Last changed Time-stamp: <2015-01-22 15:34:02 fabian>
 
 use strict;
 use warnings;
@@ -41,7 +41,7 @@ my $segemehl_control = 0;   # toggles to consider segemehl specific bam feature
 pod2usage(-verbose => 0)
         unless GetOptions(
 	  "dir|d=s"     => \$bam_dir,
-	  "bam|b=s"     =>  sub {@bams=split/:/, $_[1]},
+	  "bam|b:s"     =>  sub {@bams=split/:/, $_[1]},
 	  "odir|o=s"    => \$odir,
 	  "rlib|r=s"    => \$rlibpath,
 	  "match!"      => \$match_control,
@@ -58,17 +58,6 @@ pod2usage(-verbose => 0)
 ## # #  Input  # # ##
 #####################
 
-
-if(@bams){
-  foreach my $bam (@bams){
-    unless (-f $bam){
-      warn "Could not find input bam file $bam given via --bam option\n";
-      pod2usage(-verbose => 0);
-
-    }
-  }
-}
-
 if ($bam_dir){
   unless ($bam_dir=~ /^\// || $bam_dir =~ /\.\//){$bam_dir = "./".$bam_dir;}
   unless (-d $bam_dir){
@@ -79,6 +68,23 @@ if ($bam_dir){
   opendir(my $dh, $bam_dir) || die "can't opendir $bam_dir: $!\n";
   push @bams,  map {"$bam_dir/$_"} grep { /\.bam$/ && -f "$bam_dir/$_" } readdir($dh);
 }
+
+my @Bams=@bams;
+if(@bams){
+  foreach my $bam ( 0 .. $#bams){
+    if ($bams[$bam] && -f $bams[$bam]){
+      next;
+    }
+    elsif ($bams[$bam] eq ""){
+      splice(@Bams, $bam, 1);
+    }
+    else{
+      warn "Could not find input bam file <$bams[$bam]> given via --bam option\n";
+      pod2usage(-verbose => 0);
+    }
+  }
+}
+@bams=@Bams;
 
 unless ($odir =~ /\/$/){$odir .= "/";}
 unless (-d $odir){mkdir $odir or die $!;}
@@ -93,7 +99,7 @@ my $bamsummary = Bio::ViennaNGS::BamStatSummary->new(files          => \@bams,
 						     is_segemehl    => $segemehl_control,
 						     control_match  => $match_control,
 						     control_clip   => $clip_control,
-						     control_split  =>  $split_control,
+						     control_split  => $split_control,
 						     control_qual   => $qual_control,
 						     control_edit   => $edit_control,
 						     control_flag   => $flag_control,
@@ -101,10 +107,16 @@ my $bamsummary = Bio::ViennaNGS::BamStatSummary->new(files          => \@bams,
 						    );
 
 
+
 $bamsummary->populate_data();
 $bamsummary->populate_countStat();
 $bamsummary->dump_countStat("csv");
 $bamsummary->make_BarPlot();
+
+$bamsummary->make_BoxPlot("data_edit")  if($bamsummary->control_edit);
+$bamsummary->make_BoxPlot("data_clip")  if($bamsummary->control_clip);
+$bamsummary->make_BoxPlot("data_match") if($bamsummary->control_match);
+$bamsummary->make_BoxPlot("data_qual")  if($bamsummary->control_qual);
 
 
 __END__
@@ -152,27 +164,33 @@ alignment matches depends on the used read mapper. Some use the '='
 and the 'X' symbol. In this case only sequencing matches are
 counted. If the aligner only reports 'M' no distinction between
 sequence match and mismatch can be done. In any case, clipped bases,
-deletions, insertions are excluded.  =item B<--clip>
+deletions, insertions are excluded.
 
-Provides stats how many bases are soft or hard clipped.
+Plot data_match_stats.pdf is created in --odir.
 
 =item B<--qual>
 
 Provides stats on quality of the read match against the reference
 sequence.
 
+Plot data_qual_stats.pdf is created in --odir.
+
 =item B<--edit>
 
 Provides stats on the edit distance between read and mapped reference position. 
 
- =item B<--segemehl>
+Plot data_edit_stats.pdf is created in --odir.
+
+=item B<--segemehl>
 
 Toggles to specific segemehl bam file characteristics (e.g., mapped
-fragments per line).  =item B<--rlib -r>
+fragments per line).
+
+=item B<--rlib | -r>
 
 Path to the R library. Default is '/usr/bin/R'.
 
-=item B<--help -h>
+=item B<--help | -h>
 
 Print short help.
 

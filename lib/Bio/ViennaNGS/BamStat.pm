@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-05 15:47:13 mtw>
+# Last changed Time-stamp: <2015-01-22 15:19:03 fabian>
 
 package Bio::ViennaNGS::BamStat;
 
