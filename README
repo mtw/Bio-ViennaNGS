@@ -27,6 +27,10 @@ Bio::ViennaNGS is shipped with a complementary set of modules/classes:
   A Moose interface for manipulation of genomic interval data in BED
   format.
 
+- Bio::ViennaNGS::Expression
+  A L<Moose> interface for computation of normalized gene / transcript
+  expression based on read counts.
+
 - Bio::ViennaNGS::Fasta
   Routines for accessing genomic sequences implemented through a Moose
   interface to Bio::DB::Fasta.
