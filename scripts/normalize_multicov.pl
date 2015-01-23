@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-14 23:42:49 mtw>
+# Last changed Time-stamp: <2015-01-21 12:18:54 mtw>
 #
 # Compute normalized expression data in TPM from (raw) read
 # counts in multicov.
@@ -11,7 +11,7 @@
 # ***********************************************************************
 # *  Copyright notice
 # *
-# *  Copyright 2014 Michael T. Wolfinger <michael@wolfinger.eu>
+# *  Copyright 2015 Michael T. Wolfinger <michael@wolfinger.eu>
 # *  All rights reserved
 # *
 # *  This program is free software: you can redistribute it and/or modify
@@ -38,7 +38,7 @@ use File::Basename;
 use Pod::Usage;
 use Cwd;
 use Path::Class;
-use Bio::ViennaNGS::Util qw( parse_multicov write_multicov featCount_data computeTPM);
+use Bio::ViennaNGS::Expression;
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#

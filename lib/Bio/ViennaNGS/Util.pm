@@ -1,18 +1,15 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-20 00:34:19 mtw>
+# Last changed Time-stamp: <2015-01-21 11:57:20 mtw>
 
 package Bio::ViennaNGS::Util;
 
 use 5.12.0;
 use Exporter;
-use version; our $VERSION = qv('0.12_07');
+use version; our $VERSION = qv('0.12_11');
 use strict;
 use warnings;
-use Bio::Perl 1.00690001;
-use Bio::DB::Sam 1.39;
 use Data::Dumper;
-use File::Basename qw(basename fileparse);
-use File::Temp qw(tempfile);
+use File::Basename qw(fileparse);
 use IPC::Cmd qw(can_run run);
 use Path::Class;
 use Math::Round;
@@ -22,8 +19,7 @@ use Bio::ViennaNGS::FeatureChain;
 our @ISA = qw(Exporter);
 our @EXPORT = ();
 
-our @EXPORT_OK = qw ( bed_or_bam2bw sortbed bed2bigBed computeTPM
-		      featCount_data parse_multicov write_multicov
+our @EXPORT_OK = qw ( bed_or_bam2bw sortbed bed2bigBed
 		      unique_array kmer_enrichment extend_chain
 		      parse_bed6 fetch_chrom_sizes);
 
@@ -32,16 +28,11 @@ our @EXPORT_OK = qw ( bed_or_bam2bw sortbed bed2bigBed computeTPM
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-our @featCount = ();
 my %unique = ();
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
-
-sub featCount_data {
-  return \@featCount;
-}
 
 sub bed_or_bam2bw {
   my ($type,$infile,$chromsizes,$strand,$dest,$want_norm,$size,$scale,$log) = @_;
@@ -196,111 +187,6 @@ sub sortbed {
   }
 
   if (defined $log){ close(LOG); }
-}
-
-sub computeTPM {
-  my ($featCount_sample,$rl) = @_;
-  my ($TPM,$T,$totalTPM) = (0)x3;
-  my ($i,$features,$meanTPM);
-
-  $features = keys %$featCount_sample; # of of features in hash
-  print Dumper(\%$featCount_sample);print ">>$rl<<\n";
-
-  # iterate through $featCount_sample twice:
-  # 1. for computing T (denominator in TPM formula)
-  foreach $i (keys %$featCount_sample){
-    $T += ($$featCount_sample{$i}{count} * $rl)/($$featCount_sample{$i}{len});
-  }
-  # 2. for computng actual TPM values
-  foreach $i (keys %$featCount_sample){
-    $TPM = 1000000 * $$featCount_sample{$i}{count} * $rl/($$featCount_sample{$i}{len} * $T);
-    $$featCount_sample{$i}{TPM} = $TPM;
-    $totalTPM += $TPM;
-  }
-  $meanTPM = $totalTPM/$features;
-  # print "totalTPM=$totalTPM | meanTPM=$meanTPM\n";
-  return $meanTPM;
-}
-
-sub parse_multicov {
-  my ($file) = @_;
-  my @mcData = ();
-  my ($mcSamples,$i);
-  my $this_function = (caller(0))[3];
-
-  croak "ERROR [$this_function] multicov file $file not available\n"
-    unless (-e $file);
-  open (MULTICOV_IN, "< $file") or croak $!;
-
-  while (<MULTICOV_IN>){
-    chomp;
-    @mcData = split(/\t/); # 0:chr|1:start|2:end|3:name|4:score|5:strand
-    $mcSamples = (scalar @mcData)-6; # multicov extends BED6
-    #print "$_\n";
-    for ($i=0;$i<$mcSamples;$i++){
-      $featCount[$i]{$mcData[3]} = {
-				    chr    => $mcData[0],
-				    start  => $mcData[1],
-				    end    => $mcData[2],
-				    name   => $mcData[3],
-				    score  => $mcData[4],
-				    strand => $mcData[5],
-				    len    => eval($mcData[2]-$mcData[1]),
-				    count  => $mcData[eval(6+$i)],
-				   }
-    }
-    #print Dumper(@mcData);
-  }
-  close(MULTICOV_IN);
-  return $mcSamples;
-}
-
-sub write_multicov {
-  my ($item,$dest,$base_name) = @_;
-  my ($outfile,$mcSamples,$nrFeatures,$feat,$i);
-  my $this_function = (caller(0))[3];
-
-  croak "ERROR [$this_function]: $dest does not exist\n"
-    unless (-d $dest);
-  $outfile = file($dest,$base_name.".".$item.".multicov.csv");
-  open (MULTICOV_OUT, "> $outfile") or croak $!;
-
-  $mcSamples = scalar @featCount; # of samples in %{$featCount}
-  $nrFeatures = scalar keys %{$featCount[1]}; # of keys in %{$featCount}[1]
-  #print "=====> write_multicov: writing multicov file $outfile with $nrFeatures lines and $mcSamples conditions\n";
-
-  # check whether each column in %$featCount has the same number of entries
-  for($i=0;$i<$mcSamples;$i++){
-    my $fc = scalar keys %{$featCount[$i]}; # of keys in %{$featCount}
-    #print "condition $i => $fc keys\n";
-    unless($nrFeatures == $fc){
-      croak "ERROR [$this_function]: unequal element count in \%\$featCount\nExpected $nrFeatures have $fc in condition $i\n";
-    }
-  }
-
-  foreach $feat (keys  %{$featCount[1]}){
-    my @mcLine = ();
-    # process standard BED6 fields first
-    push @mcLine, (${$featCount[1]}{$feat}->{chr},
-		   ${$featCount[1]}{$feat}->{start},
-		   ${$featCount[1]}{$feat}->{end},
-		   ${$featCount[1]}{$feat}->{name},
-		   ${$featCount[1]}{$feat}->{score},
-		   ${$featCount[1]}{$feat}->{strand});
-    # process multicov values for all samples
-
-    for($i=0;$i<$mcSamples;$i++){
-     # print "------------>  ";  print "processing $i th condition ";  print "<-----------\n";
-      unless (defined ${$featCount[$i]}{$feat}){
-	croak "Could not find item $feat in mcSample $i\n";
-      }
-      push @mcLine, ${$featCount[$i]}{$feat}->{$item};
-
-    }
-    #print Dumper(\@mcLine);
-    print MULTICOV_OUT join("\t",@mcLine)."\n";
-  }
-  close(MULTICOV_OUT);
 }
 
 sub unique_array{
