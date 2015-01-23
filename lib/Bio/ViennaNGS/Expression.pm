@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-22 15:54:54 mtw>
+# Last changed Time-stamp: <2015-01-23 17:27:01 mtw>
 
 package Bio::ViennaNGS::Expression;
 
@@ -7,14 +7,14 @@ use version; our $VERSION = qv('0.12_11');
 use Moose;
 use Carp;
 use Data::Dumper;
+use Bio::ViennaNGS::Bed;
 
 use namespace::autoclean;
 
 
 has 'readcountfile' => (
-		    is => 'ro',
-		    isa => 'Str',
-		    
+		    is => 'rw',
+		    predicate => 'has_readcountfile',
 		  );
 
 has 'data' => (
@@ -26,90 +26,111 @@ has 'data' => (
 has 'conds' => (
 		is => 'rw',
 		isa => 'Int',
-		lazy => 1,
+		predicate => 'has_conds',
 	       );
 
 
 sub parse_readcounts_bed12 {
-  my ($self) = @_;
+  my ($self,$file) = @_;
   my @mcData = ();
   my $i;
   my $this_function = (caller(0))[3];
 
   croak "ERROR [$this_function] readcount / multicov file $self->readcountfile not available\n"
     unless (-e $file);
-  open (RC_IN, "< $file") or croak $!;
+
+  #TODO check contents of $file here
+  $self->readcountfile($file);
+  open (RC_IN, "< $self->readcountfile") or croak $!;
 
   while (<RC_IN>){
     chomp;
-    @mcData = split(/\t/); # 0:chr|1:start|2:end|3:name|4:score|5:strand
-    $self->conds = (scalar @mcData)-6; # multicov extends BED6
-    #print "$_\n";
+    # 0:chr|1:start|2:end|3:name|4:score|5:strand
+    # 6:thickStart|7:thickEnd|8:itemRgb|9:blockCount|
+    # 10:blockSizes|11:blockStarts
+    @mcData = split(/\t/);
+    $self->conds = (scalar @mcData)-12; # multicov extends BED12
+
+    # NOTE: Better keep BED12 entries in a hash, generating UUIDs as
+    # keys instead of storing the same BED12 entry n times (ie for
+    # each sample) in $self->data
+
+    my $bedobj =  Bio::ViennaNGS::Bed->new(chromosome   => $mcData[0],
+					   start        => $mcData[1],
+					   end          => $mcData[2],
+					   name         => $mcData[3],
+					   score        => $mcData[4],
+					   strand       => $mcData[5],
+					   thickStart   => $mcData[6],
+					   thickEnd     => $mcData[7],
+					   itemRgb      => $mcData[8],
+					   blockCount   => $mcData[9],
+					   blockSizes   => $mcData[10],
+					   blockStarts  => $mcData[11],
+					  );
+    my $len = $bedobj->length;
+    my $id = sprintf("%s:%d-%d_%s_%s", $mcData[0],$mcData[1],
+		     $mcData[2],$mcData[3],$mcData[5]);
+    print "\$id: $id\n";
     for ($i=0;$i<$self->conds;$i++){
-      ${$self->data}[$i]{$mcData[3]} = {
-				    chr    => $mcData[0],
-				    start  => $mcData[1],
-				    end    => $mcData[2],
-				    name   => $mcData[3],
-				    score  => $mcData[4],
-				    strand => $mcData[5],
-				    len    => eval($mcData[2]-$mcData[1]),
-				    count  => $mcData[eval(6+$i)],
-				   }
+      ${$self->data}[$i]{$id} = {
+				 bed_entry => $bedobj,
+				 length    => $len,
+				 count     => $mcData[eval(12+$i)],
+				};
+      print Dumper(${$self->data}[$i]);
     }
-    #print Dumper(@mcData);
   }
   close(RC_IN);
-  return $mcSamples;
 }
 
-sub write_multicov {
-  my ($item,$dest,$base_name) = @_;
-  my ($outfile,$mcSamples,$nrFeatures,$feat,$i);
-  my $this_function = (caller(0))[3];
+#sub write_multicov {
+#  my ($item,$dest,$base_name) = @_;
+#  my ($outfile,$mcSamples,$nrFeatures,$feat,$i);
+#  my $this_function = (caller(0))[3];
 
-  croak "ERROR [$this_function]: $dest does not exist\n"
-    unless (-d $dest);
-  $outfile = file($dest,$base_name.".".$item.".multicov.csv");
-  open (MULTICOV_OUT, "> $outfile") or croak $!;
+#  croak "ERROR [$this_function]: $dest does not exist\n"
+#    unless (-d $dest);
+#  $outfile = file($dest,$base_name.".".$item.".multicov.csv");
+#  open (MULTICOV_OUT, "> $outfile") or croak $!;
 
-  $mcSamples = scalar @featCount; # of samples in %{$featCount}
-  $nrFeatures = scalar keys %{$featCount[1]}; # of keys in %{$featCount}[1]
-  #print "=====> write_multicov: writing multicov file $outfile with $nrFeatures lines and $mcSamples conditions\n";
+#  $mcSamples = scalar @featCount; # of samples in %{$featCount}
+#  $nrFeatures = scalar keys %{$featCount[1]}; # of keys in %{$featCount}[1]
+#  #print "=====> write_multicov: writing multicov file $outfile with $nrFeatures lines and $mcSamples conditions\n";
 
-  # check whether each column in %$featCount has the same number of entries
-  for($i=0;$i<$mcSamples;$i++){
-    my $fc = scalar keys %{$featCount[$i]}; # of keys in %{$featCount}
-    #print "condition $i => $fc keys\n";
-    unless($nrFeatures == $fc){
-      croak "ERROR [$this_function]: unequal element count in \%\$featCount\nExpected $nrFeatures have $fc in condition $i\n";
-    }
-  }
+#  # check whether each column in %$featCount has the same number of entries
+#  for($i=0;$i<$mcSamples;$i++){
+#    my $fc = scalar keys %{$featCount[$i]}; # of keys in %{$featCount}
+#    #print "condition $i => $fc keys\n";
+#    unless($nrFeatures == $fc){
+#      croak "ERROR [$this_function]: unequal element count in \%\$featCount\nExpected $nrFeatures have $fc in condition $i\n";
+#    }
+#  }
 
-  foreach $feat (keys  %{$featCount[1]}){
-    my @mcLine = ();
-    # process standard BED6 fields first
-    push @mcLine, (${$featCount[1]}{$feat}->{chr},
-		   ${$featCount[1]}{$feat}->{start},
-		   ${$featCount[1]}{$feat}->{end},
-		   ${$featCount[1]}{$feat}->{name},
-		   ${$featCount[1]}{$feat}->{score},
-		   ${$featCount[1]}{$feat}->{strand});
-    # process multicov values for all samples
+#  foreach $feat (keys  %{$featCount[1]}){
+#    my @mcLine = ();
+#    # process standard BED6 fields first
+#    push @mcLine, (${$featCount[1]}{$feat}->{chr},
+#		   ${$featCount[1]}{$feat}->{start},
+#		   ${$featCount[1]}{$feat}->{end},
+#		   ${$featCount[1]}{$feat}->{name},
+#		   ${$featCount[1]}{$feat}->{score},
+#		   ${$featCount[1]}{$feat}->{strand});
+#   # process multicov values for all samples
 
-    for($i=0;$i<$mcSamples;$i++){
-     # print "------------>  ";  print "processing $i th condition ";  print "<-----------\n";
-      unless (defined ${$featCount[$i]}{$feat}){
-	croak "Could not find item $feat in mcSample $i\n";
-      }
-      push @mcLine, ${$featCount[$i]}{$feat}->{$item};
+#    for($i=0;$i<$mcSamples;$i++){
+#     # print "------------>  ";  print "processing $i th condition ";  print "<-----------\n";
+#      unless (defined ${$featCount[$i]}{$feat}){
+#	croak "Could not find item $feat in mcSample $i\n";
+#      }
+#      push @mcLine, ${$featCount[$i]}{$feat}->{$item};
 
-    }
-    #print Dumper(\@mcLine);
-    print MULTICOV_OUT join("\t",@mcLine)."\n";
-  }
-  close(MULTICOV_OUT);
-}
+#    }
+#    #print Dumper(\@mcLine);
+#    print MULTICOV_OUT join("\t",@mcLine)."\n";
+#  }
+#  close(MULTICOV_OUT);
+#}
 
 
 sub computeTPM {
@@ -145,8 +166,8 @@ __END__
 
 =head1 NAME
 
-Bio::ViennaNGS::Expression - OO interface for read-count based gene
-expression
+Bio::ViennaNGS::Expression - An object oriented interface for
+read-count based gene expression
 
 =head1 SYNOPSIS
 
