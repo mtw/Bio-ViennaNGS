@@ -1,4 +1,4 @@
-Bio::ViennaNGS 0.12_10
+Bio::ViennaNGS 0.12_11
 ==============
 
 Bio::ViennaNGS is a distribution of Perl modules and utilities for
@@ -22,6 +22,10 @@ Bio::ViennaNGS is shipped with a complementary set of modules/classes:
 - Bio::ViennaNGS::BamStatSummary
   A Moose interface for processing Bio::ViennaNGS::BamStat objects on
   a set of BAM files.
+
+- Bio::ViennaNGS::Bed 
+  A Moose interface for manipulation of genomic interval data in BED
+  format.
 
 - Bio::ViennaNGS::Fasta
   Routines for accessing genomic sequences implemented through a Moose
@@ -173,6 +177,7 @@ and packages that are not part of the Perl core distribution:
   namespace::autoclean
   Tie::Hash::Indexed
   MooseX::Clone
+  MooseX::InstanceTracking
 
 The  modules listed below are only reuqired by some of the utilities. You will
 only need to install them if you intend to use the reference utilities:
