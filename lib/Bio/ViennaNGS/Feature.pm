@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-20 00:32:26 mtw>
+# Last changed Time-stamp: <2015-01-22 22:34:03 mtw>
 
 package Bio::ViennaNGS::Feature;
 
-use 5.12.0;
-use version; our $VERSION = qv('0.12_07');
+use 5.10.0;
+use version; our $VERSION = qv('0.12_11');
 
 #use namespace::autoclean;
 use Moose;
@@ -17,12 +17,14 @@ has 'name' => (
 	       is  => 'rw',
 	       isa => 'Str',
 	       required => '1',
+	       predicate => 'has_name',
 	      );
 
 has 'score' => (
 		is => 'rw',
 		isa => 'Value',
 		default => '0',
+		predicate => 'has_score',
 	       );
 
 has 'extension' => (

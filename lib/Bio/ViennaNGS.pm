@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-16 15:50:29 mtw>
+# Last changed Time-stamp: <2015-01-23 15:08:09 mtw>
 
 package Bio::ViennaNGS;
 
-use version; our $VERSION = qv('0.12_10');
+use version; our $VERSION = qv('0.12_11');
 
 1;
 
@@ -28,11 +28,17 @@ The main Bio::ViennaNGS module is shipped with a complementary set of
 =item L<Bio::ViennaNGS::AnnoC>: A Moose interface for storage and
 conversion of sequence annotation data.
 
+=item L<Bio::ViennaNGS::Bam>: Routines for high-level manipulation of
+BAM files.
+
 =item L<Bio::ViennaNGS::BamStat>: A L<Moose> based class for
 collecting mapping statistics.
 
 =item L<Bio::ViennaNGS::BamStatSummary>: A L<Moose> interface for
 processing L<Bio::ViennaNGS::BamStat> objects on a set of BAM files.
+
+=item L<Bio::ViennaNGS::Bed>: A L<Moose> interface for manipulation of
+  genomic interval data in BED format.
 
 =item L<Bio::ViennaNGS::Fasta>: Routines for accessing genomic
 sequences implemented through a L<Moose> interface to
@@ -145,7 +151,7 @@ Fastq file by user defined length.
 The L<Bio::ViennaNGS> modules and classes depend on a set of Perl
 modules, some of which are part of the Perl core distribution:
 
-=over 16
+=over 17
 
 =item L<Bio::Perl> >= 1.00690001
 
@@ -176,6 +182,8 @@ modules, some of which are part of the Perl core distribution:
 =item L<namespace::autoclean>
 
 =item L<MooseX::Clone>
+
+=item L<MooseX::InstanceTracking>
 
 =item L<Tie::Hash::Indexed>
 
@@ -233,7 +241,7 @@ test Windows compatibility.
 
 =head1 SEE ALSO
 
-=over 13
+=over 14
 
 =item L<Bio::ViennaNGS::AnnoC>
 
@@ -242,6 +250,8 @@ test Windows compatibility.
 =item L<Bio::ViennaNGS::BamStat>
 
 =item L<Bio::ViennaNGS::BamStatSummary>
+
+=item L<Bio::ViennaNGS::Bed>
 
 =item L<Bio::ViennaNGS::Fasta>
 
@@ -253,9 +263,9 @@ test Windows compatibility.
 
 =item L<Bio::ViennaNGS::SpliceJunc>
 
-=item L<Bio::ViennaNGS::Util>
-
 =item L<Bio::ViennaNGS::Tutorial>
+
+=item L<Bio::ViennaNGS::Util>
 
 =item L<Bio::ViennaNGS::UCSC>
 
@@ -279,7 +289,8 @@ test Windows compatibility.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2014-2015 Michael T. Wolfinger
+E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.12.4 or,

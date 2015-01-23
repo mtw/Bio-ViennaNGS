@@ -95,12 +95,13 @@ Revision history for Perl extension ViennaNGS.
 	- updated POD and README
 	
 0.12
-	- integrated Bio::ViennaNGS::SpliceJunc
-	- integrated Bio::ViennaNGS::UCSC
-	- integrated Bio::ViennaNGS::Tutorial
+	- integrated Bio::ViennaNGS::Bam
 	- integrated Bio::ViennaNGS::BamStat
 	- integrated Bio::ViennaNGS::BamStatSummary
-	- added Bio::ViennaNGS::Bam;
+	- integrated Bio::ViennaNGS::Bed
+	- integrated Bio::ViennaNGS::SpliceJunc
+	- integrated Bio::ViennaNGS::Tutorial
+	- integrated Bio::ViennaNGS::UCSC
 	- added scripts/bam_quality_stat.pl
 	- added scripts/Tutorial_pipeline01.pl
 	- added scripts/track_hub_constructor.pl
