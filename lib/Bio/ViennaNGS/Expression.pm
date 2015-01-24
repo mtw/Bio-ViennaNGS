@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-23 17:27:01 mtw>
+# Last changed Time-stamp: <2015-01-24 01:01:23 mtw>
 
 package Bio::ViennaNGS::Expression;
 
@@ -20,7 +20,7 @@ has 'readcountfile' => (
 has 'data' => (
 	       is => 'rw',
 	       isa => 'ArrayRef',
-	       predicate => 'has_data',
+	       default => sub { [] },
 		   );
 
 has 'conds' => (
@@ -29,27 +29,32 @@ has 'conds' => (
 		predicate => 'has_conds',
 	       );
 
+has 'nr_features' => (
+		      is => 'rw',
+		      isa => 'Int',
+		     );
+
 
 sub parse_readcounts_bed12 {
   my ($self,$file) = @_;
   my @mcData = ();
-  my $i;
+  my ($i,$n) = 0x2;
   my $this_function = (caller(0))[3];
 
   croak "ERROR [$this_function] readcount / multicov file $self->readcountfile not available\n"
     unless (-e $file);
-
-  #TODO check contents of $file here
   $self->readcountfile($file);
-  open (RC_IN, "< $self->readcountfile") or croak $!;
+  open (RC_IN, "< $file") or croak $!;
 
   while (<RC_IN>){
+    $n++;
     chomp;
     # 0:chr|1:start|2:end|3:name|4:score|5:strand
     # 6:thickStart|7:thickEnd|8:itemRgb|9:blockCount|
     # 10:blockSizes|11:blockStarts
     @mcData = split(/\t/);
-    $self->conds = (scalar @mcData)-12; # multicov extends BED12
+    my $conditions = (scalar @mcData)-12;  # multicov extends BED12
+    $self->conds($conditions);
 
     # NOTE: Better keep BED12 entries in a hash, generating UUIDs as
     # keys instead of storing the same BED12 entry n times (ie for
@@ -71,16 +76,17 @@ sub parse_readcounts_bed12 {
     my $len = $bedobj->length;
     my $id = sprintf("%s:%d-%d_%s_%s", $mcData[0],$mcData[1],
 		     $mcData[2],$mcData[3],$mcData[5]);
-    print "\$id: $id\n";
+    #print "\$id: $id\n";
     for ($i=0;$i<$self->conds;$i++){
       ${$self->data}[$i]{$id} = {
 				 bed_entry => $bedobj,
 				 length    => $len,
 				 count     => $mcData[eval(12+$i)],
 				};
-      print Dumper(${$self->data}[$i]);
+      # print Dumper(${$self->data}[$i]);
     }
   }
+  $self->nr_features($n);
   close(RC_IN);
 }
 
@@ -134,26 +140,24 @@ sub parse_readcounts_bed12 {
 
 
 sub computeTPM {
-  my ($featCount_sample,$rl) = @_;
+  my ($self,$sample,$rl) = @_;
   my ($TPM,$T,$totalTPM) = (0)x3;
-  my ($i,$features,$meanTPM);
+  my ($i,$meanTPM);
 
-  $features = keys %$featCount_sample; # of of features in hash
-  print Dumper(\%$featCount_sample);print ">>$rl<<\n";
-
-  # iterate through $featCount_sample twice:
+  # iterate through $self->data[$i] twice:
   # 1. for computing T (denominator in TPM formula)
-  foreach $i (keys %$featCount_sample){
-    $T += ($$featCount_sample{$i}{count} * $rl)/($$featCount_sample{$i}{len});
+  for ($i=0;$i<$self->nr_features;$i++){
+    $T += (${$self->data}[$sample]{count} *  $rl)/(${$self->data}[$sample]{length});
   }
   # 2. for computng actual TPM values
-  foreach $i (keys %$featCount_sample){
-    $TPM = 1000000 * $$featCount_sample{$i}{count} * $rl/($$featCount_sample{$i}{len} * $T);
-    $$featCount_sample{$i}{TPM} = $TPM;
+  for ($i=0;$i<$self->nr_features;$i++){
+    $TPM = 1000000 * ${$self->data}[$sample]{count} *
+      $rl/(${$self->data}[$sample]{length} * $T);
+    ${$self->data}[$i]{TPM} = $TPM;
     $totalTPM += $TPM;
   }
-  $meanTPM = $totalTPM/$features;
-  # print "totalTPM=$totalTPM | meanTPM=$meanTPM\n";
+  $meanTPM = $totalTPM/$self->nr_features;
+   print "totalTPM=$totalTPM | meanTPM=$meanTPM\n";
   return $meanTPM;
 }
 
