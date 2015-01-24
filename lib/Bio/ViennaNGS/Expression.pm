@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-24 01:01:23 mtw>
+# Last changed Time-stamp: <2015-01-25 00:54:23 mtw>
 
 package Bio::ViennaNGS::Expression;
 
@@ -146,18 +146,28 @@ sub computeTPM {
 
   # iterate through $self->data[$i] twice:
   # 1. for computing T (denominator in TPM formula)
-  for ($i=0;$i<$self->nr_features;$i++){
-    $T += (${$self->data}[$sample]{count} *  $rl)/(${$self->data}[$sample]{length});
+  foreach $i (keys %{${$self->data}[$sample]}){
+    my $count  = ${${$self->data}[$sample]}{$i}{count};
+    my $length =  ${${$self->data}[$sample]}{$i}{length};
+    #print "count: $count\nlength: $length\n";
+    $T += $count * $rl / $length;
   }
+
   # 2. for computng actual TPM values
-  for ($i=0;$i<$self->nr_features;$i++){
-    $TPM = 1000000 * ${$self->data}[$sample]{count} *
-      $rl/(${$self->data}[$sample]{length} * $T);
-    ${$self->data}[$i]{TPM} = $TPM;
+  foreach $i (keys %{${$self->data}[$sample]}){
+    my $count  = ${${$self->data}[$sample]}{$i}{count};
+    my $length =  ${${$self->data}[$sample]}{$i}{length};
+    $TPM = 1000000 * $count * $rl/($length * $T);
+    ${${$self->data}[$sample]}{$i}{TPM} = $TPM;
     $totalTPM += $TPM;
   }
+
   $meanTPM = $totalTPM/$self->nr_features;
-   print "totalTPM=$totalTPM | meanTPM=$meanTPM\n";
+
+  print Dumper(${$self->data}[$sample]);
+  print "totalTPM=$totalTPM | meanTPM=$meanTPM\n";
+
+
   return $meanTPM;
 }
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-24 00:59:39 mtw>
+# Last changed Time-stamp: <2015-01-25 00:51:23 mtw>
 #
 # Compute normalized expression data in TPM from (raw) read
 # counts in multicov.
@@ -73,12 +73,13 @@ my $exp = Bio::ViennaNGS::Expression->new();
 $exp->parse_readcounts_bed12("$infile"); # stringified Path::Class object
 #print Dumper($exp->nr_features);
 
-print Dumper ($exp->data);die;
+#print Dumper ($exp->data);die;
+
 # extract hash for a specific sample from $FC
 #for ($i=0;$i<$conds;$i++){
 #  my $meanTPM;
 #  $FC_sample = @$FC[$i];
-$exp->computeTPM(1, $readlength);
+$exp->computeTPM(2, $readlength);
 #}
 
 # write multicov file based on TPM data in @featCount
