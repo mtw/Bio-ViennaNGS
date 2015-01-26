@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-20 00:41:39 mtw>
+# Last changed Time-stamp: <2015-01-26 15:49:06 mtw>
 
 package Bio::ViennaNGS::Tutorial;
 
@@ -132,9 +132,10 @@ __END__
          }
          close(KMER);
     }>
+
 =cut
 
-=head1 
+=head2 MEME
 
     In a second approach we run MEME to retrieve the 20 most over-represented motifs of length 8.
     C<meme hg19_highexpressed.ext50_fromStart_10_downstream.fa -oc MEME_hg19_highexpressed.ext50_fromStart_10_downstream.fa -w 8 -dna -maxsize 1000000000 -nmotifs 20>
