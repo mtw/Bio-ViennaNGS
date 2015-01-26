@@ -28,7 +28,7 @@ Bio::ViennaNGS is shipped with a complementary set of modules/classes:
   format.
 
 - Bio::ViennaNGS::Expression
-  A L<Moose> interface for computation of normalized gene / transcript
+  A Moose interface for computation of normalized gene / transcript
   expression based on read counts.
 
 - Bio::ViennaNGS::Fasta
