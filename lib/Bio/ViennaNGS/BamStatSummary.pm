@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-05 15:49:29 mtw>
+# Last changed Time-stamp: <2015-01-22 15:24:58 fabian>
 
 package Bio::ViennaNGS::BamStatSummary;
 
@@ -115,7 +115,7 @@ has 'is_segemehl' => ( # toggles to consider segemehl specific bam feature
 sub populate_data {
   my ($self) = @_;
   foreach my $bamfile (@{$self->files}){
-    carp ">> processing $bamfile\n";
+    #carp ">> processing $bamfile\n";
     my $bo = Bio::ViennaNGS::BamStat->new(bam => $bamfile);
     $bo->stat_singleBam();
     push (@{$self->data}, $bo);
@@ -143,15 +143,14 @@ sub populate_countStat {
   foreach my $sample (@{$self->data}){
     my ($basename,$dir,$ext) = fileparse($$sample{'bam'},qr/\.[^.]*/);
      ${$self->countStat}{$basename}{'total_alignments'} = floor(0.5 + $$sample{'data_out'}->{'aln_count'}->{'total'} );
-     ${$self->countStat}{$basename}{'mapped_reads'} = floor(0.5 + $$sample{'data_out'}->{'uniq'}->{'mapped_reads'} );
-     ${$self->countStat}{$basename}{'umapped_reads'} = floor(0.5 + $$sample{'data_out'}->{'uniq'}->{'uniq_mapped_reads'} );
-     ${$self->countStat}{$basename}{'mmapped_reads'} = 
-       floor(0.5 + $$sample{'data_out'}->{'uniq'}->{'mapped_reads'} - $$sample{'data_out'}->{'uniq'}->{'uniq_mapped_reads'} );
-     ${$self->countStat}{$basename}{'aligned_pairs'} = floor(0.5 + ($$sample{'data_out'}->{'aln_count'}->{'mapped_pair'})/2 );
-     ${$self->countStat}{$basename}{'aligned_mm'} = floor(0.5 + $$sample{'data_out'}->{'aln_count'}->{'unmapped_pair'} );
-     ${$self->countStat}{$basename}{'aligned_se'} = floor(0.5 + $$sample{'data_out'}->{'aln_count'}->{'mapped_single'} );
-     ${$self->countStat}{$basename}{'aligned_fwd'} = floor(0.5 + $$sample{'data_out'}->{'strand'}->{'forward'} );
-     ${$self->countStat}{$basename}{'aligned_rev'} = floor(0.5 + $$sample{'data_out'}->{'strand'}->{'reverse'} );
+     ${$self->countStat}{$basename}{'mapped_reads'}     = floor(0.5 + $$sample{'data_out'}->{'uniq'}->{'mapped_reads'} );
+     ${$self->countStat}{$basename}{'umapped_reads'}    = floor(0.5 + $$sample{'data_out'}->{'uniq'}->{'uniq_mapped_reads'} );
+     ${$self->countStat}{$basename}{'mmapped_reads'}    = floor(0.5 + $$sample{'data_out'}->{'uniq'}->{'mapped_reads'} - $$sample{'data_out'}->{'uniq'}->{'uniq_mapped_reads'} );
+     ${$self->countStat}{$basename}{'aligned_pairs'}    = floor(0.5 + ($$sample{'data_out'}->{'aln_count'}->{'mapped_pair'})/2 );
+     ${$self->countStat}{$basename}{'aligned_mm'}       = floor(0.5 + $$sample{'data_out'}->{'aln_count'}->{'unmapped_pair'} );
+     ${$self->countStat}{$basename}{'aligned_se'}       = floor(0.5 + $$sample{'data_out'}->{'aln_count'}->{'mapped_single'} );
+     ${$self->countStat}{$basename}{'aligned_fwd'}      = floor(0.5 + $$sample{'data_out'}->{'strand'}->{'forward'} );
+     ${$self->countStat}{$basename}{'aligned_rev'}      = floor(0.5 + $$sample{'data_out'}->{'strand'}->{'reverse'} );
   }
 }
 
@@ -159,9 +158,10 @@ sub dump_countStat {
   my ($self,$how) = @_;
   my $mn = "mapping_stats.csv";
   my $fn = file($self->outpath,$mn);
+  
   open(OUT, "> $fn") or croak "cannot open OUT $!";
-
   print OUT join ("\t", values %{$self->countStat->{'header'} })."\n";
+
   foreach my $sample (keys %{$self->countStat} ){
     next if ($sample eq 'header');
     my @line = ();
@@ -213,12 +213,12 @@ sub make_BarPlot{
 }
 
 sub plot_barplot { #plot barplot read.table text string
-  my ($self, $filename,$ylab,$data_string) = @_;
+  my ($self, $filename, $ylab, $data_string) = @_;
   my ($bn,$odir,$ext) = fileparse($filename, qr /\..*/);
   #my $rlibpath        = '/usr/bin/R';
   my $rlibpath        = $self->rlib;
 
-  $filename .= '.pdf' unless ($ext eq 'pdf');
+  $filename .= '.pdf' unless ($ext eq '.pdf');
 
   my $R = Statistics::R->new();
   $R->startR;
@@ -227,12 +227,163 @@ sub plot_barplot { #plot barplot read.table text string
   $R->run("pdf('${filename}')") ;
   $R->run("dat<-read.table(text = \"$data_string\", header = TRUE, row.names=1)") ;
   $R->run("dat_m<-as.matrix(dat)") ;
-  $R->run("colors<-terrain.colors(nrow(dat_m), alpha = 1)") ;
-# $R->run("colors<-c('darkolivegreen4','darkolivegreen2','coral1')") ;
-# $R->run("colors<-hcl(seq(0, 360, length =nrow(dat_m)))") ;
-  $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)+2), col=colors, legend.text = TRUE, args.legend = list(x = ncol(dat_m) + 2, y=max(colSums(dat_m)), bty = 'n' ), ylab='$ylab', xlab='Samples')") ;
+##$R->run("colors<-terrain.colors(nrow(dat_m), alpha = 1)") ;
+  $R->run("colors<-c('lightblue','lightgreen','lightcoral', terrain.colors(nrow(dat_m)-3, alpha = 1))") ;
+  $R->run("types<-row.names(dat_m)") ;
+  $R->run("par(mar = c(15,3,5,5), oma = c(1, 1, 4, 1))") ;
+# $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)+2), col=colors, legend.text = TRUE, args.legend = list(x = ncol(dat_m) + 2, y=max(colSums(dat_m)), bty = 'n' ), ylab='$ylab', xlab='Samples')") ;
+# $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)), col=colors, legend.text = TRUE, args.legend = list(x = ncol(dat_m) + 5, y=-5, bty = 'o' ), ylab='$ylab', xlab='Samples', las=3)") ;
+#  $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)), col=colors, legend.text = TRUE, args.legend = list(\"topright\", horiz = TRUE, bty = 'o' ), ylab='$ylab', xlab='', las=3)") ;
+  $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)), col=colors, ylab='$ylab', xlab='', las=3)") ;
+  $R->run("par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0),mar = c(0, 0, 0, 0), new = TRUE)") ;
+  $R->run("legend('top', types, horiz = TRUE, inset = c(0,0), bty = 'n', fill = colors, cex = 1.2 )") ;
   $R->run("dev.off()") ;
   $R->stopR;
 }
 
+
+sub make_BoxPlot{
+  my ($self, $whattodo) = @_;
+  my @Rstat_data   = ();
+  my @Rstat_length = ();
+  my @Rstat_names  = ();
+  
+  ## collect data for read.table string
+  foreach my $sample (@{$self->data}){
+    my ($basename,$dir,$ext) = fileparse($$sample{'bam'},qr/\.[^.]*/);
+    
+    push @Rstat_data, statsstring(@{$$sample{$whattodo}});
+    push @Rstat_length, scalar(@{$$sample{$whattodo}});
+    push @Rstat_names, "'$basename'",
+    
+  }
+
+  my $data_string="summarydata<-list(stats=matrix(c(".join(",",@Rstat_data)."),5,".scalar(@Rstat_names)."), n=c(".join(",",@Rstat_length)."), names=c(".join(",",@Rstat_names)."))";
+
+  ## produce box plot
+  if(@Rstat_data){
+    
+    my $mn = "${whattodo}_stats.pdf";
+    my $fn = file($self->outpath,$mn);
+    
+    $self->plot_bxplot($fn, $whattodo, $data_string);
+  }
+}
+
+sub plot_bxplot{
+  my ($self, $filename, $ylab, $datacommand_string) = @_;
+  my ($bn,$odir,$ext) = fileparse($filename, qr /\..*/);
+  my $rlibpath        = $self->rlib;
+  #my $rlibpath        = '/usr/bin/R';
+  $filename .= '.pdf' unless ($ext eq '.pdf');
+  
+  my $R = Statistics::R->new();
+  $R->startR;
+  $R->set('rlib', $rlibpath);
+  $R->set('log_dir', $odir);
+  $R->run("pdf('${filename}')") ;
+  $R->run("$datacommand_string") ;
+  $R->run("bxp(summarydata, medcol = 'red', ylab='$ylab', xlab='',las=3)") ;
+  $R->run("dev.off()") ;
+  $R->stopR;
+}
+
+sub statsstring{
+  # usage: %h = %{stats(@a)};
+  my @vals = sort {$a <=> $b} @_;
+  my %stats = ();
+  my @statstring = ();
+
+  if(@vals){
+    push @statstring, sprintf("%.2f", &min(\@vals));             ## min
+    push @statstring, sprintf("%.2f", $vals[int(@vals/4)]);      ## 1.quartile
+    if(@vals%2){
+      push @statstring, $vals[int(@vals/2)];                     ## odd median
+    }
+    else{
+      push @statstring, ($vals[int(@vals/2)-1] + $vals[int(@vals/2)])/2;  ## even median
+    }
+    push @statstring, sprintf("%.2f", $vals[int((@vals*3)/4)]);  ## 3.quartile
+    push @statstring, sprintf("%.2f", &max(\@vals));             ## max
+  }
+  else{
+    @statstring=qw/0 0 0 0 0/;
+  }
+  return(@statstring);
+}
+
+sub max { # usage: $h = %{max(\@a)};
+  my ($arrayref) = @_;
+  my $max = $arrayref->[0];
+  foreach (@$arrayref) {$max = $_ if $_ > $max}
+  return $max;
+}
+
+sub min { # usage: $h = %{min(\@a)};
+  my ($arrayref) = @_;
+  my $min = $arrayref->[0];
+  foreach (@$arrayref) {$min = $_ if $_ < $min}
+  return $min;
+}
+
 1;
+
+__END__
+
+
+=head1 NAME
+
+Bio::ViennaNGS::BamStatSummary - Moose interface to analyze, summarize and compare BAM mapping statistics data structure produced by  Bio::ViennaNGS::BamStat
+
+=head1 SYNOPSIS
+
+  use Bio::ViennaNGS::BamStatSummary;
+
+  $bamsummary->populate_data();
+  $bamsummary->populate_countStat();
+  $bamsummary->dump_countStat("csv");
+  $bamsummary->make_BarPlot();
+
+  $bamsummary->make_BoxPlot("data_edit" ) if( $bamsummary->has_control_edit   );
+  $bamsummary->make_BoxPlot("data_clip" ) if( $bamsummary->has_control_clip   );
+  $bamsummary->make_BoxPlot("data_match") if( $$bamsummary->has_control_match );
+  $bamsummary->make_BoxPlot("data_qual" ) if( $bamsummary->has_control_qual   );
+
+
+=head1 DESCRIPTION
+
+This module provides a L<Moose> interface to process the mapping statistics of
+single BAM file. It uses the data structure as produced by BamStat, summarizes the data and compares different bam files. It produces csv files and graphical representation of the results. Thereby it builds on Statistics::R;
+
+=head1 SEE ALSO
+
+=over 
+
+=item L<Bio::ViennaNGS>
+=item L<Bio::ViennaNGS::BamStat>
+
+=back
+
+=head1 AUTHORS
+
+=over 
+
+=item Fabian Amman E<lt>fabian@tbi.univie.ac.atE<gt>
+
+=item Michael T. Wolfinger  E<lt>michael@wolfinger.euE<gt>
+
+=back
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2014 by Michael T. Wolfinger
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.16.3 or,
+at your option, any later version of Perl 5 you may have available.
+
+This software is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut
