@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-23 15:08:09 mtw>
+# Last changed Time-stamp: <2015-01-26 09:33:55 mtw>
 
 package Bio::ViennaNGS;
 
@@ -38,7 +38,10 @@ collecting mapping statistics.
 processing L<Bio::ViennaNGS::BamStat> objects on a set of BAM files.
 
 =item L<Bio::ViennaNGS::Bed>: A L<Moose> interface for manipulation of
-  genomic interval data in BED format.
+genomic interval data in BED format.
+
+=item L<Bio::ViennaNGS::Expression>: An object oriented interface for
+read-count based gene expression analysis.
 
 =item L<Bio::ViennaNGS::Fasta>: Routines for accessing genomic
 sequences implemented through a L<Moose> interface to
@@ -252,6 +255,8 @@ test Windows compatibility.
 =item L<Bio::ViennaNGS::BamStatSummary>
 
 =item L<Bio::ViennaNGS::Bed>
+
+=item L<Bio::ViennaNGS::Expression>
 
 =item L<Bio::ViennaNGS::Fasta>
 
