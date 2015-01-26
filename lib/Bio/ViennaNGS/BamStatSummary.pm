@@ -230,7 +230,7 @@ sub plot_barplot { #plot barplot read.table text string
 ##$R->run("colors<-terrain.colors(nrow(dat_m), alpha = 1)") ;
   $R->run("colors<-c('lightblue','lightgreen','lightcoral', terrain.colors(nrow(dat_m)-3, alpha = 1))") ;
   $R->run("types<-row.names(dat_m)") ;
-  $R->run("par(mar = c(10,3,5,5), oma = c(1, 1, 4, 1))") ;
+  $R->run("par(mar = c(15,3,5,5), oma = c(1, 1, 4, 1))") ;
 # $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)+2), col=colors, legend.text = TRUE, args.legend = list(x = ncol(dat_m) + 2, y=max(colSums(dat_m)), bty = 'n' ), ylab='$ylab', xlab='Samples')") ;
 # $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)), col=colors, legend.text = TRUE, args.legend = list(x = ncol(dat_m) + 5, y=-5, bty = 'o' ), ylab='$ylab', xlab='Samples', las=3)") ;
 #  $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)), col=colors, legend.text = TRUE, args.legend = list(\"topright\", horiz = TRUE, bty = 'o' ), ylab='$ylab', xlab='', las=3)") ;
@@ -327,3 +327,63 @@ sub min { # usage: $h = %{min(\@a)};
 }
 
 1;
+
+__END__
+
+
+=head1 NAME
+
+Bio::ViennaNGS::BamStatSummary - Moose interface to analyze, summarize and compare BAM mapping statistics data structure produced by  Bio::ViennaNGS::BamStat
+
+=head1 SYNOPSIS
+
+  use Bio::ViennaNGS::BamStatSummary;
+
+  $bamsummary->populate_data();
+  $bamsummary->populate_countStat();
+  $bamsummary->dump_countStat("csv");
+  $bamsummary->make_BarPlot();
+
+  $bamsummary->make_BoxPlot("data_edit" ) if( $bamsummary->has_control_edit   );
+  $bamsummary->make_BoxPlot("data_clip" ) if( $bamsummary->has_control_clip   );
+  $bamsummary->make_BoxPlot("data_match") if( $$bamsummary->has_control_match );
+  $bamsummary->make_BoxPlot("data_qual" ) if( $bamsummary->has_control_qual   );
+
+
+=head1 DESCRIPTION
+
+This module provides a L<Moose> interface to process the mapping statistics of
+single BAM file. It uses the data structure as produced by BamStat, summarizes the data and compares different bam files. It produces csv files and graphical representation of the results. Thereby it builds on Statistics::R;
+
+=head1 SEE ALSO
+
+=over 
+
+=item L<Bio::ViennaNGS>
+=item L<Bio::ViennaNGS::BamStat>
+
+=back
+
+=head1 AUTHORS
+
+=over 
+
+=item Fabian Amman E<lt>fabian@tbi.univie.ac.atE<gt>
+
+=item Michael T. Wolfinger  E<lt>michael@wolfinger.euE<gt>
+
+=back
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2014 by Michael T. Wolfinger
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.16.3 or,
+at your option, any later version of Perl 5 you may have available.
+
+This software is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut

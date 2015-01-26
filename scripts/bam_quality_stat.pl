@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-22 15:34:02 fabian>
+# Last changed Time-stamp: <2015-01-26 09:25:52 fabian>
 
 use strict;
 use warnings;
@@ -113,10 +113,10 @@ $bamsummary->populate_countStat();
 $bamsummary->dump_countStat("csv");
 $bamsummary->make_BarPlot();
 
-$bamsummary->make_BoxPlot("data_edit")  if($bamsummary->control_edit);
-$bamsummary->make_BoxPlot("data_clip")  if($bamsummary->control_clip);
-$bamsummary->make_BoxPlot("data_match") if($bamsummary->control_match);
-$bamsummary->make_BoxPlot("data_qual")  if($bamsummary->control_qual);
+$bamsummary->make_BoxPlot("data_edit")  if($bamsummary->control_edit  && $bamsummary->has_control_edit);
+$bamsummary->make_BoxPlot("data_clip")  if($bamsummary->control_clip  && $bamsummary->has_control_clip);
+$bamsummary->make_BoxPlot("data_match") if($bamsummary->control_match && $bamsummary->has_control_match);
+$bamsummary->make_BoxPlot("data_qual")  if($bamsummary->control_qual  && $bamsummary->has_control_qual);
 
 
 __END__

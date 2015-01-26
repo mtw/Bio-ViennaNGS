@@ -546,18 +546,30 @@ Bio::ViennaNGS::BamStat - Moose interface to BAM mapping statistics
 
   use Bio::ViennaNGS::BamStat;
 
-  my $bss1 = Bio::ViennaNGS::BamStat->new(bam => "path/to/file.bam");
+  my $bamsummary = Bio::ViennaNGS::BamStatSummary->new(files          => "path/to/file.bam",
+                                                       outpath        => "path/to/output.directory",
+                                                       rlib           => "path/to/R_installation",
+                                                       is_segemehl    =>  0|1,
+                                                       control_match  =>  0|1,
+                                                       control_clip   =>  0|1,
+                                                       control_split  =>  0|1,
+                                                       control_qual   =>  0|1,
+                                                       control_edit   =>  0|1,
+                                                       control_flag   =>  0|1,
+                                                       control_score  =>  0|1,
+                                                      );
 
 =head1 DESCRIPTION
 
 This module provides a L<Moose> interface to the mapping statistics of
-a single BAM file. It builds on L<Bio::DB::Sam> and 
+a single BAM file. It builds on L<Bio::DB::Sam>
 
 =head1 SEE ALSO
 
 =over 
 
 =item L<Bio::ViennaNGS>
+=item L<Bio::ViennaNGS::BamStatSummary>
 
 =back
 
