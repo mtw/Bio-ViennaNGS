@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-25 00:54:23 mtw>
+# Last changed Time-stamp: <2015-01-26 01:18:36 mtw>
 
 package Bio::ViennaNGS::Expression;
 
@@ -7,7 +7,9 @@ use version; our $VERSION = qv('0.12_11');
 use Moose;
 use Carp;
 use Data::Dumper;
+use Path::Class;
 use Bio::ViennaNGS::Bed;
+use Bio::ViennaNGS::Util qw(sortbed);
 
 use namespace::autoclean;
 
@@ -32,6 +34,7 @@ has 'conds' => (
 has 'nr_features' => (
 		      is => 'rw',
 		      isa => 'Int',
+		      predicate => 'has_features',
 		     );
 
 
@@ -90,53 +93,60 @@ sub parse_readcounts_bed12 {
   close(RC_IN);
 }
 
-#sub write_multicov {
-#  my ($item,$dest,$base_name) = @_;
-#  my ($outfile,$mcSamples,$nrFeatures,$feat,$i);
-#  my $this_function = (caller(0))[3];
+sub write_expression_bed12 {
+  my ($self,$item,$dest,$base_name) = @_;
+  my ($bedname,$bedname_u,$outfile,$feat,$i);
+  my $this_function = (caller(0))[3];
 
-#  croak "ERROR [$this_function]: $dest does not exist\n"
-#    unless (-d $dest);
-#  $outfile = file($dest,$base_name.".".$item.".multicov.csv");
-#  open (MULTICOV_OUT, "> $outfile") or croak $!;
+  croak "ERROR [$this_function]: $dest does not exist\n"
+    unless (-d $dest);
 
-#  $mcSamples = scalar @featCount; # of samples in %{$featCount}
-#  $nrFeatures = scalar keys %{$featCount[1]}; # of keys in %{$featCount}[1]
-#  #print "=====> write_multicov: writing multicov file $outfile with $nrFeatures lines and $mcSamples conditions\n";
+  $bedname = $base_name.".".$item.".multicov.bed12";
+  $bedname_u = $base_name.".".$item.".multicov.u.bed12";
 
-#  # check whether each column in %$featCount has the same number of entries
-#  for($i=0;$i<$mcSamples;$i++){
-#    my $fc = scalar keys %{$featCount[$i]}; # of keys in %{$featCount}
-#    #print "condition $i => $fc keys\n";
-#    unless($nrFeatures == $fc){
-#      croak "ERROR [$this_function]: unequal element count in \%\$featCount\nExpected $nrFeatures have $fc in condition $i\n";
-#    }
-#  }
+  $outfile = file($dest,$bedname_u);
 
-#  foreach $feat (keys  %{$featCount[1]}){
-#    my @mcLine = ();
-#    # process standard BED6 fields first
-#    push @mcLine, (${$featCount[1]}{$feat}->{chr},
-#		   ${$featCount[1]}{$feat}->{start},
-#		   ${$featCount[1]}{$feat}->{end},
-#		   ${$featCount[1]}{$feat}->{name},
-#		   ${$featCount[1]}{$feat}->{score},
-#		   ${$featCount[1]}{$feat}->{strand});
-#   # process multicov values for all samples
+  croak "ERROR [$this_function]: $self->conds not available\n"
+    unless ($self->has_conds);
 
-#    for($i=0;$i<$mcSamples;$i++){
-#     # print "------------>  ";  print "processing $i th condition ";  print "<-----------\n";
-#      unless (defined ${$featCount[$i]}{$feat}){
-#	croak "Could not find item $feat in mcSample $i\n";
-#      }
-#      push @mcLine, ${$featCount[$i]}{$feat}->{$item};
+  croak "ERROR [$this_function]: $self->nr_features not available\n"
+    unless ($self->has_features);
 
-#    }
-#    #print Dumper(\@mcLine);
-#    print MULTICOV_OUT join("\t",@mcLine)."\n";
-#  }
-#  close(MULTICOV_OUT);
-#}
+  #print "=====> write_multicov: writing multicov file $bedfile with ".
+  #  eval($self->nr_features)."  lines and ".eval($self->conds)." conditions\n";
+
+  # check whether each element in @{$self->data} has the same amount of entries
+  for($i=0;$i<$self->conds;$i++){
+    my $fc = scalar keys %{$self->data->[$i]}; # of keys in %{$featCount}
+    #print "condition $i => $fc keys\n";
+    croak "ERROR [$this_function]: unequal element count in @{$self->data}"
+      unless($self->nr_features == $fc)
+  }
+
+  open (MULTICOV_OUT, "> $bedname_u") or croak $!;
+
+  # use BED12 data stored with condition 0 here, assuming its the same for all conditions
+  foreach $feat (keys %{${$self->data}[0]} ){
+    my @mcLine = ();
+    # retrieve BED12 line first
+    my $bedo = ${${$self->data}[0]}{$feat}{bed_entry};
+    my $bedline = $bedo->as_bed_line(12);
+    push @mcLine, $bedline;
+
+    # process multicov values for all samples
+    for($i=0;$i<$self->conds;$i++){
+      # print "------------>  ";  print "processing $i th condition ";  print "<-----------\n";
+      croak "Could not find item $feat in mcSample $i\n"
+	unless ( defined ${${$self->data}[$i]}{$feat} );
+      push @mcLine, ${${$self->data}[$i]}{$feat}{$item};
+
+    }
+   print MULTICOV_OUT join("\t",@mcLine)."\n";
+  }
+  close(MULTICOV_OUT);
+
+  sortbed($bedname_u,"./",$bedname,1,"./MTWlog.txt");  # sort bed file
+}
 
 
 sub computeTPM {
@@ -164,8 +174,8 @@ sub computeTPM {
 
   $meanTPM = $totalTPM/$self->nr_features;
 
-  print Dumper(${$self->data}[$sample]);
-  print "totalTPM=$totalTPM | meanTPM=$meanTPM\n";
+ # print Dumper(${$self->data}[$sample]);
+ # print "totalTPM=$totalTPM | meanTPM=$meanTPM\n";
 
 
   return $meanTPM;
@@ -187,22 +197,107 @@ read-count based gene expression
 
   use Bio::ViennaNGS::Expression;
 
-  my $file = 
+  my $expression = Bio::ViennaNGS::Expression->new();
+
+  # parse read counts from an extended BED12 file
+  $expression->>parse_readcounts_bed12("$bed12");
+
+  # compute normalized expression of ith sample in Transcript per Million (TPM)
+  $expression->computeTPM($i, $readlength);
+
+  # write extended BED12 file with TPM for each condition past
+  # the 12th column
+  $expression->>write_expression_bed12("TPM", $dest, $basename);
 
 =head1 DESCRIPTION
 
 This module provides a L<Moose> interface for computation of gene /
-transcript expression based on read counts.
+transcript expression from read counts.
 
 =head1 METHODS
 
+=over
+
+=item parse_readcounts_bed12
+
+ Title : parse_readcounts_bed12
+
+ Usage : $obj->parse_readcounts_bed12($file)
+
+ Function: Parses a bedtools multicov (multiBamCov) file, i.e. an
+           extended BED12 file, into an Array of Hash of Hashes data
+           structure (C<@{$self->data}>).
+
+  Args : C<$file> is the input file, i.e. and extended BED12 file
+         where each column past the 12th lists read counts for this
+         bedline's feature(s) for a specific sample/condition.
+
+  Returns :
+
+  Notes: This method evaluates the number of samples/conditions
+         present in the input, i.e. the number of columns extending
+         the canonical BED12 columns in the input multicov file and
+         populates C<$self->conds>. Also populates
+         C<$self->nr_features> with the number of genes/features
+         present in the input (evidently, this should be the same for
+         each sample/condition in the input).
+
+=item computeTPM
+
+ Title : computeTPM
+
+ Usage : $obj->computeTPM($sample, $readlength)
+
+ Function : Computes expression of each gene/feature present in
+            C<$self->data> in Transcript per Million (TPM) [Wagner
+            et.al. Theory Biosci. (2012)].  is a reference
+            to a Hash of Hashes data straucture where keys are feature
+            names and values hold a hash that must at least contain
+            length and raw read counts. Practically,
+            C<$featCount_sample> is represented by _one_ element of
+            C<@featCount>, which is populated from a multicov file by
+            C<parse_multicov()>.
+
+  Args : C<$sample> is the sample index of C<@{$self->data}>. This is
+         especially handy if one is only interested in computing
+         normalized expression values for a specific sample, rather
+         than all samples in multicov BED12 file. C<$readlength> is
+         the read length of the RNA-seq sequencing experiment.
+
+  Returns : Returns the mean TPM of the processed sample, which is
+            invariant among samples. (TPM models relative molar
+            concentration and thus fulfills the invariant average
+            criterion.)
+
+=item write_expression_bed12
+
+  Title : write_expression_bed12
+
+  Usage : $obj->write_expression_bed12($measure, $dest, $basename)
+
+  Function : Writes normalized expression data to a bedtools multicov
+             (multiBamCov)-type BED12 file.
+
+  Args : C<$measure> specifies the type in which normalized expression
+         data from C<@{$self->data}> is dumped, i.e. TPM or
+         RPKM. These values must have been computed and inserted into
+         C<@{self->data}> beforehand by
+         e.g. C<$self->computeTPM()>. C<$dest> and C<$base_name> give
+         path and base name of the output file, respectively.
+
+  Returns : None. The output is position-sorted extended BED12 file.
+
+=back
+
 =head1 DEPENDENCIES
 
-=over 3
+=over 4
 
 =item L<Moose>
 
 =item L<Carp>
+
+=item L<Path::Class>
 
 =item L<namespace::autoclean>
 
@@ -210,9 +305,13 @@ transcript expression based on read counts.
 
 =head1 SEE ALSO
 
-=over 1
+=over 3
 
 =item L<Bio::ViennaNGS>
+
+=item L<Bio::ViennaNGS::Bed>
+
+=item L<Bio::ViennaNGS::Util>
 
 =back
 

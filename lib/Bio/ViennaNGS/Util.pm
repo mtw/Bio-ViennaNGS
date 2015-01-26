@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-21 11:57:20 mtw>
+# Last changed Time-stamp: <2015-01-26 01:14:12 mtw>
 
 package Bio::ViennaNGS::Util;
 
@@ -158,7 +158,7 @@ sub sortbed {
   my ($cmd,$out);
   my $this_function = (caller(0))[3];
   my $bedtools = can_run('bedtools') or
-    croak "ERROR [$this_function bedtools utility not found";
+    croak "ERROR [$this_function] bedtools utility not found";
 
   croak "ERROR [$this_function] Cannot find $infile"
     unless (-e $infile);
@@ -413,15 +413,6 @@ analysis
   # sort a BED file 
   sortbed($bed_in,$destdir,$bed_out,$rm_orig,$logfile)
 
-  # compute transcript abundance in TPM
-  $meanTPM = computeTPM($sample,$readlength);
-
-  # parse a bedtools multicov compatible file
-  $conds = parse_multicov($infile);
-
-  # write bedtools multicov compatible file
-  write_multicov("TPM",$destdir,$basename);
-
 =head1 DESCRIPTION
 
 Bio::ViennaNGS::Util is a collection of utility subroutines for
@@ -476,7 +467,7 @@ ready.
 
 =item sortbed($infile,$dest,$outfile,$rm_orig,$log)
 
-Sorts BED file C<$infile> with F<bedtools sortt>. C<$dest> and
+Sorts BED file C<$infile> with F<bedtools sort>. C<$dest> and
 C<outfile> name path and filename of the resulting sorted BED
 file. C<$rm_infile> is either 1 or 0 and indicated whether the
 original C<$infile> should be deleted. C<$log> holds path and name of
@@ -488,44 +479,13 @@ Creates an indexed bigBed file from a BED file. C<$infile> is the BED
 file to be transformed, C<$chromsizes> is the chromosome.sizes file
 and C<$dest> contains the output path for results. C<$log> is the name
 of a log file, or undef if no logging is reuqired. A '.bed', '.bed6'
-or '.bed12' suffix in C<$infile> will be replace by '.bb' in the
+or '.bed12' suffix in C<$infile> will be replaced by '.bb' in the
 output. Else, the name of the output bigBed file will be the value of
 C<$infile> plus '.bb' appended.
 
 The conversion from BED to bigBed is done by a third-party utility
-(bedToBigBed), which is executed by IPC::Cmd.
+(bedToBigBed), which is executed by L<IPC::Cmd>.
 
-=item computeTPM($featCount_sample,$rl)
-
-Computes expression in Transcript per Million (TPM) [Wagner
-et.al. Theory Biosci. (2012)]. C<$featCount_sample> is a reference to
-a Hash of Hashes data straucture where keys are feature names and
-values hold a hash that must at least contain length and raw read
-counts. Practically, C<$featCount_sample> is represented by _one_
-element of C<@featCount>, which is populated from a multicov file by
-C<parse_multicov()>. C<$rl> is the read length of the sequencing run.
-
-Returns the mean TPM of the processed sample, which is invariant among
-samples. (TPM models relative molar concentration and thus fulfills
-the invariant average criterion.)
-
-=item parse_multicov($file)
-
-Parse a bedtools multicov (multiBamCov) file, i.e. an extended BED6
-file, into an Array of Hash of Hashes data structure
-(C<@featCount>). C<$file> is the input file. Returns the number of
-samples present in the multicov file, ie. the numner of columns
-extending the canonical BED6 columns in the input multicov file.
-
-=item write_multicov($item,$dest,$base_name)
-
-Write C<@featCount> data to a bedtools multicov (multiBamCov)-type
-file. C<$item> specifies the type of information from C<@featCount>
-HoH entries, e.g. TPM or RPKM. These values must have been computed
-and inserted into C<@featCount> beforehand by
-e.g. C<computeTPM()>. C<$dest> gives the absolute path and
-C<$base_name> the basename (will be extended by C<$item>.csv) of the
-output file.
 
 =back
 
@@ -570,7 +530,7 @@ L<BEDtools|https://github.com/arq5x/bedtools2> on your system.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2015 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.12.4 or,

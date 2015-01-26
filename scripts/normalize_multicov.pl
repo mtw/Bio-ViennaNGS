@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-25 00:51:23 mtw>
+# Last changed Time-stamp: <2015-01-26 00:38:37 mtw>
 #
 # Compute normalized expression data in TPM from (raw) read
 # counts in multicov.
@@ -45,7 +45,7 @@ use Bio::ViennaNGS::Expression;
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 my ($infile,$FC,$FC_sample,$conds,$totreads,$i,$sample,$basename,$dir,$ext,$cwd);
 my $readlength  = 100;
-my $dest = getcwd();;
+my $dest = getcwd();
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
@@ -73,17 +73,13 @@ my $exp = Bio::ViennaNGS::Expression->new();
 $exp->parse_readcounts_bed12("$infile"); # stringified Path::Class object
 #print Dumper($exp->nr_features);
 
-#print Dumper ($exp->data);die;
+# compute TPM values for all genes in each condition
+for ($i=0;$i<$exp->conds;$i++){
+  $exp->computeTPM($i, $readlength);
+}
 
-# extract hash for a specific sample from $FC
-#for ($i=0;$i<$conds;$i++){
-#  my $meanTPM;
-#  $FC_sample = @$FC[$i];
-$exp->computeTPM(2, $readlength);
-#}
-
-# write multicov file based on TPM data in @featCount
-#write_multicov("TPM", $dest, $basename);
+# write extended BED12 file with TPM for each condition after column 12
+$exp->write_expression_bed12("TPM", $dest, $basename);
 
 __END__
 
@@ -102,17 +98,17 @@ normalize_multicov.pl [-i I<FILE>] [--readlength I<INT>] [options]
 This program computes normalized expression values in Transcript per
 Million (TPM) from read counts. The latter must be provided in the
 format produced by the 'bedtools multicov' utility, i.e. an extended
-BED6 file where each colum past the 6th lists the read counts for one
+BED12 file where each colum past the 12th lists read counts for one
 sample/condition.
 
-=head1 OPTION
+=head1 OPTIONS
 
 =over
 
 =item B<-i>
 
-Input file in 'bedtools multicov' output format, i.e. an extended BED6
-file where each colum past the 6th lists the read counts for one
+Input file in 'bedtools multicov' output format, i.e. an extended BED12
+file where each colum past the 12th lists the read counts for one
 sample/condition.
 
 =item B<--readlength -r>
