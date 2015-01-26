@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-22 15:24:58 fabian>
+# Last changed Time-stamp: <2015-01-26 14:05:36 mtw>
 
 package Bio::ViennaNGS::BamStatSummary;
 
-use 5.12.0;
-use version; our $VERSION = qv('0.12_08');
+use 5.10.0;
+use version; our $VERSION = qv('0.12_12');
 use Moose;
 use Carp;
 use POSIX qw(floor);
@@ -333,7 +333,9 @@ __END__
 
 =head1 NAME
 
-Bio::ViennaNGS::BamStatSummary - Moose interface to analyze, summarize and compare BAM mapping statistics data structure produced by  Bio::ViennaNGS::BamStat
+Bio::ViennaNGS::BamStatSummary - Moose interface to analyze, summarize
+and compare BAM mapping statistics data structure produced by
+Bio::ViennaNGS::BamStat
 
 =head1 SYNOPSIS
 
@@ -352,14 +354,34 @@ Bio::ViennaNGS::BamStatSummary - Moose interface to analyze, summarize and compa
 
 =head1 DESCRIPTION
 
-This module provides a L<Moose> interface to process the mapping statistics of
-single BAM file. It uses the data structure as produced by BamStat, summarizes the data and compares different bam files. It produces csv files and graphical representation of the results. Thereby it builds on Statistics::R;
+This module provides a L<Moose> interface to process the mapping
+statistics of single BAM file. It uses the data structure as produced
+by L<Bio::ViennaNGS::BamStat>, summarizes the data and compares
+different BAM files. Output is written both as CSV files and graphical
+representation of the results.  Internally, this modules build on
+L<Statistics::R>.
+
+
+=head1 DEPENDENCIES
+
+=over
+
+=item L<Statistics::R>
+
+=item L<Path::Class>
+
+=item L<Tie::Hash::Indexed>
+
+=item L<Moose>
+
+=back
 
 =head1 SEE ALSO
 
-=over 
+=over
 
 =item L<Bio::ViennaNGS>
+
 =item L<Bio::ViennaNGS::BamStat>
 
 =back
@@ -376,10 +398,10 @@ single BAM file. It uses the data structure as produced by BamStat, summarizes t
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 by Michael T. Wolfinger
+Copyright (C) 2015 by Michael T. Wolfinger
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.16.3 or,
+it under the same terms as Perl itself, either Perl version 5.10.0 or,
 at your option, any later version of Perl 5 you may have available.
 
 This software is distributed in the hope that it will be useful, but
