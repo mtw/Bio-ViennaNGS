@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-26 01:18:36 mtw>
+# Last changed Time-stamp: <2015-01-26 13:48:13 mtw>
 
 package Bio::ViennaNGS::Expression;
 
-use version; our $VERSION = qv('0.12_11');
+use version; our $VERSION = qv('0.12_12');
 use Moose;
 use Carp;
 use Data::Dumper;
@@ -145,7 +145,7 @@ sub write_expression_bed12 {
   }
   close(MULTICOV_OUT);
 
-  sortbed($bedname_u,"./",$bedname,1,"./MTWlog.txt");  # sort bed file
+  sortbed($bedname_u,"./",$bedname,1,undef);  # sort bed file
 }
 
 
@@ -220,72 +220,71 @@ transcript expression from read counts.
 
 =item parse_readcounts_bed12
 
- Title : parse_readcounts_bed12
+Title : parse_readcounts_bed12
 
- Usage : $obj->parse_readcounts_bed12($file)
+Usage : $obj->parse_readcounts_bed12($file)
 
- Function: Parses a bedtools multicov (multiBamCov) file, i.e. an
+Function : Parses a bedtools multicov (multiBamCov) file, i.e. an
            extended BED12 file, into an Array of Hash of Hashes data
            structure (C<@{$self->data}>).
 
-  Args : C<$file> is the input file, i.e. and extended BED12 file
-         where each column past the 12th lists read counts for this
-         bedline's feature(s) for a specific sample/condition.
+Args : C<$file> is the input file, i.e. and extended BED12 file where
+       each column past the 12th lists read counts for this bedline's
+       feature(s) for a specific sample/condition.
 
-  Returns :
+Returns :
 
-  Notes: This method evaluates the number of samples/conditions
-         present in the input, i.e. the number of columns extending
-         the canonical BED12 columns in the input multicov file and
-         populates C<$self->conds>. Also populates
-         C<$self->nr_features> with the number of genes/features
-         present in the input (evidently, this should be the same for
-         each sample/condition in the input).
+Notes : This method evaluates the number of samples/conditions present
+        in the input, i.e. the number of columns extending the
+        canonical BED12 columns in the input multicov file and
+        populates C<$self->conds>. Also populates
+        C<$self->nr_features> with the number of genes/features
+        present in the input (evidently, this should be the same for
+        each sample/condition in the input).
 
 =item computeTPM
 
- Title : computeTPM
+Title : computeTPM
 
- Usage : $obj->computeTPM($sample, $readlength)
+Usage : $obj->computeTPM($sample, $readlength)
 
- Function : Computes expression of each gene/feature present in
-            C<$self->data> in Transcript per Million (TPM) [Wagner
-            et.al. Theory Biosci. (2012)].  is a reference
-            to a Hash of Hashes data straucture where keys are feature
-            names and values hold a hash that must at least contain
-            length and raw read counts. Practically,
-            C<$featCount_sample> is represented by _one_ element of
-            C<@featCount>, which is populated from a multicov file by
-            C<parse_multicov()>.
+Function : Computes expression of each gene/feature present in
+           C<$self->data> in Transcript per Million (TPM) [Wagner
+           et.al. Theory Biosci. (2012)].  is a reference to a Hash of
+           Hashes data straucture where keys are feature names and
+           values hold a hash that must at least contain length and
+           raw read counts. Practically, C<$featCount_sample> is
+           represented by _one_ element of C<@featCount>, which is
+           populated from a multicov file by C<parse_multicov()>.
 
-  Args : C<$sample> is the sample index of C<@{$self->data}>. This is
-         especially handy if one is only interested in computing
-         normalized expression values for a specific sample, rather
-         than all samples in multicov BED12 file. C<$readlength> is
-         the read length of the RNA-seq sequencing experiment.
+ Args : C<$sample> is the sample index of C<@{$self->data}>. This is
+        especially handy if one is only interested in computing
+        normalized expression values for a specific sample, rather
+        than all samples in multicov BED12 file. C<$readlength> is the
+        read length of the RNA-seq sequencing experiment.
 
-  Returns : Returns the mean TPM of the processed sample, which is
-            invariant among samples. (TPM models relative molar
-            concentration and thus fulfills the invariant average
-            criterion.)
+Returns : Returns the mean TPM of the processed sample, which is
+          invariant among samples. (TPM models relative molar
+          concentration and thus fulfills the invariant average
+          criterion.)
 
 =item write_expression_bed12
 
-  Title : write_expression_bed12
+Title : write_expression_bed12
 
-  Usage : $obj->write_expression_bed12($measure, $dest, $basename)
+Usage : $obj->write_expression_bed12($measure, $dest, $basename)
 
-  Function : Writes normalized expression data to a bedtools multicov
-             (multiBamCov)-type BED12 file.
+Function : Writes normalized expression data to a bedtools multicov
+           (multiBamCov)-type BED12 file.
 
-  Args : C<$measure> specifies the type in which normalized expression
-         data from C<@{$self->data}> is dumped, i.e. TPM or
-         RPKM. These values must have been computed and inserted into
-         C<@{self->data}> beforehand by
-         e.g. C<$self->computeTPM()>. C<$dest> and C<$base_name> give
-         path and base name of the output file, respectively.
+Args : C<$measure> specifies the type in which normalized expression
+       data from C<@{$self->data}> is dumped, i.e. TPM or RPKM. These
+       values must have been computed and inserted into
+       C<@{self->data}> beforehand by
+       e.g. C<$self->computeTPM()>. C<$dest> and C<$base_name> give
+       path and base name of the output file, respectively.
 
-  Returns : None. The output is position-sorted extended BED12 file.
+Returns : None. The output is position-sorted extended BED12 file.
 
 =back
 
