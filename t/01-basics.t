@@ -19,6 +19,8 @@ BEGIN { use_ok('Bio::ViennaNGS::AnnoC') };
 BEGIN { use_ok('Bio::ViennaNGS::Bam') };
 BEGIN { use_ok('Bio::ViennaNGS::BamStat') };
 BEGIN { use_ok('Bio::ViennaNGS::BamStatSummary') };
+BEGIN { use_ok('Bio::ViennaNGS::Bed') };
+BEGIN { use_ok('Bio::ViennaNGS::Expression') };
 BEGIN { use_ok('Bio::ViennaNGS::Fasta') };
 BEGIN { use_ok('Bio::ViennaNGS::Feature') };
 BEGIN { use_ok('Bio::ViennaNGS::FeatureChain') };
