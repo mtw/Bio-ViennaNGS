@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-26 01:14:12 mtw>
+# Last changed Time-stamp: <2015-01-26 18:32:54 fall>
 
 package Bio::ViennaNGS::Util;
 
@@ -232,6 +232,7 @@ sub extend_chain{
   my $r	    = $_[3];
   my $u     = $_[4];
   my $d     = $_[5];
+  my $e     = $_[6];
 
   ##return a new chain with extended coordinates
   my $extendchain = $chain -> clone();
@@ -245,7 +246,7 @@ sub extend_chain{
     my $right  = 0;
     my $left   = 0;
     my $width  = nearest(1,($end-$start)/2);
-    $width = 0 if ($d > 0 || $u > 0);
+    $width = 0 if ($d > 0 || $u > 0 || !$e);
     if ($strand eq "+"){
       if ($d > 0){
 	$start = $end;

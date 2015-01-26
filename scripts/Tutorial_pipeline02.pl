@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-01-26 17:59:42 fall>
+# Last changed Time-stamp: <2015-01-26 19:09:13 fall>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -43,27 +43,28 @@ pod2usage(-verbose => 0) unless GetOptions(
 my $bed	     = 'hg19_highlyexpressed.bed';
 my $name     = (split(/\./,$bed))[0];
 my $upstream = 50;
-my $into     = 10;
-my $outfile  = "$name.ext$upstream\_fromStart_$into\_downstream.bed";
+my $outfile = "$name.ext$upstream\_upstream.bed";
 
 my %sizes = %{fetch_chrom_sizes('hg19')}; ### Requires installation of UCSCs fetchChromSizes script or mysql
 
 my @featurelist = @{parse_bed6($bed)};
 my $chain	= Bio::ViennaNGS::FeatureChain->new('type'=>'original','chain'=>\@featurelist);
 
-my $extended_chain  = extend_chain(\%sizes,$chain,0,$into,$upstream,0);
+my $extended_chain = extend_chain(\%sizes,$chain,$upstream,0,0,0);
 
 open (my $Out, ">",$outfile) or die "$!";
 
-my $out	= $extended_chain->print_chain();
+my $out = $extended_chain->print_chain();
 print $Out $out;
 
 close($Out);
 
-my $bedtools = `bedtools getfasta -s -fi hg19_chromchecked.fa -bed $outfile -fo $name.ext$upstream\_fromStart_$into\_downstream.fa`;
+print STDERR $extended_chain->type();
+
+my $bedtools = `bedtools getfasta -s -fi hg19_chromchecked.fa -bed $outfile -fo $name.ext$upstream\_upstream.fa`;
 print STDERR "$bedtools\n" if $?;
 
-open(IN,"<","$name.ext$upstream\_fromStart_$into\_downstream.fa") || die ("Could not open $name.ext$upstream\_fromStart_$into\_downstream.fa!\n@!\n");
+open(IN,"<","$name.ext$upstream\_upstream.fa") || die ("Could not open $name.ext$upstream\_upstream.fa!\n@!\n");
 
 my @fastaseqs;
 while(<IN>){
@@ -87,18 +88,18 @@ for (6..8){
     close(KMER);
 }
 
-my $cmd = "perl ../scripts/MEME_xml_motif_extractor.pl -f Example_Pipeline_meme.xml -r $RLIBPATH -t Example_Pipeline";
-my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run(command => $cmd, verbose => 0);
-
-if(!$success){    
-    my $this_function = (caller(0))[3];
-    print STDERR "ERROR: MEME_xml_motif_extractor.pl run unsuccessful\n";
-    print join "", @$full_buf;
-    unless ($r) {
-	warn "If you do not provide a valid R-lib-path and ggplot is not found in the standard R path, this pipeline will not be able to parse the MEME xml output.\n";
-	pod2usage(-verbose => 0);
-    }
-}
+#my $cmd = "perl ../scripts/MEME_xml_motif_extractor.pl -f Example_Pipeline_meme.xml -r $RLIBPATH -t Example_Pipeline";
+#my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run(command => $cmd, verbose => 0);
+#
+#if(!$success){    
+#    my $this_function = (caller(0))[3];
+#    print STDERR "ERROR: MEME_xml_motif_extractor.pl run unsuccessful\n";
+#    print join "", @$full_buf;
+#    unless ($r) {
+#	warn "If you do not provide a valid R-lib-path and ggplot is not found in the standard R path, this pipeline will not be able to parse the MEME xml output.\n";
+#	pod2usage(-verbose => 0);
+#    }
+#}
 
 ###############
 ###POD
@@ -108,31 +109,17 @@ __END__
 
 =head1 NAME
 
-Tutorial_Pipeline01.pl - An example pipeline for the ViennaNGS toolbox
+Tutorial_Pipeline02.pl - Another example pipeline for the ViennaNGS toolbox
 
 =head1 SYNOPSIS
     
-./Tutorial_Pipeline01.pl [-r I<STRING>]
+./Tutorial_Pipeline02.pl
 
 =head1 DESCRIPTION 
 
 This script is a showcase for the usage of ViennaNGS in a real NGS example.
 We start from a file containing ENSEMBL annotation information for human protein-coding genes, which have a read pileup of at least 1001 reads in an ENCODE dataset mapped with segemehl.
-We are insterested in finding sequence motifs in close proximity to the gene start (50nt upstream, 10nt into the gene).
-
-The first step is to initialize some variables and generate a chromosome-sizes hash.
-
-=head1 Generate a Bio::ViennaNGS::FeatureChain object
-
-The bed file of interest is parsed, a feature array is generated and passed on to Bio::ViennaNGS::FeatureChain, which creates a new Moose Object of type FeatureChain, containing the original bed entries
-
-=head1 OPTIONS
-
-=over 4
-
-=item B<--rpath -r>
-
-The command line option -r should be given a path to the R-lib directory containing ggplot2, which is needed for the MEME_xml_motif_extractor.pl, otherwise this script will fail.
+We are insterested in generating a UCSC bigwig track for those genes and the region 50nt upstream of the gene start.
 
 =item B<--help -h>
 
