@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-22 15:19:03 fabian>
+# Last changed Time-stamp: <2015-01-26 14:07:22 mtw>
 
 package Bio::ViennaNGS::BamStat;
 
-use 5.12.0;
-use version; our $VERSION = qv('0.12_08');
+use 5.10.0;
+use version; our $VERSION = qv('0.12_12');
 use Bio::DB::Sam 1.39;
 use Moose;
 use Carp;
@@ -562,13 +562,24 @@ Bio::ViennaNGS::BamStat - Moose interface to BAM mapping statistics
 =head1 DESCRIPTION
 
 This module provides a L<Moose> interface to the mapping statistics of
-a single BAM file. It builds on L<Bio::DB::Sam>
+a single BAM file. It builds on L<Bio::DB::Sam>.
+
+=head1 DEPENDENCIES
+
+=over
+
+=item L<Bio::DB::Sam> >= 1.39
+
+=item L<Moose>
+
+=back
 
 =head1 SEE ALSO
 
-=over 
+=over
 
 =item L<Bio::ViennaNGS>
+
 =item L<Bio::ViennaNGS::BamStatSummary>
 
 =back
@@ -585,7 +596,7 @@ a single BAM file. It builds on L<Bio::DB::Sam>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 by Michael T. Wolfinger
+Copyright (C) 2015 by Michael T. Wolfinger
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.16.3 or,
