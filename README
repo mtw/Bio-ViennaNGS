@@ -111,7 +111,7 @@ RefSeq bacterial GFF3 annotation.
 kmer_analysis.pl:
 Count k-mers of predefined length in FastQ and Fasta files
 
-MEME_XML_motif_extractor.pl:
+MEME_xml_motif_extractor.pl:
 Compute simple statistics from MEME XML output and return a list of found
 motifs with the number of sequences containing those motifs as well as nice
 ggplot graphs.
@@ -124,14 +124,14 @@ newUCSCdb.pl:
 Create a new genome database (ie. add a novel organism) in a local
 instance of the UCSC genome browser.
 
-normalize_multicov.pl: [currently broken ]
+normalize_multicov.pl: 
 Compute normalized expression data in TPM/RPKM from (raw) read counts in
 bedtools multicov format. TPM reference: Wagner et al, Theory
 Biosci. 131(4), pp 281-85 (2012)
 
 sj_visualizer.pl:
 Convert splice junctions from mapped RNA-seq data in segemehl BED6 splice
-junction format to BED12 for easy visualization in genome Browsers.
+junction format to BED12 for easy visualization in genome browsers.
 
 splice_site_summary.pl:
 Identify and characterize splice junctions from RNA-seq data by
