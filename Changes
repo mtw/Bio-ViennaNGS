@@ -94,7 +94,8 @@ Revision history for Perl extension ViennaNGS.
 	- ship demo files in share/ folder
 	- updated POD and README
 	
-0.12_11
+0.12_13
+	- requires Perl >= 5.10.0
 	- integrated Bio::ViennaNGS::Bam
 	- integrated Bio::ViennaNGS::BamStat
 	- integrated Bio::ViennaNGS::BamStatSummary
