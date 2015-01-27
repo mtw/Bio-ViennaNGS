@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-27 16:11:59 mtw>
+# Last changed Time-stamp: <2015-01-27 16:56:46 mtw>
 
 package Bio::ViennaNGS::Util;
 
@@ -231,6 +231,7 @@ sub extend_chain{
   my $r	    = $_[3];
   my $u     = $_[4];
   my $d     = $_[5];
+  my $this_function = (caller(0))[3];
 
   ##return a new chain with extended coordinates
   my $extendchain = $chain -> clone();
@@ -300,7 +301,7 @@ sub extend_chain{
       }
     }
     else{
-      die "Something wrong here!\n";
+      croak "ERROR [$this_function] Something wrong here!\n";
     }
     $feature->start($start);
     $feature->end($end);
@@ -311,7 +312,9 @@ sub extend_chain{
 
 sub parse_bed6{
   my $bedfile = shift;
-  open (my $Bed, "<:gzip(autopop)",$bedfile) or die "$!";
+  my $this_function = (caller(0))[3];
+  open (my $Bed, "<:gzip(autopop)",$bedfile) or 
+    croak "ERROR [$this_function] $!";
   my @featurelist; ## This will become a FeatureChain
   while(<$Bed>){
     ### This should be done by FeatureIO
@@ -352,28 +355,29 @@ sub fetch_chrom_sizes{
   my $this_function = (caller(0))[3];
 
   my $test_fetchChromSizes = can_run('fetchChromSizes') or
-    say "ERROR [$this_function] fetchChromSizes utility not found";
+    croak "ERROR [$this_function] fetchChromSizes utility not found";
 
   my $cmd = "fetchChromSizes $species";
-  my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run(command => $cmd, verbose => 0);
+  my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = 
+    run(command => $cmd, verbose => 0);
   if ($success){
     @chromsize = @{$stdout_buf};
   }
   else{
-    print STDERR "Using UCSCs fetchChromSizes failed, trying alternative mysql fetch!\n";
+    carp "WARN [$this_function] Using UCSCs fetchChromSizes failed, trying alternative mysql fetch!\n";
     my $test_fetchChromSizes = can_run('mysql') or
-      die "ERROR [$this_function] mysql utility not found";
+      croak "ERROR [$this_function] mysql utility not found";
     $cmd = "mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e \"select chrom, size from $species.chromInfo\"";  ### Alternative to UCSC fetchChromSizes, has mysql dependency
-    my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf )  = run(command => $cmd, verbose => 0);
+    my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) =
+      run(command => $cmd, verbose => 0);
     if ($success){
       @chromsize = @{$stdout_buf};
     }
     else{
-      print STDERR "ERROR [$this_function] External command call unsuccessful\n";
-      print STDERR "ERROR: this is what the command printed:\n";
+      carp "ERROR [$this_function] External command call unsuccessful\n";
+      carp "ERROR [$this_function] this is what the command printed:\n";
       print join "", @$full_buf;
-      croak $!;
-      die "Fetching of chromosome sizes failed, please either download fetchChromSizes from the UCSC script collection, or install mysql!\n";
+      confess "Fetching of chromosome sizes failed, please either download fetchChromSizes from the UCSC script collection, or install mysql!\n";
     }
   }
 
