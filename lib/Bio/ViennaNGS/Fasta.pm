@@ -1,10 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-20 00:32:02 mtw>
+# Last changed Time-stamp: <2015-01-27 16:07:44 mtw>
 
 package Bio::ViennaNGS::Fasta;
 
-use 5.12.0;
-use version; our $VERSION = qv('0.12_07');
+use version; our $VERSION = qv('0.12_13');
 use Bio::Perl 1.00690001;
 use Bio::DB::Fasta;
 use Moose;
@@ -158,20 +157,20 @@ This module provides a L<Moose> interface to L<Bio::DB::Fasta>.
 
 =item stranded_subsequence
 
-  Title   : stranded_subsequence
-  Usage   : $obj->stranded_subsequence($id,$start,$end,$strand)
-  Function: Returns the DNA/RNA sequence for C<$id> from
-            C<$start> to C<$end>.
-  Args    : C<$id> is the Fasta ID (a L<Bio::PrimarySeq::Fasta> object). 
-            C<$start> and C<$end>  should be self-explnatory, C<$strand>
-            is 1 or -1 for [+] or [-] strand, respectively
-  Returns : A string
+Title : stranded_subsequence
+Usage : C<<$obj->stranded_subsequence($id,$start,$end,$strand)>>
+Function : Returns the DNA/RNA sequence for C<$id> from C<$start> to
+           C<$end>.
+Args : C<$id> is the Fasta ID (a L<Bio::PrimarySeq::Fasta> object).
+        C<$start> and C<$end> should be self-explnatory, C<$strand> is
+        1 or -1 for [+] or [-] strand, respectively
+Returns : A string.
 
 =back
 
 =head1 DEPENDENCIES
 
-=over 5
+=over
 
 =item L<Bio::Perl> >= 1.00690001
 
@@ -187,7 +186,7 @@ This module provides a L<Moose> interface to L<Bio::DB::Fasta>.
 
 =head1 SEE ALSO
 
-=over 2
+=over
 
 =item L<Bio::ViennaNGS>
 
@@ -201,10 +200,10 @@ Michael T. Wolfinger, E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 by Michael T. Wolfinger
+Copyright (C) 2014-2015 by Michael T. Wolfinger
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.16.3 or,
+it under the same terms as Perl itself, either Perl version 5.10.0 or,
 at your option, any later version of Perl 5 you may have available.
 
 This software is distributed in the hope that it will be useful, but

@@ -1,10 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-16 15:47:04 mtw>
+# Last changed Time-stamp: <2015-01-27 16:11:04 mtw>
 
 package Bio::ViennaNGS::AnnoC;
 
-use 5.12.0;
-use version; our $VERSION = qv('0.12_10');
+use version; our $VERSION = qv('0.12_13');
 use Bio::ViennaNGS::Util qw(sortbed);
 use Bio::Tools::GFF;
 use Path::Class;
@@ -276,48 +275,46 @@ scenarios, including spliced isoforms.
 
 =item parse_gff
 
- Title   : parse_gff
- Usage   : $obj->parse_gff($gff3_file);
- Function: Parses GFF3 annotation files of non-spliced genomes into
-           C<$self->features>
- Args    : The full path to a GFF3 file
- Returns :
- Notes   : The GFF3 specification is available at
-           L<http://www.sequenceontology.org/resources/gff3.html>.
-           This routine has been tested with NCBI bacteria GFF3
-           annotation.
+Title : parse_gff
+Usage : C<<$obj->parse_gff($gff3_file);>>
+Function: Parses GFF3 annotation files of non-spliced genomes into
+          C<<$self->features>>
+Args : The full path to a GFF3 file
+Returns :
+Notes : The GFF3 specification is available at
+        L<http://www.sequenceontology.org/resources/gff3.html>. This
+        routine has been tested with NCBI bacteria GFF3 annotation.
 
 =item feature_summary
 
- Title   : feature_summary
- Usage   : $obj->feature_summary($dest);
- Function: Generate a summary file for all features present in
-           C<$self->features> 
- Args    : Full output path for summary.txt file
- Returns :
-
+Title : feature_summary
+Usage : C<<$obj->feature_summary($dest);>>
+Function : Generate a summary file for all features present in
+           C<<$self->features>>
+Args : Full output path for summary.txt file
+Returns :
 
 =item features2bed
 
- Title   : features2bed
- Usage   : $obj->features2bed($feature,$workdir,$bn,$log);
- Function: Dumps genomic features from C<$self->features> hash to a
+Title : features2bed
+Usage : C<<$obj->features2bed($feature,$workdir,$bn,$log);>>
+Function : Dumps genomic features from C<$self->features> hash to a
            BED12 file.
- Args    : C<$gbkey> can be either a string corresponding to a
-           genbank key in C<$self->featstat> or C<undef>. If defined,
-           only features of the speficied key will be dumped to a single
-           BED12 file. If C<$gbkey> is C<undef>, BED12 files will be
-           generated for each type present in C<$self->featstat>.
-           C<$dest> is the output directory and C<$bn> the basename for
-           all output files. C<$log> is either be the full path to a
-           logfile or C<undef>.
- Returns  :
+Args : C<<$gbkey>> can be either a string corresponding to a genbank
+       key in C<<$self->featstat>> or C<undef>. If defined, only
+       features of the speficied key will be dumped to a single BED12
+       file. If C<$gbkey> is C<undef>, BED12 files will be generated
+       for each type present in C<<$self->featstat>>.  C<$dest> is the
+       output directory and C<$bn> the basename for all output
+       files. C<$log> is either be the full path to a logfile or
+       C<undef>.
+Returns  :
 
 =back
 
 =head1 DEPENDENCIES
 
-=over 4
+=over
 
 =item L<Bio::Tools::GFF>
 
@@ -335,10 +332,10 @@ Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2014-2015 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.12.4 or,
+it under the same terms as Perl itself, either Perl version 5.10.0 or,
 at your option, any later version of Perl 5 you may have available.
 
 This program is distributed in the hope that it will be useful, but

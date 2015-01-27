@@ -1,10 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-26 14:07:22 mtw>
+# Last changed Time-stamp: <2015-01-27 16:11:30 mtw>
 
 package Bio::ViennaNGS::BamStat;
 
-use 5.10.0;
-use version; our $VERSION = qv('0.12_12');
+use version; our $VERSION = qv('0.12_13');
 use Bio::DB::Sam 1.39;
 use Moose;
 use Carp;
@@ -599,7 +598,7 @@ a single BAM file. It builds on L<Bio::DB::Sam>.
 Copyright (C) 2015 by Michael T. Wolfinger
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.16.3 or,
+it under the same terms as Perl itself, either Perl version 5.10.0 or,
 at your option, any later version of Perl 5 you may have available.
 
 This software is distributed in the hope that it will be useful, but

@@ -1,10 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-22 22:34:03 mtw>
+# Last changed Time-stamp: <2015-01-27 16:15:02 mtw>
 
 package Bio::ViennaNGS::Feature;
 
-use 5.10.0;
-use version; our $VERSION = qv('0.12_11');
+use version; our $VERSION = qv('0.12_13');
 
 #use namespace::autoclean;
 use Moose;

@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-26 15:46:18 mtw>
+# Last changed Time-stamp: <2015-01-27 16:08:25 mtw>
 
 package Bio::ViennaNGS::Expression;
 
@@ -222,11 +222,11 @@ transcript expression from read counts.
 
 Title : parse_readcounts_bed12
 
-Usage : C<$obj-E<gt>parse_readcounts_bed12($file)>
+Usage : C<<$obj->parse_readcounts_bed12($file);>>
 
 Function : Parses a bedtools multicov (multiBamCov) file, i.e. an
            extended BED12 file, into an Array of Hash of Hashes data
-           structure (C<@{$self-E<gt>data}>).
+           structure (C<<@{$self->data}>>).
 
 Args : C<$file> is the input file, i.e. and extended BED12 file where
        each column past the 12th lists read counts for this bedline's
@@ -237,8 +237,8 @@ Returns :
 Notes : This method evaluates the number of samples/conditions present
         in the input, i.e. the number of columns extending the
         canonical BED12 columns in the input multicov file and
-        populates C<$self-E<gt>conds>. Also populates
-        C<$self-E<gt>nr_features> with the number of genes/features
+        populates C<<$self->conds>>. Also populates
+        C<<$self->nr_features>> with the number of genes/features
         present in the input (evidently, this should be the same for
         each sample/condition in the input).
 
@@ -246,10 +246,10 @@ Notes : This method evaluates the number of samples/conditions present
 
 Title : computeTPM
 
-Usage : C<$obj-E<gt>computeTPM($sample, $readlength)>
+Usage : C<<$obj-E<gt>computeTPM($sample, $readlength);>>
 
 Function : Computes expression of each gene/feature present in
-           C<$self-E<gt>data> in Transcript per Million (TPM) [Wagner
+           C<<$self->data>> in Transcript per Million (TPM) [Wagner
            et.al. Theory Biosci. (2012)].  is a reference to a Hash of
            Hashes data straucture where keys are feature names and
            values hold a hash that must at least contain length and
@@ -257,7 +257,7 @@ Function : Computes expression of each gene/feature present in
            represented by _one_ element of C<@featCount>, which is
            populated from a multicov file by C<parse_multicov()>.
 
-Args : C<$sample> is the sample index of C<@{$self-E<gt>data}>. This is
+Args : C<$sample> is the sample index of C<<@{$self->data}>>. This is
         especially handy if one is only interested in computing
         normalized expression values for a specific sample, rather
         than all samples in multicov BED12 file. C<$readlength> is the
@@ -272,17 +272,17 @@ Returns : Returns the mean TPM of the processed sample, which is
 
 Title : write_expression_bed12
 
-Usage : C<$obj-E<gt>write_expression_bed12($measure, $dest,
-$basename)>
+Usage : C<<$obj-E<gt>write_expression_bed12($measure, $dest,
+$basename);>>
 
 Function : Writes normalized expression data to a bedtools multicov
            (multiBamCov)-type BED12 file.
 
 Args : C<$measure> specifies the type in which normalized expression
-       data from C<@{$self--E<gt>data}> is dumped, i.e. TPM or
+       data from C<<@{$self-->data}>> is dumped, i.e. TPM or
        RPKM. These values must have been computed and inserted into
-       C<@{self--E<gt>data}> beforehand by
-       e.g. C<$self--E<gt>computeTPM()>. C<$dest> and C<$base_name>
+       C<<@{self->data}>> beforehand by
+       e.g. C<<$self->computeTPM()>>. C<$dest> and C<$base_name>
        give path and base name of the output file, respectively.
 
 Returns : None. The output is position-sorted extended BED12 file.
@@ -291,7 +291,7 @@ Returns : None. The output is position-sorted extended BED12 file.
 
 =head1 DEPENDENCIES
 
-=over 4
+=over
 
 =item L<Moose>
 
@@ -305,7 +305,7 @@ Returns : None. The output is position-sorted extended BED12 file.
 
 =head1 SEE ALSO
 
-=over 3
+=over
 
 =item L<Bio::ViennaNGS>
 
@@ -324,7 +324,7 @@ Michael T. Wolfinger, E<lt>michael@wolfinger.euE<gt>
 Copyright (C) 2015 by Michael T. Wolfinger
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.16.3 or,
+it under the same terms as Perl itself, either Perl version 5.10.0 or,
 at your option, any later version of Perl 5 you may have available.
 
 This software is distributed in the hope that it will be useful, but

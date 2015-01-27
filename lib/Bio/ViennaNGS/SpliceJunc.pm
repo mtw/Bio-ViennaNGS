@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-20 00:33:10 mtw>
+# Last changed Time-stamp: <2015-01-27 16:08:04 mtw>
 
 package Bio::ViennaNGS::SpliceJunc;
 
 use Exporter;
-use version; our $VERSION = qv('0.12_07');
+use version; our $VERSION = qv('0.12_13');
 use strict;
 use warnings;
 use Data::Dumper;
@@ -413,7 +413,7 @@ splice junctions.
 
 =head2 SUBROUTINES
 
-=over 3
+=over
 
 =item bed6_ss_from_bed12($bed12,$dest,$window,$can,$fastaO)
 
@@ -555,10 +555,10 @@ Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2015 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.12.4 or,
+it under the same terms as Perl itself, either Perl version 5.10.0 or,
 at your option, any later version of Perl 5 you may have available.
 
 This software is distributed in the hope that it will be useful, but

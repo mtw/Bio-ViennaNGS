@@ -1,10 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-20 00:32:56 mtw>
+# Last changed Time-stamp: <2015-01-27 16:11:17 mtw>
 
 package Bio::ViennaNGS::MinimalFeature;
 
-use 5.12.0;
-use version; our $VERSION = qv('0.12_07');
+use version; our $VERSION = qv('0.12_13');
 use namespace::autoclean;
 
 use Moose::Util::TypeConstraints;

@@ -1,11 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-20 00:31:03 mtw>
+# Last changed Time-stamp: <2015-01-27 16:03:52 mtw>
 
 package Bio::ViennaNGS::Bam;
 
-use 5.12.0;
 use Exporter;
-use version; our $VERSION = qv('0.12_07');
+use version; our $VERSION = qv('0.12_13');
 use strict;
 use warnings;
 use Bio::Perl 1.00690001;
@@ -419,7 +418,7 @@ unless your BAM file has these attributes.
 
 =head1 DEPENDENCIES
 
-=over 6
+=over
 
 =item  L<Bio::Perl> >= 1.00690001
 
@@ -445,10 +444,10 @@ unless your BAM file has these attributes.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2015 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.12.4 or,
+it under the same terms as Perl itself, either Perl version 5.10.0 or,
 at your option, any later version of Perl 5 you may have available.
 
 This software is distributed in the hope that it will be useful, but

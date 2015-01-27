@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-26 17:02:25 mtw>
+# Last changed Time-stamp: <2015-01-27 16:20:14 mtw>
 
 package Bio::ViennaNGS;
 
@@ -14,11 +14,11 @@ Bio::ViennaNGS - A Perl distribution for Next-Generation Sequencing
 
 =head1 DESCRIPTION
 
-Bio::ViennaNGS is a distribution of Perl modules and utilities for building
-efficient Next-Generation Sequencing (NGS) analysis pipelines. It covers
-various aspects of NGS data analysis, including (but not limited to)
-conversion of sequence annotation, evaluation of mapped data, expression
-quantification and visualization.
+Bio::ViennaNGS is a distribution of Perl modules and utilities for
+building efficient Next-Generation Sequencing (NGS) analysis
+pipelines. It covers various aspects of NGS data analysis, including
+(but not limited to) conversion of sequence annotation, evaluation of
+mapped data, expression quantification and visualization.
 
 The main Bio::ViennaNGS module is shipped with a complementary set of 
 (sub)modules:
@@ -154,7 +154,7 @@ Fastq file by user defined length.
 The L<Bio::ViennaNGS> modules and classes depend on a set of Perl
 modules, some of which are part of the Perl core distribution:
 
-=over 17
+=over
 
 =item L<Bio::Perl> >= 1.00690001
 
@@ -194,7 +194,7 @@ modules, some of which are part of the Perl core distribution:
 
 In addition the following modules are required by the L<Bio::ViennaNGS> utilities:
 
-=over 4
+=over
 
 =item L<PerlIO::gzip>
 
@@ -244,7 +244,7 @@ test Windows compatibility.
 
 =head1 SEE ALSO
 
-=over 14
+=over
 
 =item L<Bio::ViennaNGS::AnnoC>
 
@@ -298,7 +298,7 @@ Copyright (C) 2014-2015 Michael T. Wolfinger
 E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.12.4 or,
+it under the same terms as Perl itself, either Perl version 5.10.0 or,
 at your option, any later version of Perl 5 you may have available.
 
 This software is distributed in the hope that it will be useful, but

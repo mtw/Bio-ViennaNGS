@@ -1,11 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-26 01:14:12 mtw>
+# Last changed Time-stamp: <2015-01-27 16:11:59 mtw>
 
 package Bio::ViennaNGS::Util;
 
-use 5.12.0;
 use Exporter;
-use version; our $VERSION = qv('0.12_11');
+use version; our $VERSION = qv('0.12_13');
 use strict;
 use warnings;
 use Data::Dumper;
@@ -533,7 +532,7 @@ L<BEDtools|https://github.com/arq5x/bedtools2> on your system.
 Copyright (C) 2015 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.12.4 or,
+it under the same terms as Perl itself, either Perl version 5.10.0 or,
 at your option, any later version of Perl 5 you may have available.
 
 This software is distributed in the hope that it will be useful, but

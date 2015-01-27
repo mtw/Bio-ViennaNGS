@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-20 00:34:07 mtw>
+# Last changed Time-stamp: <2015-01-27 16:03:13 mtw>
 
 package Bio::ViennaNGS::UCSC;
 
 use Exporter;
-use version; our $VERSION = qv('0.12_07');
+use version; our $VERSION = qv('0.12_13');
 use strict;
 use warnings;
 use Template;
@@ -577,20 +577,28 @@ This function takes 4 parameters:
 
 =head1 SEE ALSO
 
-perldoc ViennaNGS
-perldoc ViennaNGS::AnnoC
+=over
+
+=item L<Bio::ViennaNGS>
+
+=back
 
 =head1 AUTHORS
 
-Michael Thomas Wolfinger, E<lt>michael@wolfinger.euE<gt>
-Florian Eggenhofer, E<lt>florian.eggenhofer@univie.ac.atE<gt>
+=over
+
+=item Michael T. Wolfinger, E<lt>michael@wolfinger.euE<gt>
+
+=item Florian Eggenhofer, E<lt>florian.eggenhofer@univie.ac.atE<gt>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014
+Copyright (C) 2015 Michael T. Wolfinger, E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.16.3 or,
+it under the same terms as Perl itself, either Perl version 5.10.0 or,
 at your option, any later version of Perl 5 you may have available.
 
 This program is distributed in the hope that it will be useful,

@@ -1,10 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-23 13:52:44 mtw>
+# Last changed Time-stamp: <2015-01-27 16:11:46 mtw>
 
 package Bio::ViennaNGS::Bed;
 
-use 5.10.0;
-use version; our $VERSION = qv('0.12_11');
+use version; our $VERSION = qv('0.12_13');
 use Carp;
 use Moose;
 use namespace::autoclean;
@@ -124,6 +123,12 @@ genomic interval data in BED format
 
   my $bedobject = Bio::ViennaNGS::Bed->new();
 
+  # compute the length of a BED12 block
+  $bedobject->_build_length();
+
+  # dump an object as BED12 line
+  $bedobject->as_bed_line(12);
+
 =head1 DESCRIPTION
 
 This module provides a Moose interface for storage and manipulation of
@@ -137,31 +142,31 @@ L<Bio::ViennaNGS::FeatureLine>.
 
 =over
 
-=item get_length
+=item _build_length
 
- Title   : _build_length
- Usage   : $obj->_build_length();
- Function: Compute the length of a BED12 interval block / line, i.e.
-           the sum over the lengths of all intervals that make up a
-           BED12 entry.
- Args    :
- Returns :
+Title   : _build_length
+Usage   : C<<$obj->_build_length();>>
+Function: Compute the length of a BED12 interval block / line, i.e.
+          the sum over the lengths of all intervals that make up a
+          BED12 entry.
+Args    :
+Returns :
 
 =item as_bed_line
 
- Title   : as_bed_line
- Usage   : $obj->as_bed_line($bedtype);
- Function: Dump the contents of the object as BED6 or BED12 line.
- Args    : C<$bedtype> can either be 6 or 12, determining BED6 or BED12
-           output.
- Returns : A (tab-separated) BED6 or BED12 line as string.
+Title   : as_bed_line
+Usage   : C<<$obj->as_bed_line($bedtype);>>
+Function: Dump the contents of the object as BED6 or BED12 line.
+Args    : C<$bedtype> can either be 6 or 12, determining BED6 or BED12
+          output.
+Returns : A (tab-separated) BED6 or BED12 line as string.
 
 
 =back
 
 =head1 DEPENDENCIES
 
-=over 4
+=over
 
 =item L<Carp>
 
@@ -176,7 +181,7 @@ Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 Copyright (C) 2015 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.12.4 or,
+it under the same terms as Perl itself, either Perl version 5.10.0 or,
 at your option, any later version of Perl 5 you may have available.
 
 This program is distributed in the hope that it will be useful, but
