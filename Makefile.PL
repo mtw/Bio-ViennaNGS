@@ -38,6 +38,7 @@ WriteMakefile(
 				    "namespace::autoclean"         => '0',
 				    "File::Share"                  => '0',
 				    "Template"                     => '0',
+				    "Statistics::R"                => '0',
 				   },
 	      'MIN_PERL_VERSION'          => '5.010',
 	      'EXE_FILES'                 => [ map { "scripts/$_" } @scripts ],
