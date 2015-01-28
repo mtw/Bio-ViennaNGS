@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-01-27 17:15:07 fall>
+# Last changed Time-stamp: <2015-01-28 10:38:48 fall>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -48,13 +48,15 @@ Tutorial_pipeline01.pl - An example pipeline for the ViennaNGS toolbox
 ./Tutorial_Pipeline01.pl path/to/R/libraries
 Where path/to/R/libraries should point to the directory containing ggplot2
 
-=head2 Pipeline 
+=head2 DESCRIPTION 
 
 This script is a showcase for the usage of ViennaNGS in a real NGS
 example.  We start from a file containing ENSEMBL annotation
 information for human protein-coding genes.  We are insterested in
 finding sequence motifs in close proximity to the gene start (50nt
 upstream, 10nt into the gene).
+
+=head2 PIPELINE
 
 The first step is to initialize some variables and generate a chromosome_sizes hash.
 
@@ -76,7 +78,7 @@ my $outfile  = "$name.ext$upstream\_fromStart_$into\_downstream.bed";
 
 my %sizes = %{fetch_chrom_sizes('hg19')}; ### Requires installation of UCSCs fetchChromSizes script or mysql
 
-=head2 Generate a Bio::ViennaNGS::FeatureChain object
+=head3 Generate a Bio::ViennaNGS::FeatureChain object
 
 The bed file of interest is parsed, a feature array is generated and
 passed on to Bio::ViennaNGS::FeatureChain, which creates a new Moose
@@ -91,27 +93,23 @@ my $chain = Bio::ViennaNGS::FeatureChain->new('type'=>'original','chain'=>\@feat
 my @featurelist = @{parse_bed6($bed)};
 my $chain	= Bio::ViennaNGS::FeatureChain->new('type'=>'original','chain'=>\@featurelist);
 
-=head2 Extend the existing chain for motif analysis
+=head3 Extend the existing chain for motif analysis
 
 The newly created FeatureChain object will now be extended 50nt upstream of the gene start and 10nt into the gene, to retrieve a bed file which contains the putative sequence motifs.
 
 C<<my $extended_chain = extend_chain(\%sizes,$chain,0,$into,$upstream,0);>>
 
-For later purposes we also extend the whole U6 gene span 50nt upstream.
-C<<my $extended_chain2 = extend_chain(\%sizes,$chain,$upstream,0,0,0);>>
-
 =cut
 
 my $extended_chain  = extend_chain(\%sizes,$chain,0,$into,$upstream,0);
 
-=head2 Print extended Bio::ViennaNGS::FeatureChain objects to files
+=head3 Print extended Bio::ViennaNGS::FeatureChain objects to files
 
 Extended chains are now print out to make them available for external tools like bedtools.
 
 C<<my $out = $extended_chain->print_chain();
-  print $Out $out;
-  $out = $extended_chain2->print_chain();
-  print $Out2 $out;>>
+print $Out $out;
+close ($Out)>>
 
 =cut
 
@@ -146,7 +144,7 @@ Extends a Bio::ViennaNGS::FeatureChain object by given constraints
 
 =cut
 
-=head2 Sequence analysis
+=head3 Sequence analysis
 
  We now generate FASTA files from the extended bed files using bedtools getfasta method.
 C<<my $bedtools = `bedtools getfasta -s -fi hg19_chromchecked.fa -bed $outfile -fo $name.ext$upstream\_fromStart_$into\_downstream.fa`;>>
@@ -163,24 +161,24 @@ C<<open(IN,"<","$name.ext$upstream\_fromStart_$into\_downstream.fa") || die ("Co
 
 C<<my @fastaseqs;>>
 C<<while(<IN>){
-    chomp (my $raw = $_);
-    next if ($_ =~ /^>/);
-    push @fastaseqs, $raw;
+chomp (my $raw = $_);
+next if ($_ =~ /^>/);
+push @fastaseqs, $raw;
 }>>
 C<<close(IN);>>
 
 C<<for (6..8){
-    my %kmer = %{kmer_enrichment(\@fastaseqs, $_)};
-    my $total = sum values %kmer;
-    ### Print Output
-    open(KMER,">","$_\_mers") or die "Could not open file $_\_mers$!\n";
-    print KMER "$_\-mer\tCount\tRatio\n";
-    print KMER "TOTAL\t$total\t1\n";
-    foreach my $key  (sort {$kmer{$b} <=> $kmer{$a} } keys %kmer) {
-        my $ratio = nearest(.0001,$kmer{$key}/$total);
-        print KMER "$key\t$kmer{$key}\t$ratio\n";
-    }
-    close(KMER);
+my %kmer = %{kmer_enrichment(\@fastaseqs, $_)};
+my $total = sum values %kmer;
+### Print Output
+open(KMER,">","$_\_mers") or die "Could not open file $_\_mers$!\n";
+print KMER "$_\-mer\tCount\tRatio\n";
+print KMER "TOTAL\t$total\t1\n";
+foreach my $key  (sort {$kmer{$b} <=> $kmer{$a} } keys %kmer) {
+my $ratio = nearest(.0001,$kmer{$key}/$total);
+print KMER "$key\t$kmer{$key}\t$ratio\n";
+}
+close(KMER);
 }>>
 
 =cut
@@ -212,7 +210,7 @@ for (6..8){
     close(KMER);
 }
 
-=head2 MEME
+=head3 MEME
 
 In a second approach we run MEME to retrieve the 20 most
 over-represented motifs of length 8.  C<meme
@@ -227,13 +225,13 @@ C<<my $cmd = "perl ../scripts/MEME_xml_motif_extractor.pl -f Example_Pipeline_me
 my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run(command => $cmd, verbose => 0);
 
 if(!$success){    
-    my $this_function = (caller(0))[3];
-    print STDERR "ERROR: MEME_xml_motif_extractor.pl run unsuccessful\n";
-    print join "", @$full_buf;
-    unless ($r) {
-	warn "If you do not provide a valid R-lib-path and ggplot is not found in the standard R path, this pipeline will not be able to parse the MEME xml output.\n";
-	pod2usage(-verbose => 0);
-    }
+my $this_function = (caller(0))[3];
+print STDERR "ERROR: MEME_xml_motif_extractor.pl run unsuccessful\n";
+print join "", @$full_buf;
+unless ($r) {
+warn "If you do not provide a valid R-lib-path and ggplot is not found in the standard R path, this pipeline will not be able to parse the MEME xml output.\n";
+pod2usage(-verbose => 0);
+}
 }>>
 =cut
 
