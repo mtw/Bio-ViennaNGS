@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-#Last changed Time-stamp: <2014-12-16 12:26:58 fall>
+#Last changed Time-stamp: <2015-01-28 11:16:47 fall>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -11,12 +11,12 @@ use Data::Dumper;
 use Getopt::Long qw( :config posix_default bundling no_ignore_case );
 use Pod::Usage;
 use PerlIO::gzip;
-use Storable;
 use Cwd;
-use All::Misc;
-use File::Path qw(make_path remove_tree);
+use File::Path;
+use Path::Class;
 use XML::Simple;
 use Statistics::R;
+use Bio::ViennaNGS::Util qw(mkdircheck);
 ###############
 ###Variables
 ###############
@@ -43,7 +43,7 @@ pod2usage(-verbose => 0)
 	"verbose"     => sub{ $VERBOSE++ }
 	);
 
-$dir	 =  cwd() unless ($dir);
+$dir	 =  getcwd() unless ($dir);
 $odir	 =  "$dir"."/XMLParseOut" unless $odir;
 $dir	 =~ s/ //g;
 $odir	 =~ s/ //g;
@@ -66,7 +66,7 @@ else{
 ##############
 
 if (!-d $odir){
-make_path($odir) or die "Error creating directory: $odir";
+make_path($pcd) or die "Error creating directory: $odir";
 }
 
 chdir($dir) or die "Directory $dir not found!\n";
