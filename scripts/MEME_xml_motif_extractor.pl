@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-#Last changed Time-stamp: <2015-01-28 11:16:47 fall>
+#Last changed Time-stamp: <2015-01-28 12:07:01 fall>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -66,7 +66,7 @@ else{
 ##############
 
 if (!-d $odir){
-make_path($pcd) or die "Error creating directory: $odir";
+mkdircheck($odir) or die "Error creating directory: $odir";
 }
 
 chdir($dir) or die "Directory $dir not found!\n";
