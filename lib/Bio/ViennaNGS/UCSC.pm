@@ -414,6 +414,18 @@ sub make_track{
   return $trackEntry;
 }
 
+sub make_bigwig_container_track{
+  my ($tag, $track, $shortLabel, $longLabel, $type, $visibility, $group, $priority) = @_;
+  my $trackEntry ="#$tag\ntrack $track\ncontainer multiWig\n noInherit on\n$shortLabel $shortLabel\nlongLabel $longLabel\ntype $type\nconfigureable on\nvisibility $visibility\naggregate transparentOverlay\nshowSubtrackColorOnUi on\nautoScale $autoScale\nwindowingFunction maximum\npriority $priority\nalwaysZero on\nyLineMark 0\nyLineOnOff on\nmaxHeightPixels 125:125:11\n\n";
+  return $trackEntry;
+}
+
+sub make_bigwig_track{
+  my ($tag, $track, $bigDataUrl, $shortLabel, $longLabel, $type, $parent, $color) = @_;
+  my $trackEntry ="#$tag\ntrack $track\nbigDataUrl $bigDataUrl\nshortLabel $shortLabel\nlongLabel $longLabel\ntype $type\nparent $parent\ncolor $color\n\n";
+  return $trackEntry;
+}
+
 sub valid_ncbi_accession{
   # receives a NCBI accession ID, with or without version number
   # returns NCBI accession ID without version number
