@@ -1,0 +1,278 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>ViennaNGS by mtw</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>ViennaNGS</h1>
+        <p>A Perl extension and collection of utilities for Next-Generation Sequencing (NGS) data analysis</p>
+
+        <p class="view"><a href="https://github.com/mtw/Bio-ViennaNGS">View the Project on GitHub <small>mtw/Bio-ViennaNGS</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/mtw/Bio-ViennaNGS/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/mtw/Bio-ViennaNGS/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/mtw/Bio-ViennaNGS">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="bioviennangs-012_13" class="anchor" href="#bioviennangs-012_13" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bio::ViennaNGS 0.12_13</h1>
+
+<p>Bio::ViennaNGS is a distribution of Perl modules and utilities for
+building efficient Next-Generation Sequencing (NGS) analysis
+pipelines. It covers various aspects of NGS data analysis, including
+(but not limited to) conversion of sequence annotation, evaluation of
+mapped data, expression quantification and visualization.</p>
+
+<p>Bio::ViennaNGS is shipped with a complementary set of modules/classes:</p>
+
+<ul>
+<li><p>Bio::ViennaNGS::AnnoC
+A Moose interface for storage and conversion of sequence annotation
+data.</p></li>
+<li><p>Bio::ViennaNGS::Bam
+Routines for high-level manipulation of BAM files.</p></li>
+<li><p>Bio::ViennaNGS::BamStat
+A Moose-based class for collecting mapping statistics.</p></li>
+<li><p>Bio::ViennaNGS::BamStatSummary
+A Moose interface for processing Bio::ViennaNGS::BamStat objects on
+a set of BAM files.</p></li>
+<li><p>Bio::ViennaNGS::Bed 
+A Moose interface for manipulation of genomic interval data in BED
+format.</p></li>
+<li><p>Bio::ViennaNGS::Expression
+A Moose interface for computation of normalized gene / transcript
+expression based on read counts.</p></li>
+<li><p>Bio::ViennaNGS::Fasta
+Routines for accessing genomic sequences implemented through a Moose
+interface to Bio::DB::Fasta.</p></li>
+<li><p>Bio::ViennaNGS::Feature
+A Moose-ish BED6 wrapper.  </p></li>
+<li><p>Bio::ViennaNGS::FeatureChain
+Yet another Moose class for chaining gene annotation features. </p></li>
+<li><p>Bio::ViennaNGS::MinimalFeature
+A Moose interface for handling elementary gene annotation. </p></li>
+<li><p>Bio::ViennaNGS::SpliceJunc
+A collection of routines for alternative splicing analysis.  </p></li>
+<li><p>Bio::ViennaNGS::Tutorial
+A comprehensive tutorial of the Bio::ViennaNGS core routines with
+real-world NGS data.</p></li>
+<li><p>Bio::ViennaNGS::UCSC
+Routines for visualization of genomics data with the UCSC genome
+browser.</p></li>
+<li><p>Bio::ViennaNGS::Util
+A collection of wrapper routines for commonly used third-party NGS
+utilities, code for normalization of gene expression values based on
+read count data and a set of utility functions.</p></li>
+</ul>
+
+<p>UTILITIES</p>
+
+<p>In addition, Bio::ViennaNGS comes with a collection of utility
+programs for accomplishing routine tasks often required in NGS data
+processing. These utilities serve as reference implementation of the
+routines implemented in the (sub)modules:</p>
+
+<p>assembly_hub_constructor.pl:
+The UCSC genome browser offers the possibility to visualize any
+organism (including organisms that are not included in the standard
+UCSC browser bundle) through hso called 'Assembly Hubs'. This script
+constructs Assembly Hubs from genomic sequence and annotation data.</p>
+
+<p>bam_quality_stat.pl:
+Compute sophisticated quality/mapping statistics for a set of BAM
+alignment files and produce publication-ready graphics.</p>
+
+<p>bam_split.pl: 
+Split (paired-end and single-end) BAM alignment files by strand and compute
+statistics. Optionally create BED output, as well as normalized bedGraph
+and bigWig files for coverage visualization in genome browsers (see
+dependencies on third-patry tools below).</p>
+
+<p>bam_to_bigWig.pl:
+Produce bigWig coverage profiles from (aligned) BAM files, explicitly
+considering strandedness. The most natural use case of this tool is to
+create strand-aware coverage profiles in bigWig format for genome browser
+visualization.</p>
+
+<p>bam_uniq.pl:
+Extract unique and multi mapping reads from BAM alignment files and create
+a separate BAM file for both uniqe (.uniq.) and multi (.mult.) mappers.</p>
+
+<p>bed2bedGraph.pl:
+Convert BED files to (strand specific) bedGraph files, allowing
+additional annotation and automatic generation of bedGraph files which can
+easily be converted to big-type files for easy UCSC visualization.</p>
+
+<p>extend_bed.pl:
+Extend genomic features in BED files by a certain number of nucleotides,
+either on both sides or specifically at the 5' or 3' end, respectively.</p>
+
+<p>gff2bed.pl:
+Convert RefSeq GFF3 annotation files to BED12 format. Individual BED12
+files are created for each feature type (CDS/tRNA/rRNA/etc.). Tested with
+RefSeq bacterial GFF3 annotation.  </p>
+
+<p>kmer_analysis.pl:
+Count k-mers of predefined length in FastQ and Fasta files</p>
+
+<p>MEME_xml_motif_extractor.pl:
+Compute simple statistics from MEME XML output and return a list of found
+motifs with the number of sequences containing those motifs as well as nice
+ggplot graphs.</p>
+
+<p>motiffinda.pl: [ currently broken ]
+Find motifs in annotated sequence features. The motif can be provided as
+regular expression.</p>
+
+<p>newUCSCdb.pl:
+Create a new genome database (ie. add a novel organism) in a local
+instance of the UCSC genome browser.</p>
+
+<p>normalize_multicov.pl: 
+Compute normalized expression data in TPM/RPKM from (raw) read counts in
+bedtools multicov format. TPM reference: Wagner et al, Theory
+Biosci. 131(4), pp 281-85 (2012)</p>
+
+<p>sj_visualizer.pl:
+Convert splice junctions from mapped RNA-seq data in segemehl BED6 splice
+junction format to BED12 for easy visualization in genome browsers.</p>
+
+<p>splice_site_summary.pl:
+Identify and characterize splice junctions from RNA-seq data by
+intersecting them with annotated splice junctions.</p>
+
+<p>newUCSCdb.pl:
+Create a new genome database for a locally installed instance of the UCSC
+genome browser. Based on
+<a href="http://genomewiki.ucsc.edu/index.php/Building_a_new_genome_database">http://genomewiki.ucsc.edu/index.php/Building_a_new_genome_database</a></p>
+
+<p>track_hub_constructor.pl:
+Analogous to assembly_hub_constructor.pl, construct a Track Hub for an
+organism listed in the UCSC Genome Browser.</p>
+
+<p>trim_fastq.pl:
+Trim sequence and quality string fields in a Fastq file by user
+defined length.</p>
+
+<p>TUTORIAL</p>
+
+<p>See Bio::ViennaNGS::Tutorial </p>
+
+<p>INSTALLATION</p>
+
+<p>To install this module type the following:</p>
+
+<p>perl Makefile.PL
+   make
+   make test
+   make install</p>
+
+<p>DEPENDENCIES</p>
+
+<p>Bio::ViennaNGS and its submodules require a set of third-party libraries
+and packages that are not part of the Perl core distribution:</p>
+
+<p>Bio::Perl &gt;= 1.00690001
+  Bio::DB::Sam &gt;= 1.39
+  Bio::DB::Fasta
+  Bio::Tools::GFF
+  File::Share<br>
+  Template
+  Moose
+  Moose::Util::TypeConstraints
+  Path::Class
+  namespace::autoclean
+  Tie::Hash::Indexed
+  MooseX::Clone
+  MooseX::InstanceTracking</p>
+
+<p>The  modules listed below are only reuqired by some of the utilities. You will
+only need to install them if you intend to use the reference utilities:</p>
+
+<p>PerlIO::gzip
+  Math::Round
+  XML::Simple
+  Statistics::R</p>
+
+<p>Computation of BigWig files from BAM is accomplished via two calls to
+third-party tools: 'genomeCoverageBed' from the BEDtools suite
+(<a href="http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html">http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html</a>) is
+used to create a BedGraph coverage file at first place. In a second step,
+the BedGraph is converted to BigWig by 'bedGraphToBigWig', a UCSC Genome
+Browser utility (<a href="http://hgdownload.cse.ucsc.edu/admin/exe/">http://hgdownload.cse.ucsc.edu/admin/exe/</a>). Please ensure
+that all third-party utilities are available on your system and accessible
+to the Perl interpreter.</p>
+
+<p>SOURCE AVAILABILITY</p>
+
+<p>This source is available on Github: 
+              <a href="https://github.com/mtw/Bio-ViennaNGS">https://github.com/mtw/Bio-ViennaNGS</a></p>
+
+<p>PAPERS</p>
+
+<p>If the Bio::ViennaNGS suite is useful for your work or if you use any
+component of ViennaNGS in a custom pipeline, please cite the following
+publication:</p>
+
+<p>"ViennaNGS - A toolbox for building efficient next-generation sequencing
+analysis pipelines"
+Michael T. Wolfinger, Joerg Fallmann, Florian Eggenhofer and Fabian Amman
+bioRxiv doi: <a href="http://dx.doi.org/10.1101/013011">http://dx.doi.org/10.1101/013011</a></p>
+
+<p>NOTES</p>
+
+<p>The Bio::ViennaNGS suite is actively developed and tested on different
+flavours of Linux and Mac OS X. We have taken care of writing
+platform-independent code that should run out of the box on most UNIX-based
+systems, however we do not have access to machines running Microsoft
+Windows. As such, we have not tested and will not test Windows
+compatibility.</p>
+
+<p>BUGS</p>
+
+<p>Please report bugs through the Github issue tracker at
+<a href="https://github.com/mtw/Bio-ViennaNGS/issues">https://github.com/mtw/Bio-ViennaNGS/issues</a></p>
+
+<p>AUTHORS</p>
+
+<p>Michael T. Wolfinger <a href="mailto:michael@wolfinger.eu">michael@wolfinger.eu</a>
+Joerg Fallmann <a href="mailto:fall@tbi.univie.ac.at">fall@tbi.univie.ac.at</a>
+Florian Eggenhofer <a href="mailto:florian.eggenhofer@tbi.univie.ac.at">florian.eggenhofer@tbi.univie.ac.at</a>
+Fabian Amman <a href="mailto:fabian@tbi.univie.ac.at">fabian@tbi.univie.ac.at</a></p>
+
+<p>COPYRIGHT AND LICENCE</p>
+
+<p>Copyright (C) 2014-2015 Michael T. Wolfinger <a href="mailto:michael@wolfinger.eu">michael@wolfinger.eu</a></p>
+
+<p>This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself, either Perl version 5.10.0 or, at your
+option, any later version of Perl 5 you may have available.</p>
+
+<p>This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+more details.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/mtw">mtw</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
