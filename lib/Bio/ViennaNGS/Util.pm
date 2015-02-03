@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-26 18:32:54 fall>
+# Last changed Time-stamp: <2015-02-03 12:51:23 fall>
 
 package Bio::ViennaNGS::Util;
 
@@ -11,7 +11,8 @@ use warnings;
 use Data::Dumper;
 use File::Basename qw(fileparse);
 use IPC::Cmd qw(can_run run);
-use Path::Class;
+use Path::Class qw(dir file);
+use File::Path qw(make_path remove_tree);
 use Math::Round;
 use Carp;
 use Bio::ViennaNGS::FeatureChain;
@@ -19,9 +20,9 @@ use Bio::ViennaNGS::FeatureChain;
 our @ISA = qw(Exporter);
 our @EXPORT = ();
 
-our @EXPORT_OK = qw ( bed_or_bam2bw sortbed bed2bigBed
-		      unique_array kmer_enrichment extend_chain
-		      parse_bed6 fetch_chrom_sizes);
+our @EXPORT_OK = qw ( bed_or_bam2bw sortbed bed2bigBed unique_array
+		      kmer_enrichment extend_chain parse_bed6
+		      fetch_chrom_sizes mkdircheck rmdircheck);
 
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -388,6 +389,42 @@ sub fetch_chrom_sizes{
   }
 
   return(\%sizes);
+}
+
+sub mkdircheck {
+  my @dirstocreate=();
+  my $this_function = (caller(0))[3];
+  while(@_){
+    push @dirstocreate, shift(@_);
+  }
+  foreach (@dirstocreate){
+    my @total = split(/[\/\\]/,$_);
+    my $dir;
+    while(@total){
+      $dir = dir(shift(@total)) unless (defined $dir);
+      $dir = dir($dir,shift(@total));
+    }
+    return if (-d $dir);
+    make_path($dir,{ verbose => 1 }) or croak "Error creating directory: $dir\t$, in $this_function!";
+  }
+}
+
+sub rmdircheck {
+  my @dirstorm=();
+  my $this_function = (caller(0))[3];
+  while(@_){
+    push @dirstorm, shift(@_);
+  }
+  foreach (@dirstorm){
+    my @total = split(/[\/\\]/,$_);
+    my $dir='';
+    while(@total){
+      $dir = dir(shift(@total)) unless (defined $dir);
+      $dir = dir($dir,shift(@total));
+    }
+    return if (!-d $dir);
+    remove_tree($dir,{ verbose => 1 }) or croak "Error deleting directory: $dir, in $this_function!";
+  }
 }
 
 1;
