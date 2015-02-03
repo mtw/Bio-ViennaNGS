@@ -47,6 +47,7 @@ my $fasta_in = '-';
 my $folder_in = '-';
 my $dest = '.';
 my $base_URL = '-';
+my $big_wig_ids = '-';
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -55,6 +56,7 @@ pod2usage(-verbose => 1) unless GetOptions("fa|f=s"       => \$fasta_in,
 					   "infolder|i=s" => \$folder_in,
 					   "out|o=s"      => \$dest,
 					   "baseurl|b=s"  => \$base_URL,
+                                           "bigwigs|bw=s" => \$big_wig_ids,
 					   "man"          => sub{pod2usage(-verbose => 2)},
 					   "help|h"       => sub{pod2usage(1)}
 					  );
@@ -77,7 +79,7 @@ unless (-d $dest){
 }
 $lf = file($dest,$logname);
 
-$assembly_hub_return_value = make_assembly_hub($fasta_in,$folder_in,$dest,$base_URL,$lf);
+$assembly_hub_return_value = make_assembly_hub($fasta_in,$folder_in,$dest,$base_URL,$big_wig_ids,$lf);
 
 
 __END__

@@ -47,7 +47,8 @@ my $genome_identifier = '-';
 my $folder_in = '-';
 my $dest = '.';
 my $base_URL = '-';
-my $chrom_size_file="-";
+my $chrom_size_file = '-';
+my $big_wig_ids = '-';
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -57,6 +58,7 @@ pod2usage(-verbose => 1) unless GetOptions("gi|g=s"       => \$genome_identifier
 					   "out|o=s"      => \$dest,
 					   "baseurl|b=s"  => \$base_URL,
                                            "chromsize|c=s"  => \$chrom_size_file,
+                                           "bigwigs|bw=s" => \$big_wig_ids,
 					   "man"          => sub{pod2usage(-verbose => 2)},
 					   "help|h"       => sub{pod2usage(1)}
 					  );
@@ -79,7 +81,7 @@ unless (-d $dest){
 }
 $lf = file($dest,$logname);
 
-$track_hub_return_value = make_track_hub($genome_identifier,$folder_in,$dest,$base_URL,$chrom_size_file,$lf);
+$track_hub_return_value = make_track_hub($genome_identifier,$folder_in,$dest,$base_URL,$chrom_size_file,$big_wig_ids,$lf);
 
 
 __END__
