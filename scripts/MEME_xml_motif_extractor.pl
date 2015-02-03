@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-#Last changed Time-stamp: <2015-01-28 12:07:01 fall>
+#Last changed Time-stamp: <2015-02-03 12:49:42 fall>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -17,6 +17,7 @@ use Path::Class;
 use XML::Simple;
 use Statistics::R;
 use Bio::ViennaNGS::Util qw(mkdircheck);
+use Carp qw( croak );
 ###############
 ###Variables
 ###############
@@ -44,16 +45,13 @@ pod2usage(-verbose => 0)
 	);
 
 $dir	 =  getcwd() unless ($dir);
-$odir	 =  "$dir"."/XMLParseOut" unless $odir;
-$dir	 =~ s/ //g;
-$odir	 =~ s/ //g;
+$odir	 =  $dir."/XMLParserOut" unless $odir;
 $outname =  "" unless (defined $outname);
 $outname =~ s/\.[bed|fa]*//g if ($outname);
 $acid    = 'DNA' unless (defined $acid && $acid eq 'RNA');
-($dir) or die "No working directory chosen!\n";
 
-die 'No R-library path defined! Find out using the comman \'.libPaths()\' from an R shell!\n' unless ($rlibpath);
-die 'No xml file defined! Please provide a valid meme.xml file with the -f option!\n' unless ($file);
+croak "No R-library path defined! Find out using the command \'.libPaths()\' from an R shell and provide to script via the -r option!" unless ($rlibpath);
+croak "No xml file defined! Please provide a valid meme.xml file with the -f option!\n" unless ($file);
 if (defined $discard){
     @matches=split(/,/,$discard);
 }
@@ -66,7 +64,8 @@ else{
 ##############
 
 if (!-d $odir){
-mkdircheck($odir) or die "Error creating directory: $odir";
+    print STDERR "Will create dir $odir!\n";
+    mkdircheck($odir);
 }
 
 chdir($dir) or die "Directory $dir not found!\n";
@@ -92,10 +91,12 @@ foreach my $mo ( keys %{$motif{motif}} ){
     my @sites = @{$motif{motif}{$mo}{contributing_sites}{contributing_site}};
     my $evalue = $motif{motif}{$mo}{e_value};
     my $width = $motif{motif}{$mo}{width};
-
+    my %seen;
     for (0..$#sites){
 	my %entry = %{$sites[$_]};
 	my $seqid = $entry{sequence_id};
+	next if (defined $seen{$seqid} && $seen{$seqid} == 1);
+	$seen{$seqid} = 1 unless (defined $seen{$seqid});
 	my $seq = $sequences{$seqid};
 	my $re = qr/$regx/;
 	while($seq =~ /$re/g){

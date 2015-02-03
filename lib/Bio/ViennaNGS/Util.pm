@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-28 11:55:41 fall>
+# Last changed Time-stamp: <2015-02-03 12:51:23 fall>
 
 package Bio::ViennaNGS::Util;
 
@@ -401,26 +401,29 @@ sub mkdircheck {
     my @total = split(/[\/\\]/,$_);
     my $dir;
     while(@total){
+      $dir = dir(shift(@total)) unless (defined $dir);
       $dir = dir($dir,shift(@total));
     }
     return if (-d $dir);
-    make_path($dir,{ verbose => 1 }) or croak "Error creating directory: $dir\t$!";
+    make_path($dir,{ verbose => 1 }) or croak "Error creating directory: $dir\t$, in $this_function!";
   }
 }
 
 sub rmdircheck {
   my @dirstorm=();
+  my $this_function = (caller(0))[3];
   while(@_){
     push @dirstorm, shift(@_);
   }
   foreach (@dirstorm){
     my @total = split(/[\/\\]/,$_);
-    my $dir;
+    my $dir='';
     while(@total){
+      $dir = dir(shift(@total)) unless (defined $dir);
       $dir = dir($dir,shift(@total));
     }
     return if (!-d $dir);
-    remove_tree($dir,{ verbose => 1 }) or croak "Error deleting directory: $dir";
+    remove_tree($dir,{ verbose => 1 }) or croak "Error deleting directory: $dir, in $this_function!";
   }
 }
 
