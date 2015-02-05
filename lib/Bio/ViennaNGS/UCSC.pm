@@ -403,45 +403,41 @@ sub retrieve_bigwig_tracks{
       }else{
         my $this_function = (caller(0))[3];
         croak ("ERROR [$this_function] \no negative big wig file for container provided\n");
-      }    
+      }
       my ($basename1,$dir1,$ext1) = fileparse($pos_wig,qr/\..*/);
       my ($basename2,$dir2,$ext2) = fileparse($pos_wig,qr/\..*/);
       #construct container
       my $id = lc($basename1);
       my $tag = $id;
       my $track = $id;
-      my $bigDataUrl = file($trackfile);
       my $shortLabel = $tag;
       my $longLabel = $tag;
       my $type = "bigWig";
       my $autoScale = "on";
       my $visibility = "full";
       my $priority = "1500";
-      my $container_string = make_multi_bigwig_container_track($tag, $track, $shortLabel, $longLabel, $type, $autoScale, $visibility, $group, $priority);
-      my $track = ($tag,$track,$bigDataUrl,$shortLabel,$longLabel,$type,$autoScale,$bedNameLabel,$searchIndex,$colorByStrand,$visibility,$group,$priority);
-      my $trackreference = \@track;
-      push(@tracks, $trackreference);
+      my $container_string = make_multi_bigwig_container_track($tag, $track, $shortLabel, $longLabel, $type, $autoScale, $visibility, $priority);
       $bigwigtracks .= $container_string;
       #construct positive track
       my $track1 = $track . "_pos";
       my $bigDataUrl1 = $pos_wig;
-      my $shortLabel1 = $track1
-      my $longLabel1 = $track1
+      my $shortLabel1 = $track1;
+      my $longLabel1 = $track1;
       my $type1 = "bigWig";
       my $parent1 = $track;
       my $color1 = retrieve_color($counter);
       $counter++;
-      my $track1_string = make_bigwig_container_track($tag1, $track1, $bigDataUrl1, $shortLabel1, $longLabel1, $type1, $parent1, $color1);
+      my $track1_string = make_bigwig_container_track($track1, $bigDataUrl1, $shortLabel1, $longLabel1, $type1, $parent1, $color1);
       $bigwigtracks .= $track1_string;
       #construct negative track
       my $track2 = $track . "_neg";
-      my $bigDataUrl2 = $neg_wig
+      my $bigDataUrl2 = $neg_wig;
       my $shortLabel2 = $track2;
       my $longLabel2 = $track2;
       my $type2 = "bigWig";
       my $parent2 = $track;
       my $color2 = retrieve_color($counter);
-      my $track2_string = make_bigwig_container_track($tag2, $track2, $bigDataUrl2, $shortLabel2, $longLabel2, $type2, $parent2, $color2);
+      my $track2_string = make_bigwig_container_track($track2, $bigDataUrl2, $shortLabel2, $longLabel2, $type2, $parent2, $color2);
       $bigwigtracks .= $track2_string;
       $counter++;
     }else{
@@ -458,7 +454,7 @@ sub retrieve_bigwig_tracks{
       my $visibility = "full";
       my $priority = "1500";
       my $color = retrieve_color($counter);
-      my $track_string = make_bigwig_track($tag, $track, $bigDataUrl, $shortLabel, $longLabel, $type, $color);
+      my $track_string = make_bigwig_track($tag, $track, $bigDataUrl, $shortLabel, $longLabel, $type, $autoScale, $visibility, $priority, $color);
       $bigwigtracks .= $track_string;
       $counter++;
     }
@@ -515,19 +511,19 @@ sub make_track{
 }
 
 sub make_multi_bigwig_container_track{
-  my ($tag, $track, $shortLabel, $longLabel, $type, $autoScale, $visibility, $group, $priority) = @_;
+  my ($tag, $track, $shortLabel, $longLabel, $type, $autoScale, $visibility, $priority) = @_;
   my $trackEntry ="#$tag\ntrack $track\ncontainer multiWig\n noInherit on\n$shortLabel $shortLabel\nlongLabel $longLabel\ntype $type\nconfigureable on\nvisibility $visibility\naggregate transparentOverlay\nshowSubtrackColorOnUi on\nautoScale $autoScale\nwindowingFunction maximum\npriority $priority\nalwaysZero on\nyLineMark 0\nyLineOnOff on\nmaxHeightPixels 125:125:11\n\n";
   return $trackEntry;
 }
 
 sub make_bigwig_container_track{
-  my ($tag, $track, $bigDataUrl, $shortLabel, $longLabel, $type, $parent, $color) = @_;
-  my $trackEntry ="#$tag\ntrack $track\nbigDataUrl $bigDataUrl\nshortLabel $shortLabel\nlongLabel $longLabel\ntype $type\nparent $parent\ncolor $color\n\n";
+  my ($track, $bigDataUrl, $shortLabel, $longLabel, $type, $parent, $color) = @_;
+  my $trackEntry ="track $track\nbigDataUrl $bigDataUrl\nshortLabel $shortLabel\nlongLabel $longLabel\ntype $type\nparent $parent\ncolor $color\n\n";
   return $trackEntry;
 }
 
 sub make_bigwig_track{
-  my ($tag, $track, $shortLabel, $longLabel, $type, $autoScale, $visibility, $priority) = @_;
+  my ($tag, $track, $bigDataUrl, $shortLabel, $longLabel, $type, $autoScale, $visibility, $priority, $color) = @_;
   my $trackEntry ="#$tag\ntrack $track\n bigDataUrl $bigDataUrl\n$shortLabel $shortLabel\nlongLabel $longLabel\ntype $type\n visibility $visibility\n autoScale $autoScale\n priority $priority\nalwaysZero on\nyLineMark 0\nyLineOnOff on\nmaxHeightPixels 125:125:11\ncolor $color\n\n";
   return $trackEntry;
 }
