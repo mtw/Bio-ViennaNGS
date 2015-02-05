@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-05 15:45:02 fall>
+# Last changed Time-stamp: <2015-02-05 18:25:30 mtw>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -12,7 +12,8 @@ use Getopt::Long qw( :config posix_default bundling no_ignore_case );
 use Pod::Usage;
 use File::Path qw(make_path remove_tree);
 use Math::Round;
-use Bio::ViennaNGS::Util qw(parse_bed6 extend_chain kmer_enrichment fetch_chrom_sizes);
+use Bio::ViennaNGS::Bam qw(split_bam);
+use Bio::ViennaNGS::Util qw(parse_bed6 extend_chain kmer_enrichment fetch_chrom_sizes bed_or_bam2bw);
 use Bio::ViennaNGS::Feature;
 use Bio::ViennaNGS::FeatureChain;
 use List::Util qw(sum);
@@ -32,7 +33,7 @@ Getopt::Long::config('no_ignore_case');
 pod2usage(-verbose => 0) unless GetOptions(
     "rpath|r=s" => \$RLIBPATH,
     "help|h"    => sub{pod2usage(-verbose => 1)},
-    "man|m"     => sub{pod2usage(-verbose => 2)},      
+    "man|m"     => sub{pod2usage(-verbose => 2)},
     "verbose"   => sub{ $VERBOSE++ }
     );
 
@@ -42,59 +43,74 @@ pod2usage(-verbose => 0) unless GetOptions(
 
 =head1 NAME
 
-Tutorial_Pipeline02.pl - Another example pipeline for the ViennaNGS toolbox
+Tutorial_Pipeline02.pl - Another example pipeline for the ViennaNGS
+toolbox
 
 =head1 SYNOPSIS
-    
-./Tutorial_Pipeline02.pl
 
-=head1 DESCRIPTION 
+  perl Tutorial_Pipeline02.pl
 
-This script is a showcase for the usage of ViennaNGS in a real NGS example.
-We start from a file containing ENSEMBL annotation information for human protein-coding genes, which have a read pileup of at least 1001 reads in an ENCODE dataset mapped with segemehl.
-We are insterested in generating a UCSC bigwig track for those genes and the region 50nt upstream of the gene start.
+=head1 DESCRIPTION
+
+This script is a showcase for using Bio::ViennaNGS components with a
+real-world NGS example.
+
+We start from a file containing ENSEMBL annotation information for
+human protein-coding genes, which have a read pileup of at least 1001
+reads in an ENCODE dataset mapped with segemehl. We are insterested in
+generating a UCSC Track Hub visualizing those genes as well as a 50nt
+region upstream of the gene start.
+
+B<NOTE:> This tutorial works on a real-world biological data set of
+several gigabytes in size i.e. the analysis will eventually take a few
+hours to finish. If you run this script locally you need to ensure
+that your system has enough hardware resources.
 
 =head2 PIPELINE
 
-The first step is to initialize some variables and generate a chromosome_sizes hash.
+Let's first initialize some variables and generate a chromosome_sizes
+hash.
 
-C<<my $bed	 = 'hg19_highlyexpressed.bed';>>
-C<<my $name     = (split(/\./,$bed))[0];>>
-C<<my $upstream = 50;>>
-C<<my $outfile2 = "$name.ext$upstream\_upstream.bed";>>
-C<<my %sizes = %{fetch_chrom_sizes('hg19')};>>
+  my $bed       = 'hg19_highlyexpressed.bed';
+  my $name      = (split(/\./,$bed))[0];
+  my $upstream  = 50;
+  my $outfile2  = "$name.ext$upstream\_upstream.bed";
+  my %sizes     = %{fetch_chrom_sizes('hg19')};
 
 =cut
 
-my $bed	     = 'hg19_highlyexpressed.bed';
-my $name     = (split(/\./,$bed))[0];
-my $upstream = 50;
-my $outfile = "$name.ext$upstream\_upstream.bed";
-
-my %sizes = %{fetch_chrom_sizes('hg19')}; ### Requires installation of UCSCs fetchChromSizes script or mysql
+my $bed	      = 'hg19_highlyexpressed.bed';
+my $name      = (split(/\./,$bed))[0];
+my $upstream  = 50;
+my $outfile   = "$name.ext$upstream\_upstream.bed";
+my %sizes     = %{fetch_chrom_sizes('hg19')}; ### Requires installation of UCSCs fetchChromSizes script or mysql
 
 =head3 Generate a Bio::ViennaNGS::FeatureChain object
 
-The bed file of interest is parsed, a feature array is generated and
-passed on to Bio::ViennaNGS::FeatureChain, which creates a new Moose
-Object of type FeatureChain, containing the original bed entries
+We'll now parse our BED file of interest, generate a feature array and
+pass it on to L<Bio::ViennaNGS::FeatureChain>, thereby creating a new
+I<FeatureChain> L<Moose> object that contains the original BED
+entries.
 
-C<<my @featurelist = @{parse_bed6($bed)};
-my $chain = Bio::ViennaNGS::FeatureChain->new('type'=>'original','chain'=>\@featurelist);>>
+  my @featurelist  = @{parse_bed6($bed)};
+  my $chain        = Bio::ViennaNGS::FeatureChain->new('type'=>'original','chain'=>\@featurelist);
 
 =cut
 
 my @featurelist = @{parse_bed6($bed)};
 my $chain	= Bio::ViennaNGS::FeatureChain->new('type'=>'original','chain'=>\@featurelist);
 
-=head3 Extend the existing chain for visualization in UCSC
+=head3 Extend the existing chain for UCSC visualization
 
-The newly created FeatureChain object will now be extended 50nt upstream of the gene start to retrieve a bed file which contains the genic region and potential promoter regions.
+The I<FeatureChain> object will now be extended 50nt upstream of the
+gene start to retrieve a BED file containing both the genic and
+potential promoter regions.
 
-C<<my $extended_chain = extend_chain(\%sizes,$chain,$upstream,0,0,0);>>
+  my $extended_chain = extend_chain(\%sizes,$chain,$upstream,0,0,0);
 
-For later purposes we also extend the whole U6 gene span 50nt upstream.
-C<<my $extended_chain2 = extend_chain(\%sizes,$chain,$upstream,0,0,0);>>
+We'll also extend the entire U6 gene span 50nt upstream for later usage.
+
+  my $extended_chain2 = extend_chain(\%sizes,$chain,$upstream,0,0,0);
 
 =cut
 
@@ -102,11 +118,12 @@ my $extended_chain = extend_chain(\%sizes,$chain,$upstream,0,0,0);
 
 =head3 Print extended Bio::ViennaNGS::FeatureChain objects to files
 
-Extended chains are now print out to make them available for external tools like bedtools.
+Extended chains are now printed out to make them available for
+external tools like bedtools.
 
-C<<my $out = $extended_chain->print_chain();
-print $Out $out;
-close($Out);>>
+  my $out = $extended_chain->print_chain();
+  print $Out $out;
+  close($Out);
 
 =cut
 
@@ -122,19 +139,21 @@ close($Out);
 
 =over 4
 
-=item fetch_chrom_sizes<as_string>
+=item C<fetch_chrom_sizes()>
 
-Returns a chromosome-sizes hash reference for the specified species, e.g. hg19, mm9, mm10, etc.
+Returns a chromosome-sizes hash reference for the specified species,
+e.g. hg19, mm9, mm10, etc.
 
-=item parse_bed6<as_string>
+=item C<parse_bed6()>
 
 Reads a bed6 file and returns a feature array.
 
-=item Bio::ViennaNGS::FeatureChain->new()<as_method>
+=item C<Bio::ViennaNGS::FeatureChain->new()>
 
-Generates a new Bio::ViennaNGS::FeatureChain object from a feature array
+Generates a new Bio::ViennaNGS::FeatureChain object from a feature
+array
 
-=item Bio::ViennaNGS(extend_chain)<as_method>
+=item C<extend_chain()>
 
 Extends a Bio::ViennaNGS::FeatureChain object by given constraints
 
@@ -144,37 +163,39 @@ Extends a Bio::ViennaNGS::FeatureChain object by given constraints
 
 =head2 Sequence processing and analysis
 
- We now generate FASTA files from the extended bed files using bedtools getfasta method.
-C<<$bedtools = `bedtools getfasta -s -fi hg19_chromchecked.fa -bed $outfile2 -fo $name.ext$upstream\_upstream.fa`;>>
-C<<print STDERR "$bedtools\n" if $?;>>
+We will now generate FASTA files from the extended BED files by using
+the I<bedtools getfasta> method.
+
+  $bedtools = `bedtools getfasta -s -fi hg19_chromchecked.fa -bed $outfile2 -fo $name.ext$upstream\_upstream.fa`;
+  print STDERR "$bedtools\n" if $?;
 
 To analyze putative sequence motifs in the newly generated Fasta
-files, we analyze the k-mer content with the
-Bio::ViennaNGS(kmer_enrichment) method for k-mers of length 6 to 8 nt.
+files, we analyze the k-mer content using the C<Bio::ViennaNGS>
+C<kmer_enrichment()> method for k-mers of length 6 to 8 nt.
 
-C<<open(IN,"<","$name.ext$upstream\_upstream.fa") || die ("Could not open $name.ext$upstream\_upstream.fa!\n@!\n");>>
+ open(IN,"<","$name.ext$upstream\_upstream.fa") || die ("Could not open $name.ext$upstream\_upstream.fa!\n@!\n");
 
-C<<my @fastaseqs;>>
-C<<while(<IN>){
-chomp (my $raw = $_);
-next if ($_ =~ /^>/);
-push @fastaseqs, $raw;
-}>>
-C<<close(IN);>>
+  my @fastaseqs;
+  while(<IN>){
+    chomp (my $raw = $_);
+    next if ($_ =~ /^>/);
+    push @fastaseqs, $raw;
+  }
+  close(IN);
 
-C<<for (6..8){
-my %kmer = %{kmer_enrichment(\@fastaseqs, $_)};
-my $total = sum values %kmer;
-### Print Output
-open(KMER,">","$_\_mers") or die "Could not open file $_\_mers$!\n";
-print KMER "$_\-mer\tCount\tRatio\n";
-print KMER "TOTAL\t$total\t1\n";
-foreach my $key  (sort {$kmer{$b} <=> $kmer{$a} } keys %kmer) {
-my $ratio = nearest(.0001,$kmer{$key}/$total);
-print KMER "$key\t$kmer{$key}\t$ratio\n";
-}
-close(KMER);
-}>>
+  for (6..8){
+    my %kmer = %{kmer_enrichment(\@fastaseqs, $_)};
+    my $total = sum values %kmer;
+    ### Print Output
+    open(KMER,">","$_\_mers") or die "Could not open file $_\_mers$!\n";
+    print KMER "$_\-mer\tCount\tRatio\n";
+    print KMER "TOTAL\t$total\t1\n";
+    foreach my $key  (sort {$kmer{$b} <=> $kmer{$a} } keys %kmer) {
+      my $ratio = nearest(.0001,$kmer{$key}/$total);
+      print KMER "$key\t$kmer{$key}\t$ratio\n";
+    }
+    close(KMER);
+  }
 
 =cut
 
@@ -205,40 +226,66 @@ for (6..8){
     close(KMER);
 }
 
-=head3 Retrieve mapped sequences that overlap the extended chain as bam using BEDTOOLS
+=head3 Retrieve mapped sequences that overlap the extended chain as bam using I<bedtools>
 
-To generate a bam file of uniquely mapped reads that overlap our genes of interest, we use bedtools intersect method.
+To generate a BAM file containing uniquely mapped reads that overlap
+our genes of interest, we use the I<bedtools intersect> method.
 
-C<<my $cmd = "intersectBed -s -split -abam C1R1.bam -b hg19_highlyexpressed.ext50_upstream.bed > hg19_highlyexpressed.ext50_upstream_overlapping_C1R1.bed";
-my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run(command => $cmd, verbose => 0);
+  my $bam_upstream = "hg19_highlyexpressed.ext50_upstream_overlapping_C1R1.bam";
+  my $cmd = "intersectBed -s -split -abam C1R1.bam -b hg19_highlyexpressed.ext50_upstream.bed > $bam_upstream ";
+  my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run(command => $cmd, verbose => 0);
 
-if(!$success){    
-my $this_function = (caller(0))[3];
-print STDERR "ERROR: Bedtools intersect unsuccessful\n";
-print join "", @$full_buf;
-}
-}>>
+  if(!$success){
+    my $this_function = (caller(0))[3];
+    print STDERR "ERROR: Bedtools intersect unsuccessful\n";
+    print join "", @$full_buf;
+  }
 
 =cut
 
-my $cmd = "intersectBed -s -split -abam C1R1.bam -b hg19_highlyexpressed.ext50_upstream.bed > hg19_highlyexpressed.ext50_upstream_overlapping_C1R1.bed";
+my $bam_upstream = "hg19_highlyexpressed.ext50_upstream_overlapping_C1R1.bam";
+my $cmd = "intersectBed -s -split -abam C1R1.bam -b hg19_highlyexpressed.ext50_upstream.bed > $bam_upstream ";
 my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run(command => $cmd, verbose => 0);
 
-if(!$success){    
+if(!$success){
     my $this_function = (caller(0))[3];
     print STDERR "ERROR: Bedtools intersect unsuccessful\n";
     print join "", @$full_buf;
     }
 }
 
-=head3 Split bam by strand
+=head3 Split BAM by strand
+
+We will now split the BAM file by strands, thereby creating two new
+BAM files (one containg all reads mapping the [+] strand, and one that
+contains all reads that map to the [-] strand).
 
 
-###############
-###POD
-###############
+The C<@ref> array contains six fields: The paths of the BAM files for
+[+] and [-] strand, number of alignments in the [+] and [-] BAM files
+as well as the paths to the interim BED files for [=] and [-] strand,
+respectively.
+
+=cut
+
+my $reversed = 1;
+my $wantuniq = 0;
+my $wantbed  = 1;
+my $outdir   = cwd();
+my $lf       = undef;
+my @result = split_bam($bam_upstream,$reversed,$wantuniq,$wantbed,$outdir,$lf);
+
+=head3 Create BigWig coverage profiles
+
+In the next step we will create coverage profiles for subsequent UCSC visualization
+
+
+=head1 COMMAND LINE OPTIONS
+
+=cut
 
 __END__
+
 
 =over 4
 
