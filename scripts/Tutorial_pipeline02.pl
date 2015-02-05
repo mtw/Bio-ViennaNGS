@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-05 18:25:30 mtw>
+# Last changed Time-stamp: <2015-02-05 23:19:17 mtw>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -61,12 +61,14 @@ reads in an ENCODE dataset mapped with segemehl. We are insterested in
 generating a UCSC Track Hub visualizing those genes as well as a 50nt
 region upstream of the gene start.
 
-B<NOTE:> This tutorial works on a real-world biological data set of
-several gigabytes in size i.e. the analysis will eventually take a few
-hours to finish. If you run this script locally you need to ensure
-that your system has enough hardware resources.
+=head2 DISCLAIMER
 
-=head2 PIPELINE
+This tutorial works on a real-world biological data set of several
+gigabytes in size i.e. the analysis will eventually take a few hours
+to finish. If you run this script locally you need to ensure that your
+system has enough hardware resources.
+
+=head1 PIPELINE
 
 Let's first initialize some variables and generate a chromosome_sizes
 hash.
@@ -226,7 +228,7 @@ for (6..8){
     close(KMER);
 }
 
-=head3 Retrieve mapped sequences that overlap the extended chain as bam using I<bedtools>
+=head3 Retrieve mapped sequences that overlap the extended chain as BAM using I<bedtools>
 
 To generate a BAM file containing uniquely mapped reads that overlap
 our genes of interest, we use the I<bedtools intersect> method.
@@ -248,23 +250,38 @@ my $cmd = "intersectBed -s -split -abam C1R1.bam -b hg19_highlyexpressed.ext50_u
 my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run(command => $cmd, verbose => 0);
 
 if(!$success){
-    my $this_function = (caller(0))[3];
-    print STDERR "ERROR: Bedtools intersect unsuccessful\n";
-    print join "", @$full_buf;
-    }
+  my $this_function = (caller(0))[3];
+  print STDERR "ERROR: Bedtools intersect unsuccessful\n";
+  print join "", @$full_buf;
 }
+
 
 =head3 Split BAM by strand
 
-We will now split the BAM file by strands, thereby creating two new
-BAM files (one containg all reads mapping the [+] strand, and one that
-contains all reads that map to the [-] strand).
+We will now split the BAM file by strands using the C<bam_split()>
+routine, thereby creating two new BAM files: One containg all reads
+mapped to the [+] strand, and one that contains all reads that map to
+the [-] strand.
 
+  my $reversed = 1;
+  my $wantuniq = 0;
+  my $wantbed  = 1;
+  my $outdir   = cwd();
+  my $lf       = undef;
 
-The C<@ref> array contains six fields: The paths of the BAM files for
-[+] and [-] strand, number of alignments in the [+] and [-] BAM files
-as well as the paths to the interim BED files for [=] and [-] strand,
-respectively.
+  my @result = split_bam($bam_upstream,$reversed,$wantuniq,$wantbed,$outdir,$lf);
+
+  my $bam_p  = $result[0]; # BAM file containing fragments of [+] strand
+  my $bam_n  = $result[1]; # BAM file containing fragments of [-] strand
+  my $size_p = $result[2]; # of alignments on [+] strand
+  my $size_n = $result[3]; # of alignments on [-] srand
+  my $bed_p  = $result[4]; # BED file containing fragments of [+] strand
+  my $bed_n  = $result[5]; # BED file containing fragments of [-] strand
+
+C<bam_split> returns an array, (C<@ref> in our example) that contains
+six fields: The paths of the BAM files for [+] and [-] strand, number
+of alignments in the [+] and [-] BAM files as well as the paths to the
+interim BED files for [=] and [-] strand, respectively.
 
 =cut
 
@@ -273,12 +290,44 @@ my $wantuniq = 0;
 my $wantbed  = 1;
 my $outdir   = cwd();
 my $lf       = undef;
+
 my @result = split_bam($bam_upstream,$reversed,$wantuniq,$wantbed,$outdir,$lf);
+
+my $bam_p  = $result[0]; # BAM file containing fragments of [+] strand
+my $bam_n  = $result[1]; # BAM file containing fragments of [-] strand
+my $size_p = $result[2]; # of alignments on [+] strand
+my $size_n = $result[3]; # of alignments on [-] srand
+my $bed_p  = $result[4]; # BED file containing fragments of [+] strand
+my $bed_n  = $result[5]; # BED file containing fragments of [-] strand
 
 =head3 Create BigWig coverage profiles
 
-In the next step we will create coverage profiles for subsequent UCSC visualization
+Now that we have separate BAM files for each strand at hand, the next
+step will be to create coverage profiles in BigWig format for
+subsequent UCSC visualization. The routine of choice for this task is
+C<bed_or_bam2bw()>, which is called separately for [+] and [-] strand.
 
+  my $od       = cwd();
+  my $cs_in    = "hg19.chrom.sizes";
+  my $wantnorm = 0;
+  my $scale    = 10000000;
+
+  bed_or_bam2bw("bed",$bed_p,$cs_in,"+",$od,$wantnorm,$size_p,$scale,$lf);
+  bed_or_bam2bw("bed",$bed_n,$cs_in,"-",$od,$wantnorm,$size_n,$scale,$lf);
+
+Once finished, there will be two BigWig files in the current working
+directoy, one for each strand. These files can be used for
+visualization in a genome browser.
+
+=cut
+
+my $od       = cwd();
+my $cs_in    = "hg19.chrom.sizes";
+my $wantnorm = 0;
+my $scale    = 10000000;
+
+bed_or_bam2bw("bed",$bed_p,$cs_in,"+",$od,$wantnorm,$size_p,$scale,$lf);
+bed_or_bam2bw("bed",$bed_n,$cs_in,"-",$od,$wantnorm,$size_n,$scale,$lf);
 
 =head1 COMMAND LINE OPTIONS
 
@@ -299,12 +348,17 @@ Prints the manual page and exits
 
 =back
 
-=head1 AUTHOR
+=head1 AUTHORS
 
-Joerg Fallmann E<lt>joerg.fallmann@univie.ac.atE<gt>
+=over
+
+=item Joerg Fallmann E<lt>joerg.fallmann@univie.ac.atE<gt>
+
+=item Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+
+=back
 
 =cut
 
 
 ##################################END################################
-
