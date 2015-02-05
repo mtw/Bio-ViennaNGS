@@ -15,7 +15,7 @@ use File::Share ':all';
 use Path::Class;
 use Data::Dumper;
 use Carp;
-use Bio::ViennaNGS::UCSC;
+use Bio::ViennaNGS::Util qw(fetch_chrom_sizes);
 
 our @ISA = qw(Exporter);
 
@@ -281,21 +281,24 @@ sub make_track_hub{
   $template->process($genometxt_file,$genometxt_vars,$genometxt_path) or
     croak "Template process failed: ", $template->error(), "\n";
 
-  if(-e $chrom_sizes_file){
-    convert_tracks($filesdir, $genome_assembly_directory, $species, $bedToBigBed, $chrom_sizes_file);
-  }else{
-    my $chromosome_sizes = fetch_chrom_sizes($species);
-    my $chromosome_size_filepath = file($genome_assembly_directory,"$species.chrom.sizes");
-    write_chromosome_sizes_file($chromosome_size_filepath,$chromosome_sizes);
-    convert_tracks($filesdir, $genome_assembly_directory, $species, $bedToBigBed, $chromosome_size_filepath);
-  }
-  my @trackfiles = retrieve_tracks($genome_assembly_directory, $baseURL, $track_hub_name, $species);
-
   my $tracksList;
-  #big beds
-  foreach my $track (@trackfiles){
-    my $trackString = make_track(@$track);
-    $tracksList .= $trackString;
+  #Bigbeds are only created from infolder
+  unless($filesdir =~ /-/){
+    if(-e $chrom_sizes_file){
+      convert_tracks($filesdir, $genome_assembly_directory, $species, $bedToBigBed, $chrom_sizes_file);
+    }else{
+      my $chromosome_sizes = fetch_chrom_sizes($species);
+      my $chromosome_size_filepath = file($genome_assembly_directory,"$species.chrom.sizes");
+      write_chromosome_sizes_file($chromosome_size_filepath,$chromosome_sizes);
+      convert_tracks($filesdir, $genome_assembly_directory, $species, $bedToBigBed, $chromosome_size_filepath);
+    }
+    my @trackfiles = retrieve_tracks($genome_assembly_directory, $baseURL, $track_hub_name, $species);
+
+    #big beds
+    foreach my $track (@trackfiles){
+      my $trackString = make_track(@$track);
+      $tracksList .= $trackString;
+    }
   }
   #big wigs
   my $bigwig_tracks_string = "";
@@ -397,9 +400,9 @@ sub retrieve_bigwig_tracks{
         croak ("ERROR [$this_function] \no positive big wig file for container provided\n");
       }
       if ($big_wig_pair[0] =~ /\.neg\./){
-        $pos_wig = $big_wig_pair[0];
+        $neg_wig = $big_wig_pair[0];
       }elsif($big_wig_pair[1] =~ /\.neg\./){
-        $pos_wig = $big_wig_pair[1];
+        $neg_wig = $big_wig_pair[1];
       }else{
         my $this_function = (caller(0))[3];
         croak ("ERROR [$this_function] \no negative big wig file for container provided\n");
@@ -425,7 +428,7 @@ sub retrieve_bigwig_tracks{
       my $longLabel1 = $track1;
       my $type1 = "bigWig";
       my $parent1 = $track;
-      my $color1 = retrieve_color($counter);
+      my $color1 = "133,154,0";
       $counter++;
       my $track1_string = make_bigwig_container_track($track1, $bigDataUrl1, $shortLabel1, $longLabel1, $type1, $parent1, $color1);
       $bigwigtracks .= $track1_string;
@@ -436,7 +439,7 @@ sub retrieve_bigwig_tracks{
       my $longLabel2 = $track2;
       my $type2 = "bigWig";
       my $parent2 = $track;
-      my $color2 = retrieve_color($counter);
+      my $color2 = "220,51,47";
       my $track2_string = make_bigwig_container_track($track2, $bigDataUrl2, $shortLabel2, $longLabel2, $type2, $parent2, $color2);
       $bigwigtracks .= $track2_string;
       $counter++;
@@ -453,7 +456,7 @@ sub retrieve_bigwig_tracks{
       my $autoScale = "on";
       my $visibility = "full";
       my $priority = "1500";
-      my $color = retrieve_color($counter);
+      my $color = "38,140,210";
       my $track_string = make_bigwig_track($tag, $track, $bigDataUrl, $shortLabel, $longLabel, $type, $autoScale, $visibility, $priority, $color);
       $bigwigtracks .= $track_string;
       $counter++;
@@ -512,19 +515,19 @@ sub make_track{
 
 sub make_multi_bigwig_container_track{
   my ($tag, $track, $shortLabel, $longLabel, $type, $autoScale, $visibility, $priority) = @_;
-  my $trackEntry ="#$tag\ntrack $track\ncontainer multiWig\n noInherit on\n$shortLabel $shortLabel\nlongLabel $longLabel\ntype $type\nconfigureable on\nvisibility $visibility\naggregate transparentOverlay\nshowSubtrackColorOnUi on\nautoScale $autoScale\nwindowingFunction maximum\npriority $priority\nalwaysZero on\nyLineMark 0\nyLineOnOff on\nmaxHeightPixels 125:125:11\n\n";
+  my $trackEntry ="#$tag\ntrack $track\ncontainer multiWig\nnoInherit on\nshortLabel $shortLabel\nlongLabel $longLabel\ntype $type\nconfigureable on\nvisibility $visibility\naggregate transparentOverlay\nshowSubtrackColorOnUi on\nautoScale $autoScale\nwindowingFunction maximum\npriority $priority\nalwaysZero on\nyLineMark 0\nyLineOnOff on\nmaxHeightPixels 125:125:11\n\n";
   return $trackEntry;
 }
 
 sub make_bigwig_container_track{
   my ($track, $bigDataUrl, $shortLabel, $longLabel, $type, $parent, $color) = @_;
-  my $trackEntry ="track $track\nbigDataUrl $bigDataUrl\nshortLabel $shortLabel\nlongLabel $longLabel\ntype $type\nparent $parent\ncolor $color\n\n";
+  my $trackEntry = "track $track\nbigDataUrl $bigDataUrl\nshortLabel $shortLabel\nlongLabel $longLabel\ntype $type\nparent $parent\ncolor $color\n\n";
   return $trackEntry;
 }
 
 sub make_bigwig_track{
   my ($tag, $track, $bigDataUrl, $shortLabel, $longLabel, $type, $autoScale, $visibility, $priority, $color) = @_;
-  my $trackEntry ="#$tag\ntrack $track\n bigDataUrl $bigDataUrl\n$shortLabel $shortLabel\nlongLabel $longLabel\ntype $type\n visibility $visibility\n autoScale $autoScale\n priority $priority\nalwaysZero on\nyLineMark 0\nyLineOnOff on\nmaxHeightPixels 125:125:11\ncolor $color\n\n";
+  my $trackEntry ="#$tag\ntrack $track\n bigDataUrl $bigDataUrl\nshortLabel $shortLabel\nlongLabel $longLabel\ntype $type\n visibility $visibility\n autoScale $autoScale\n priority $priority\nalwaysZero on\nyLineMark 0\nyLineOnOff on\nmaxHeightPixels 125:125:11\ncolor $color\n\n";
   return $trackEntry;
 }
 
