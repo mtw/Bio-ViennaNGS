@@ -1,4 +1,4 @@
-Bio::ViennaNGS 0.12_13
+Bio::ViennaNGS 0.12_14
 ==============
 
 Bio::ViennaNGS is a distribution of Perl modules and utilities for
@@ -40,6 +40,10 @@ Bio::ViennaNGS is shipped with a complementary set of modules/classes:
 
 - Bio::ViennaNGS::FeatureChain
   Yet another Moose class for chaining gene annotation features. 
+
+- Bio::ViennaNGS::FeatureLine
+  An abstract Moose class for combining several
+  Bio::ViennaNGS::FeatureChain objects.
 
 - Bio::ViennaNGS::MinimalFeature
   A Moose interface for handling elementary gene annotation. 
@@ -121,8 +125,8 @@ Find motifs in annotated sequence features. The motif can be provided as
 regular expression.
 
 newUCSCdb.pl:
-Create a new genome database (ie. add a novel organism) in a local
-instance of the UCSC genome browser.
+Create a new genome database to a locally installed instance of the UCSC
+genome browser in order to add a novel organism for visualization.
 
 normalize_multicov.pl: 
 Compute normalized expression data in TPM/RPKM from (raw) read counts in
@@ -136,11 +140,6 @@ junction format to BED12 for easy visualization in genome browsers.
 splice_site_summary.pl:
 Identify and characterize splice junctions from RNA-seq data by
 intersecting them with annotated splice junctions.
-
-newUCSCdb.pl:
-Create a new genome database for a locally installed instance of the UCSC
-genome browser. Based on
-http://genomewiki.ucsc.edu/index.php/Building_a_new_genome_database
 
 track_hub_constructor.pl:
 Analogous to assembly_hub_constructor.pl, construct a Track Hub for an
@@ -174,6 +173,7 @@ and packages that are not part of the Perl core distribution:
   Bio::DB::Fasta
   Bio::Tools::GFF
   File::Share	
+  File::Path
   Template
   Moose
   Moose::Util::TypeConstraints
@@ -183,8 +183,9 @@ and packages that are not part of the Perl core distribution:
   MooseX::Clone
   MooseX::InstanceTracking
 
-The  modules listed below are only reuqired by some of the utilities. You will
-only need to install them if you intend to use the reference utilities:
+The modules listed below are only reuqired by some of the utilities. You
+will only need to install them if you intend to use the reference
+utilities:
 
   PerlIO::gzip
   Math::Round

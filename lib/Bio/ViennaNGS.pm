@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-27 16:20:14 mtw>
+# Last changed Time-stamp: <2015-02-06 00:37:19 mtw>
 
 package Bio::ViennaNGS;
 
-use version; our $VERSION = qv('0.12_13');
+use version; our $VERSION = qv('0.12_14');
 
 1;
 
@@ -49,8 +49,11 @@ L<Bio::DB::Fasta>.
 
 =item L<Bio::ViennaNGS::Feature>: A L<Moose> based BED6 wrapper.
 
-=item L<Bio::ViennaNGS::FeatureChain>: Yet another L <Moose> class for
+=item L<Bio::ViennaNGS::FeatureChain>: Yet another L<Moose> class for
 chaining gene annotation features.
+
+=item L<Bio::ViennaNGS::FeatureLine>: An abstract L<Moose> class for
+combining several L<Bio::ViennaNGS::FeatureChain> objects.
 
 =item L<Bio::ViennaNGS::MinimalFeature>: A L<Moose> interface for
 handling elementary gene annotation.
@@ -125,8 +128,10 @@ sequences containing those motifs as well as nice ggplot graphs.
 =item F<motiffinda.pl>: Find motifs in annotated sequence
 features. The motif can be provided as regular expression.
 
-=item F<newUCSCdb.pl>: Create a new genome database (ie. add a novel
-organism) in a local instance of the UCSC genome browser.
+=item F<newUCSCdb.pl>: Create a new genome database to a locally
+installed instance of the UCSC genome browser in order to add a novel
+organism for visualization. Based on L<this Genomewiki
+article|http://genomewiki.ucsc.edu/index.php/Building_a_new_genome_database>.
 
 =item F<normalize_multicov.pl>: Compute normalized expression data in
 TPM/RPKM from (raw) read counts in bedtools multicov format. TPM
@@ -139,10 +144,6 @@ visualization in genome Browsers.
 =item F<splice_site_summary.pl>: Identify and characterize splice
 junctions from RNA-seq data by intersecting them with annotated splice
 junctions.
-
-=item F<newUCSCdb.pl>: Create a new genome database for a locally
-installed instance of the UCSC genome browser. Based on
-http://genomewiki.ucsc.edu/index.php/Building_a_new_genome_database
 
 =item F<trim_fastq.pl>: Trim sequence and quality string fields in a
 Fastq file by user defined length.
@@ -264,13 +265,13 @@ test Windows compatibility.
 
 =item L<Bio::ViennaNGS::FeatureChain>
 
+=item L<Bio::ViennaNGS::FeatureLine>
+
 =item L<Bio::ViennaNGS::MinimalFeature>
 
 =item L<Bio::ViennaNGS::SpliceJunc>
 
 =item L<Bio::ViennaNGS::Tutorial>
-
-=item L<Bio::ViennaNGS::Util>
 
 =item L<Bio::ViennaNGS::UCSC>
 
