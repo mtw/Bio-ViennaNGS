@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-27 16:10:51 mtw>
+# Last changed Time-stamp: <2015-02-06 00:11:22 mtw>
 
 package Bio::ViennaNGS::Tutorial;
 
 use Exporter;
-use version; our $VERSION = qv('0.12_13');
+use version; our $VERSION = qv('0.12_14');
 use strict;
 use warnings;
 
@@ -18,137 +18,70 @@ __END__
 
 =head1 NAME
 
-    Tutorial_pipeline01.pl - An example pipeline for the ViennaNGS toolbox
+  Bio::ViennaNGS::Tutorial - A collection of basic tutorials
+  demonstrating of the core components and features of the
+  L<Bio::ViennaNGS> suite
 
-=head2 SYNOPSIS
- 
-   ./Pipeline.pl path/to/R/libraries
-    Where path/to/R/libraries should point to the directory containing ggplot2
+=head1 DESCRIPTION
 
-=head2 Pipeline 
+  The L<Bio::ViennaNGS> tutorial is a collection of fully documented
+  pipeline scripts that have been built as a showcase for the usage
+  of the L<Bio::ViennaNGS> distribution with real NGS data.
 
-    This script is a showcase for the usage of ViennaNGS in a real NGS example.
-    We start from a file containing ENSEMBL annotation information for human protein-coding genes.
-    We are insterested in finding sequence motifs in close proximity to the gene start (50nt upstream, 10nt into the gene).
+=head2 DISCLAIMER
 
-    The first step is to initialize some variables and generate a chromosome_sizes hash.
-    
-    C<my $bed	 = 'hg19_highlyexpressed.bed';>
-    C<my $name     = (split(/\./,$bed))[0];>
-    C<my $upstream = 50;>
-    C<my $into     = 10;>
-    C<my $outfile  = "$name.ext$upstream\_fromStart_$into\_downstream.bed";>
-    C<my $outfile2 = "$name.ext$upstream\_upstream.bed";>
-    C<my %sizes = %{fetch_chrom_sizes('hg19')};
-    
-=cut
+  Many example pipelines covered here work and depend on fairly large
+  real world NGS data sets in the gigabyte scale. Be prepared that
+  each tutorial takes a couple of hours of CPU time to finish. When
+  running the scripts locally you need to ensure that your system has
+  enough hardware resources available.
 
-=head2 Generate a Bio::ViennaNGS::FeatureChain object
+=head2 DATA DOWNLOAD
 
-    The bed file of interest is parsed, a feature array is generated and passed on to Bio::ViennaNGS::FeatureChain, which creates a new Moose Object of type FeatureChain, containing the original bed entries
-    C<my @featurelist = @{parse_bed6($bed)};
-    ### Now we create a Bio::ViennaNGS::FeatureChain from the featurelist above
-    my $chain = Bio::ViennaNGS::FeatureChain->new('type'=>'original','chain'=>\@featurelist);>
-    
-=cut
+  All input data required for the individual tutorial pipelines can be
+  downloaded from the L<ViennaNGS data
+  repository|http://nibiru.tbi.univie.ac.at/ViennaNGS/>.
 
-=head2 Extend the existing chain for motif analysis
+=head1 TUTORIALS
 
-    The newly created FeatureChain object will now be extended 50nt upstream of the gene start and 10nt into the gene, to retrieve a bed file which contains the putative sequence motifs.
-    
-    C<my $extended_chain = extend_chain(\%sizes,$chain,0,$into,$upstream,0);>
-    
-    For later purposes we also extend the whole U6 gene span 50nt upstream.
-    C<my $extended_chain2 = extend_chain(\%sizes,$chain,$upstream,0,0,0);>
+=over
 
-=cut
+=item L<Tutorial 00|http://search.cpan.org/dist/Bio-ViennaNGS/scripts/Tutorial_pipeline00.pl>: Inferring detailed mapping statistics from BAM files
 
-=head2 Print extended Bio::ViennaNGS::FeatureChain objects to files
+=item L<Tutorial 01|http://search.cpan.org/dist/Bio-ViennaNGS/scripts/Tutorial_pipeline01.pl>: Finding sequence motifs in close proximity to gene starts in a set of human protein coding genes
 
-    Extended chains are now print out to make them available for external tools like bedtools.
-    C<my $out = $extended_chain->print_chain();
-    print $Out $out;
-    $out = $extended_chain2->print_chain();
-    print $Out2 $out;>
-
-=cut
-
-=head3 Summary of so far used methods
-
-=over 4
-
-=item fetch_chrom_sizes<as_string>
-
-    Returns a chromosome-sizes hash reference for the specified species, e.g. hg19, mm9, mm10, etc.
-
-=item parse_bed6<as_string>
-
-    Reads a bed6 file and returns a feature array.
-
-=item Bio::ViennaNGS::FeatureChain->new()<as_method>
-
-    Generates a new Bio::ViennaNGS::FeatureChain object from a feature array
-
-=item Bio::ViennaNGS(extend_chain)<as_method>
-
-    Extends a Bio::ViennaNGS::FeatureChain object by given constraints
+=item L<Tutorial 02|http://search.cpan.org/dist/Bio-ViennaNGS/scripts/Tutorial_pipeline02.pl>: Automatic generation of UCSC genome browser Track Hubs for visualization of ENCODE RNA-seq data 
 
 =back
 
-=cut
 
-=head2 Sequence analysis
+=head1 AUTHORS
 
-    We now generate FASTA files from the extended bed files using bedtools getfasta method.
-    C<my $bedtools = `bedtools getfasta -s -fi hg19_chromchecked.fa -bed $outfile -fo $name.ext$upstream\_fromStart_$into\_downstream.fa`;>
-    C<print STDERR "$bedtools\n" if $?;>
-    C<$bedtools = `bedtools getfasta -s -fi hg19_chromchecked.fa -bed $outfile2 -fo $name.ext$upstream\_upstream.fa`;>
-    C<print STDERR "$bedtools\n" if $?;>
+=over
 
-    To analyze putative sequence motifs in the newly generated Fasta files, we use two approaches.
-    First we analyze the k-mer content with the Bio::ViennaNGS(kmer_enrichment) method for k-mers of length 6 to 8 nt.
+=item Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
-    C<open(IN,"<","$name.ext$upstream\_fromStart_$into\_downstream.fa") || die ("Could not open $name.ext$upstream\_fromStart_$into\_downstream.fa!\n@!\n");>
+=item Joerg Fallmann E<lt>fall@tbi.univie.ac.atE<gt>
 
-    C<my @fastaseqs;>
-    C<while(<IN>){
-          chomp (my $raw = $_);
-          next if ($_ =~ /^>/);
-          push @fastaseqs, $raw;
-    }>
-    C<close(IN);>
+=item Florian Eggenhofer E<lt>florian.eggenhofer@tbi.univie.ac.atE<gt>
 
-    C<for (6..8){
-         my %kmer = %{kmer_enrichment(\@fastaseqs, $_)};
-         my $total = sum values %kmer;
-         ### Print Output
-         open(KMER,">","$_\_mers") or die "Could not open file $_\_mers$!\n";
-         print KMER "$_\-mer\tCount\tRatio\n";
-         print KMER "TOTAL\t$total\t1\n";
-         foreach my $key  (sort {$kmer{$b} <=> $kmer{$a} } keys %kmer) {
-             my $ratio = nearest(.0001,$kmer{$key}/$total);
-             print KMER "$key\t$kmer{$key}\t$ratio\n";
-         }
-         close(KMER);
-    }>
+=item Fabian Amman E<lt>fabian@tbi.univie.ac.at<gt>
+
+=back
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2014-2015 Michael T. Wolfinger
+E<lt>michael@wolfinger.euE<gt>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.10.0 or,
+at your option, any later version of Perl 5 you may have available.
+
+This software is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 =cut
 
-=head2 MEME
 
-    In a second approach we run MEME to retrieve the 20 most over-represented motifs of length 8.
-    C<meme hg19_highexpressed.ext50_fromStart_10_downstream.fa -oc MEME_hg19_highexpressed.ext50_fromStart_10_downstream.fa -w 8 -dna -maxsize 1000000000 -nmotifs 20>
-
-    Once the meme run is done, we want to have a nice figure which shows the e-value and site coverage of the top 10 motifs
-
-    C<`./scripts/MEME_xml_motif_extractor.pl -f Example_Pipeline_meme.xml -r $RLIBPATH -t Example_Pipeline`>
-
-=cut
-
-=head1 AUTHOR
-
-Joerg Fallmann E<lt>joerg.fallmann@univie.ac.atE<gt>
-
-=cut
-
-##################################END################################
