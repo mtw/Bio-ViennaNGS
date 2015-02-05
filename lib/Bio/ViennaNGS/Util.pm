@@ -1,9 +1,6 @@
 # -*-CPerl-*-
-<<<<<<< HEAD
-# Last changed Time-stamp: <2015-01-27 16:56:46 mtw>
-=======
-# Last changed Time-stamp: <2015-02-03 12:51:23 fall>
->>>>>>> tutorial
+# Last changed Time-stamp: <2015-02-05 15:34:24 mtw>
+
 
 package Bio::ViennaNGS::Util;
 
@@ -236,11 +233,8 @@ sub extend_chain{
   my $r	    = $_[3];
   my $u     = $_[4];
   my $d     = $_[5];
-<<<<<<< HEAD
-  my $this_function = (caller(0))[3];
-=======
   my $e     = $_[6];
->>>>>>> tutorial
+  my $this_function = (caller(0))[3];
 
   ##return a new chain with extended coordinates
   my $extendchain = $chain -> clone();
