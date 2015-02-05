@@ -363,8 +363,7 @@ sub retrieve_tracks{
     my $autoScale = "off";
     my $bedNameLabel = "Gene Id";
     my $searchIndex = "name";
-    #my $colorByStrand = "100,205,255 55,155,205";
-    my $colorByStrand = retrieve_color($counter );
+    my $colorByStrand = retrieve_color($counter);
     my $visibility = "pack";
     my $group = "annotation";
     my $priority = "10";
@@ -382,9 +381,8 @@ sub retrieve_bigwig_tracks{
   my ($directoryPath,$baseURL,$assembly_hub_name,$accession,$bigwigpaths) = @_;
   my $currentDirectory = getcwd;
   chdir $directoryPath or croak $!;
-  my @big_wig_array = split(';', $bigwigpaths);
+  my @big_wig_array = split('\*', $bigwigpaths);
   my $bigwigtracks = "";
-  my $counter = 0;
   foreach my $bigwig_entry (@big_wig_array){
     if($bigwig_entry=~/,/){
       #multi bigwig container detected
@@ -429,7 +427,6 @@ sub retrieve_bigwig_tracks{
       my $type1 = "bigWig";
       my $parent1 = $track;
       my $color1 = "133,154,0";
-      $counter++;
       my $track1_string = make_bigwig_container_track($track1, $bigDataUrl1, $shortLabel1, $longLabel1, $type1, $parent1, $color1);
       $bigwigtracks .= $track1_string;
       #construct negative track
@@ -442,7 +439,6 @@ sub retrieve_bigwig_tracks{
       my $color2 = "220,51,47";
       my $track2_string = make_bigwig_container_track($track2, $bigDataUrl2, $shortLabel2, $longLabel2, $type2, $parent2, $color2);
       $bigwigtracks .= $track2_string;
-      $counter++;
     }else{
       #construct single wig
       my ($basename,$dir,$ext) = fileparse($bigwig_entry,qr/\..*/);
@@ -459,7 +455,6 @@ sub retrieve_bigwig_tracks{
       my $color = "38,140,210";
       my $track_string = make_bigwig_track($tag, $track, $bigDataUrl, $shortLabel, $longLabel, $type, $autoScale, $visibility, $priority, $color);
       $bigwigtracks .= $track_string;
-      $counter++;
     }
   }
   chdir $currentDirectory or croak $!;
@@ -527,7 +522,7 @@ sub make_bigwig_container_track{
 
 sub make_bigwig_track{
   my ($tag, $track, $bigDataUrl, $shortLabel, $longLabel, $type, $autoScale, $visibility, $priority, $color) = @_;
-  my $trackEntry ="#$tag\ntrack $track\n bigDataUrl $bigDataUrl\nshortLabel $shortLabel\nlongLabel $longLabel\ntype $type\n visibility $visibility\n autoScale $autoScale\n priority $priority\nalwaysZero on\nyLineMark 0\nyLineOnOff on\nmaxHeightPixels 125:125:11\ncolor $color\n\n";
+  my $trackEntry ="#$tag\ntrack $track\nbigDataUrl $bigDataUrl\nshortLabel $shortLabel\nlongLabel $longLabel\ntype $type\nvisibility $visibility\nautoScale $autoScale\npriority $priority\nalwaysZero on\nyLineMark 0\nyLineOnOff on\nmaxHeightPixels 125:125:11\ncolor $color\n\n";
   return $trackEntry;
 }
 
