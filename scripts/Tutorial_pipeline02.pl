@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-01-28 10:48:11 fall>
+# Last changed Time-stamp: <2015-02-05 15:45:02 fall>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -239,6 +239,8 @@ if(!$success){
 ###############
 
 __END__
+
+=over 4
 
 =item B<--help -h>
 
