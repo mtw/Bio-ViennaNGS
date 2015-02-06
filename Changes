@@ -94,7 +94,7 @@ Revision history for Perl extension ViennaNGS.
 	- ship demo files in share/ folder
 	- updated POD and README
 	
-0.12_14
+0.12_15
 	- requires Perl >= 5.10.0
 	- integrated Bio::ViennaNGS::Bam
 	- integrated Bio::ViennaNGS::BamStat
@@ -104,15 +104,18 @@ Revision history for Perl extension ViennaNGS.
 	- integrated Bio::ViennaNGS::Tutorial
 	- integrated Bio::ViennaNGS::UCSC
  	- integrated Bio::ViennaNGS::FeatureLine
+	- added scripts/assembly_hub_generator.pl
 	- added scripts/bam_quality_stat.pl
+	- added scripts/Tutorial_pipeline00.pl
 	- added scripts/Tutorial_pipeline01.pl
+	- added scripts/Tutorial_pipeline02.pl
 	- added scripts/track_hub_constructor.pl
 	- renamed Bio::ViennaNGS.pm to Bio::ViennaNGS::Util.pm
 	- migrated BAM specific code from Bio::ViennaNGS::Util 
 	  to Bio::ViennaNGS::Bam
 	- migrated expression/normalization code from Bio::ViennaNGS::Util
 	  to Bio::ViennaNGS::Expression
-	- added scripts/assembly_hub_generator.pl
 	- refactored scripts/normalize_multicov.pl
+	- removed scripts/motiffinda.pl from distribution
 	- added static templates for the Assembly and Track Hub generator
 	- updated POD and README 

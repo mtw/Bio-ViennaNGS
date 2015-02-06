@@ -30,7 +30,6 @@ scripts/extend_bed.pl
 scripts/gff2bed.pl
 scripts/kmer_analysis.pl
 scripts/MEME_xml_motif_extractor.pl
-scripts/motiffinda.pl
 scripts/newUCSCdb.pl
 scripts/normalize_multicov.pl
 scripts/sj_visualizer.pl

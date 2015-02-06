@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-06 12:08:00 mtw>
+# Last changed Time-stamp: <2015-02-06 13:19:09 mtw>
 
 package Bio::ViennaNGS;
 
@@ -124,9 +124,6 @@ and Fasta files
 =item F<MEME_XML_motif_extractor.pl>: Compute simple statistics from
 MEME XML output and return a list of found motifs with the number of
 sequences containing those motifs as well as nice ggplot graphs.
-
-=item F<motiffinda.pl>: Find motifs in annotated sequence
-features. The motif can be provided as regular expression.
 
 =item F<newUCSCdb.pl>: Create a new genome database to a locally
 installed instance of the UCSC genome browser in order to add a novel
