@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-06 16:23:31 mtw>
+# Last changed Time-stamp: <2015-02-06 16:42:46 mtw>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -342,7 +342,6 @@ my $size_n = $result[3]; # of alignments on [-] srand
 my $bed_p  = $result[4]; # BED file containing fragments of [+] strand
 my $bed_n  = $result[5]; # BED file containing fragments of [-] strand
 print "DONE\n";
-print Dumper(\@result);
 
 =head3 Create BigWig coverage profiles
 
