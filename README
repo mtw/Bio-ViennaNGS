@@ -129,7 +129,7 @@ Create a new genome database to a locally installed instance of the UCSC
 genome browser in order to add a novel organism for visualization.
 
 normalize_multicov.pl: 
-Compute normalized expression data in TPM/RPKM from (raw) read counts in
+Compute normalized expression data in TPM from (raw) read counts in
 bedtools multicov format. TPM reference: Wagner et al, Theory
 Biosci. 131(4), pp 281-85 (2012)
 
