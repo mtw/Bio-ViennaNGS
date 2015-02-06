@@ -169,19 +169,28 @@ sub make_assembly_hub{
   $template->process($group_txt_file,$group_txt_vars,$group_txt_path) or
     croak "Template process failed: ", $template->error(), "\n";
 
-
-  my $chromosome_size = retrieve_chromosome_size($fasta_path);
-  my $chromosome_size_filepath = file($genome_assembly_directory,"$accession.chrom.sizes");
-  write_chromosome_size_file($chromosome_size_filepath,$accession,$chromosome_size);
-  convert_tracks($filesdir, $genome_assembly_directory, $accession, $bedToBigBed, $chromosome_size_filepath);
-  my @trackfiles = retrieve_tracks($genome_assembly_directory, $baseURL, $assembly_hub_name, $accession);
-
+  #construct big bed
   my $tracksList;
-  foreach my $track (@trackfiles){
-    my $trackString = make_track(@$track);
-    $tracksList .= $trackString;
+  #Bigbeds are only created from infolder
+  unless($filesdir =~ /-/){
+    my $chromosome_size = retrieve_chromosome_size($fasta_path);
+    my $chromosome_size_filepath = file($genome_assembly_directory,"$accession.chrom.sizes");
+    write_chromosome_size_file($chromosome_size_filepath,$accession,$chromosome_size);
+    convert_tracks($filesdir, $genome_assembly_directory, $accession, $bedToBigBed, $chromosome_size_filepath);
+    my @trackfiles = retrieve_tracks($genome_assembly_directory, $baseURL, $assembly_hub_name, $accession);
+    
+    foreach my $track (@trackfiles){
+      my $trackString = make_track(@$track);
+      $tracksList .= $trackString;
+    }
   }
-
+  
+  #big wigs
+  my $bigwig_tracks_string = "";
+  unless($big_wig_ids=~/^-$/){
+    $bigwig_tracks_string = retrieve_bigwig_tracks($genome_assembly_directory, $baseURL, $track_hub_name, $species, $big_wig_ids);
+  }
+  $tracksList .= $bigwig_tracks_string;
   #construct trackDb.txt
   my $trackDb_txt_path = file($genome_assembly_directory, "trackDb.txt")->stringify;
   my $trackDb_txt_file = 'trackDb.txt';
