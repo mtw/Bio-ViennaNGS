@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-06 13:04:13 mtw>
+# Last changed Time-stamp: <2015-02-06 16:23:31 mtw>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -57,20 +57,34 @@ a real-world NGS example.
 
 We start from a file containing ENSEMBL annotation information for
 human protein-coding genes, which have a read pileup of at least 1001
-reads in an ENCODE dataset mapped with segemehl. We are insterested in
-generating a UCSC Track Hub visualizing those genes as well as a 50nt
-region upstream of the gene start.
+reads in an ENCODE dataset mapped with F<segemehl>. We are insterested
+in visualizing those genes together with a 50nt region upstream of the
+gene start. As such, will go through the individual steps required for
+preparation of the files and subsequent UCSC Track Hub visualization.
 
 =head2 PREREQUITES
 
-For running this tutorial on your local machine you will need a recent
-version of L<bedtools|https://github.com/arq5x/bedtools2> as well as
-the following input files (which can be downloaded
-L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>):
+For running this tutorial on your machine you will need a full
+installation of the L<Bio::ViennaNGS> distribution, including all
+third party dependencies, i.e. a recent version of
+L<bedtools|https://github.com/arq5x/bedtools2> as well as the
+F<bedGraphToBigWig> utility from the UCSC source distribution
+(available L<here|http://hgdownload.cse.ucsc.edu/admin/exe/>). In
+addition, the following input files (which can be downloaded
+L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>) will be used
+throughout this tutorial:
 
 =over
 
+=item F<hg19_chromchecked.fa>
+
 =item F<hg19_highlyexpressed.bed>
+
+=item F<hg19.chrom.sizes>
+
+=item F<C1R1.bam>
+
+=item F<hg19.chrom.sizes>
 
 =back
 
@@ -78,8 +92,9 @@ L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>):
 
 This tutorial works on a real-world biological data set of several
 gigabytes in size i.e. the analysis will eventually take a few hours
-to finish. If you run this script locally you need to ensure that your
-system has enough hardware resources.
+to finish, depending on your hardware. If you run this script locally
+you need to ensure that your system has enough hardware resources
+available.
 
 =head1 PIPELINE
 
@@ -114,8 +129,10 @@ entries.
 
 =cut
 
+print STDERR "Generating Bio::ViennaNGS::FeatureChain object ...";
 my @featurelist = @{parse_bed6($bed)};
 my $chain	= Bio::ViennaNGS::FeatureChain->new('type'=>'original','chain'=>\@featurelist);
+print STDERR "DONE\n";
 
 =head3 Extend the existing chain for UCSC visualization
 
@@ -131,7 +148,9 @@ We'll also extend the entire U6 gene span 50nt upstream for later usage.
 
 =cut
 
+print STDERR "Extending the chain ...";
 my $extended_chain = extend_chain(\%sizes,$chain,$upstream,0,0,0);
+print STDERR "DONE\n";
 
 =head3 Print extended Bio::ViennaNGS::FeatureChain objects to files
 
@@ -182,15 +201,13 @@ Extends a Bio::ViennaNGS::FeatureChain object by given constraints
 We will now generate FASTA files from the extended BED files by using
 the I<bedtools getfasta> method.
 
-
-
 To analyze putative sequence motifs in the newly generated Fasta
 files, we analyze the k-mer content using the C<Bio::ViennaNGS>
 C<kmer_enrichment()> method for k-mers of length 6 to 8 nt.
 
   my $hg19fa    = "hg19_chromchecked.fa";
   my $outfilefa = $outfilebn.".fa";
-  my $bedtools = `bedtools getfasta -s -fi $hg19fa -bed $outfilebed -fo $outfilefa`;
+  my $bedtools  = `bedtools getfasta -s -fi $hg19fa -bed $outfilebed -fo $outfilefa`;
   print STDERR "$bedtools\n" if $?;
   open(IN,"<", $outfilefa) || die ("Could not open $outfilefa!\n@!\n");
 
@@ -218,13 +235,16 @@ C<kmer_enrichment()> method for k-mers of length 6 to 8 nt.
 
 =cut
 
+print STDERR "Generating FASTA files from extended BED ...";
 my $hg19fa    = "hg19_chromchecked.fa";
 my $outfilefa = $outfilebn.".fa";
 my $bedtools = `bedtools getfasta -s -fi $hg19fa -bed $outfilebed -fo $outfilefa`;
 print STDERR "$bedtools\n" if $?;
+print STDERR "DONE\n";
 
 open(IN,"<", $outfilefa) || die ("Could not open $outfilefa!\n@!\n");
 
+print STDERR "Building k-mers ...";
 my @fastaseqs;
 while(<IN>){
     chomp (my $raw = $_);
@@ -246,33 +266,35 @@ for (6..8){
     }
     close(KMER);
 }
+print STDERR "DONE\n";
 
 =head3 Retrieve mapped sequences that overlap the extended chain as BAM using I<bedtools>
 
 To generate a BAM file containing uniquely mapped reads that overlap
 our genes of interest, we use the I<bedtools intersect> method.
 
-  my $bam_upstream = "hg19_highlyexpressed.ext50_upstream_overlapping_C1R1.bam";
-  my $cmd = "intersectBed -s -split -abam C1R1.bam -b hg19_highlyexpressed.ext50_upstream.bed > $bam_upstream ";
+  my $bam_upstream = $outfilebn."_overlapping_C1R1.bam";
+  my $cmd = "intersectBed -s -split -abam C1R1.bam -b $outfilebed > $bam_upstream ";
   my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run(command => $cmd, verbose => 0);
 
   if(!$success){
-    my $this_function = (caller(0))[3];
     print STDERR "ERROR: Bedtools intersect unsuccessful\n";
     print join "", @$full_buf;
   }
 
 =cut
 
-my $bam_upstream = "hg19_highlyexpressed.ext50_upstream_overlapping_C1R1.bam";
-my $cmd = "intersectBed -s -split -abam C1R1.bam -b hg19_highlyexpressed.ext50_upstream.bed > $bam_upstream ";
+my $thebamfile = "C1R1.bam";
+print STDERR "Retrieving mapped sequences that overlap the extended chain ...";
+my $bam_upstream = $outfilebn."_upstream_overlapping_C1R1.bam";
+my $cmd = "intersectBed -s -split -abam $thebamfile -b $outfilebed > $bam_upstream ";
 my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run(command => $cmd, verbose => 0);
 
 if(!$success){
-  my $this_function = (caller(0))[3];
   print STDERR "ERROR: Bedtools intersect unsuccessful\n";
   print join "", @$full_buf;
 }
+print STDERR "DONE\n";
 
 
 =head3 Split BAM by strand
@@ -286,7 +308,7 @@ the [-] strand.
   my $wantuniq = 0;
   my $wantbed  = 1;
   my $outdir   = cwd();
-  my $lf       = undef;
+  my $lf       = "log.txt";
 
   my @result = split_bam($bam_upstream,$reversed,$wantuniq,$wantbed,$outdir,$lf);
 
@@ -304,11 +326,12 @@ interim BED files for [=] and [-] strand, respectively.
 
 =cut
 
+print STDERR "Splitting BAM by strands ...";
 my $reversed = 1;
 my $wantuniq = 0;
 my $wantbed  = 1;
 my $outdir   = cwd();
-my $lf       = undef;
+my $lf       = "log.txt";
 
 my @result = split_bam($bam_upstream,$reversed,$wantuniq,$wantbed,$outdir,$lf);
 
@@ -318,12 +341,14 @@ my $size_p = $result[2]; # of alignments on [+] strand
 my $size_n = $result[3]; # of alignments on [-] srand
 my $bed_p  = $result[4]; # BED file containing fragments of [+] strand
 my $bed_n  = $result[5]; # BED file containing fragments of [-] strand
+print "DONE\n";
+print Dumper(\@result);
 
 =head3 Create BigWig coverage profiles
 
 Now that we have separate BAM files for each strand at hand, the next
-step will be to create coverage profiles in BigWig format for
-subsequent UCSC visualization. The routine of choice for this task is
+step is to create coverage profiles in BigWig format for subsequent
+UCSC visualization. The routine of choice for this task is
 C<bed_or_bam2bw()>, which is called separately for [+] and [-] strand.
 
   my $od       = cwd();
@@ -334,12 +359,17 @@ C<bed_or_bam2bw()>, which is called separately for [+] and [-] strand.
   bed_or_bam2bw("bed",$bed_p,$cs_in,"+",$od,$wantnorm,$size_p,$scale,$lf);
   bed_or_bam2bw("bed",$bed_n,$cs_in,"-",$od,$wantnorm,$size_n,$scale,$lf);
 
-Once finished, there will be two BigWig files in the current working
-directoy, one for each strand. These files can be used for
-visualization in a genome browser.
+Once finished, there will be two new BigWig files in the current
+working directoy: F<hg19_highlyexpressed.pos.bw> and
+F<hg19_highlyexpressed.neg.bw> contain coverage information of the [+]
+and [-] strand, respectively and will be used for genome browser
+visualization in the following sections. Besides BigWig files,
+C<bed_or_bam2bw()> creates BED and BAM files for each strand. We will,
+however not use these files throughout this tutorial.
 
 =cut
 
+print STDERR "Creating coverage profiles ...";
 my $od       = cwd();
 my $cs_in    = "hg19.chrom.sizes";
 my $wantnorm = 0;
@@ -347,6 +377,7 @@ my $scale    = 10000000;
 
 bed_or_bam2bw("bed",$bed_p,$cs_in,"+",$od,$wantnorm,$size_p,$scale,$lf);
 bed_or_bam2bw("bed",$bed_n,$cs_in,"-",$od,$wantnorm,$size_n,$scale,$lf);
+print STDERR "DONE\n";
 
 =head1 COMMAND LINE OPTIONS
 
