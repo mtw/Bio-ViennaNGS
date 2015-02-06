@@ -47,7 +47,7 @@ my $fasta_in = '-';
 my $folder_in = '-';
 my $dest = '.';
 my $base_URL = '-';
-my $big_wig_ids = '-';
+my $big_wig_urls = '-';
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -56,7 +56,7 @@ pod2usage(-verbose => 1) unless GetOptions("fa|f=s"       => \$fasta_in,
 					   "infolder|i=s" => \$folder_in,
 					   "out|o=s"      => \$dest,
 					   "baseurl|b=s"  => \$base_URL,
-                                           "bigwigs|bw=s" => \$big_wig_ids,
+                                           "bigwigs|bw=s" => \$big_wig_urls,
 					   "man"          => sub{pod2usage(-verbose => 2)},
 					   "help|h"       => sub{pod2usage(1)}
 					  );
@@ -79,7 +79,7 @@ unless (-d $dest){
 }
 $lf = file($dest,$logname);
 
-$assembly_hub_return_value = make_assembly_hub($fasta_in,$folder_in,$dest,$base_URL,$big_wig_ids,$lf);
+$assembly_hub_return_value = make_assembly_hub($fasta_in,$folder_in,$dest,$base_URL,$big_wig_urls,$lf);
 
 
 __END__
@@ -93,7 +93,7 @@ from genomic sequence and annotation
 =head1 SYNOPSIS
 
 assembly_hub_constructor.pl [--fa I<FILE>] [--infolder I<PATH>] [--out
-I<PATH>] [--baseurl -I<URL>] [options]
+I<PATH>] [--baseurl -I<URL>] [--bigwigs -I<URL,URL*URL>] [options]
 
 =head1 DESCRIPTION
 
@@ -125,6 +125,16 @@ Destination folder for the output Assembly Hub.
 BaseURL used within the Assembly Hub. This URL will be included
 verbatim in the resulting Assembly Hub. It is crucial that this URl is
 valid, else the resulting Assembly Hub will be broken.
+
+=item  B<--bigwigs -bw>
+
+URLs pointing to big wig files to be included in the trackhub. Multiple URLs are
+separated by the star character *. It is possible to create a multiwig container by
+providing 2 URLs instead of one separated by comma character ,. E.g.
+http://foo.com/bar.bw,http://foo.com/bar2.bw*http://foo.com/bar3.bw yields a multi
+big wig container displaying bar as positive reads in green and bar2 as negative
+3 red colored reads in the same track and additionally bar3 in an own track
+colored blue.
 
 =item B<--help -h>
 
