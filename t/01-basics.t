@@ -24,6 +24,7 @@ BEGIN { use_ok('Bio::ViennaNGS::Expression') };
 BEGIN { use_ok('Bio::ViennaNGS::Fasta') };
 BEGIN { use_ok('Bio::ViennaNGS::Feature') };
 BEGIN { use_ok('Bio::ViennaNGS::FeatureChain') };
+BEGIN { use_ok('Bio::ViennaNGS::FeatureLine') };
 BEGIN { use_ok('Bio::ViennaNGS::MinimalFeature') };
 BEGIN { use_ok('Bio::ViennaNGS::SpliceJunc') };
 BEGIN { use_ok('Bio::ViennaNGS::Tutorial') };
