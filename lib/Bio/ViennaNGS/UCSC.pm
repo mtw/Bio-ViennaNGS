@@ -188,7 +188,7 @@ sub make_assembly_hub{
   #big wigs
   my $bigwig_tracks_string = "";
   unless($big_wig_ids=~/^-$/){
-    $bigwig_tracks_string = retrieve_bigwig_tracks($genome_assembly_directory, $baseURL, $track_hub_name, $species, $big_wig_ids);
+    $bigwig_tracks_string = retrieve_bigwig_tracks($genome_assembly_directory, $baseURL, $assembly_hub_name, $accession, $big_wig_ids);
   }
   $tracksList .= $bigwig_tracks_string;
   #construct trackDb.txt
