@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-05 23:19:17 mtw>
+# Last changed Time-stamp: <2015-02-06 13:04:13 mtw>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -52,14 +52,27 @@ toolbox
 
 =head1 DESCRIPTION
 
-This script is a showcase for using Bio::ViennaNGS components with a
-real-world NGS example.
+This script is a showcase for using L<Bio::ViennaNGS> components with
+a real-world NGS example.
 
 We start from a file containing ENSEMBL annotation information for
 human protein-coding genes, which have a read pileup of at least 1001
 reads in an ENCODE dataset mapped with segemehl. We are insterested in
 generating a UCSC Track Hub visualizing those genes as well as a 50nt
 region upstream of the gene start.
+
+=head2 PREREQUITES
+
+For running this tutorial on your local machine you will need a recent
+version of L<bedtools|https://github.com/arq5x/bedtools2> as well as
+the following input files (which can be downloaded
+L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>):
+
+=over
+
+=item F<hg19_highlyexpressed.bed>
+
+=back
 
 =head2 DISCLAIMER
 
@@ -73,19 +86,21 @@ system has enough hardware resources.
 Let's first initialize some variables and generate a chromosome_sizes
 hash.
 
-  my $bed       = 'hg19_highlyexpressed.bed';
-  my $name      = (split(/\./,$bed))[0];
-  my $upstream  = 50;
-  my $outfile2  = "$name.ext$upstream\_upstream.bed";
-  my %sizes     = %{fetch_chrom_sizes('hg19')};
+  my $bed         = 'hg19_highlyexpressed.bed';
+  my $name        = (split(/\./,$bed))[0];
+  my $upstream    = 50;
+  my $outfilebn   = $name.".ext".$upstream."_upstream";
+  my $outfilebed  = $outfilebn.".bed";
+  my %sizes       = %{fetch_chrom_sizes('hg19')};
 
 =cut
 
-my $bed	      = 'hg19_highlyexpressed.bed';
-my $name      = (split(/\./,$bed))[0];
-my $upstream  = 50;
-my $outfile   = "$name.ext$upstream\_upstream.bed";
-my %sizes     = %{fetch_chrom_sizes('hg19')}; ### Requires installation of UCSCs fetchChromSizes script or mysql
+my $bed	        = 'hg19_highlyexpressed.bed';
+my $name        = (split(/\./,$bed))[0];
+my $upstream    = 50;
+my $outfilebn   = $name.".ext".$upstream."_upstream";
+my $outfilebed  = $outfilebn.".bed";
+my %sizes       = %{fetch_chrom_sizes('hg19')}; ### Requires installation of UCSCs fetchChromSizes script or mysql
 
 =head3 Generate a Bio::ViennaNGS::FeatureChain object
 
@@ -123,6 +138,7 @@ my $extended_chain = extend_chain(\%sizes,$chain,$upstream,0,0,0);
 Extended chains are now printed out to make them available for
 external tools like bedtools.
 
+  open (my $Out, ">",$outfilebed) or die "$!";
   my $out = $extended_chain->print_chain();
   print $Out $out;
   close($Out);
@@ -130,11 +146,9 @@ external tools like bedtools.
 =cut
 
 
-open (my $Out, ">",$outfile) or die "$!";
-
+open (my $Out, ">",$outfilebed) or die "$!";
 my $out = $extended_chain->print_chain();
 print $Out $out;
-
 close($Out);
 
 =head3 Summary of so far used methods
@@ -150,7 +164,7 @@ e.g. hg19, mm9, mm10, etc.
 
 Reads a bed6 file and returns a feature array.
 
-=item C<Bio::ViennaNGS::FeatureChain->new()>
+=item C<Bio::ViennaNGS::FeatureChain-E<gt>new()>
 
 Generates a new Bio::ViennaNGS::FeatureChain object from a feature
 array
@@ -168,14 +182,17 @@ Extends a Bio::ViennaNGS::FeatureChain object by given constraints
 We will now generate FASTA files from the extended BED files by using
 the I<bedtools getfasta> method.
 
-  $bedtools = `bedtools getfasta -s -fi hg19_chromchecked.fa -bed $outfile2 -fo $name.ext$upstream\_upstream.fa`;
-  print STDERR "$bedtools\n" if $?;
+
 
 To analyze putative sequence motifs in the newly generated Fasta
 files, we analyze the k-mer content using the C<Bio::ViennaNGS>
 C<kmer_enrichment()> method for k-mers of length 6 to 8 nt.
 
- open(IN,"<","$name.ext$upstream\_upstream.fa") || die ("Could not open $name.ext$upstream\_upstream.fa!\n@!\n");
+  my $hg19fa    = "hg19_chromchecked.fa";
+  my $outfilefa = $outfilebn.".fa";
+  my $bedtools = `bedtools getfasta -s -fi $hg19fa -bed $outfilebed -fo $outfilefa`;
+  print STDERR "$bedtools\n" if $?;
+  open(IN,"<", $outfilefa) || die ("Could not open $outfilefa!\n@!\n");
 
   my @fastaseqs;
   while(<IN>){
@@ -201,10 +218,12 @@ C<kmer_enrichment()> method for k-mers of length 6 to 8 nt.
 
 =cut
 
-my $bedtools = `bedtools getfasta -s -fi hg19_chromchecked.fa -bed $outfile -fo $name.ext$upstream\_upstream.fa`;
+my $hg19fa    = "hg19_chromchecked.fa";
+my $outfilefa = $outfilebn.".fa";
+my $bedtools = `bedtools getfasta -s -fi $hg19fa -bed $outfilebed -fo $outfilefa`;
 print STDERR "$bedtools\n" if $?;
 
-open(IN,"<","$name.ext$upstream\_upstream.fa") || die ("Could not open $name.ext$upstream\_upstream.fa!\n@!\n");
+open(IN,"<", $outfilefa) || die ("Could not open $outfilefa!\n@!\n");
 
 my @fastaseqs;
 while(<IN>){
