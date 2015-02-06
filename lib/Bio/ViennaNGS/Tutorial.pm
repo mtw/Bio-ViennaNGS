@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-06 00:11:22 mtw>
+# Last changed Time-stamp: <2015-02-06 11:37:28 mtw>
 
 package Bio::ViennaNGS::Tutorial;
 
@@ -18,29 +18,29 @@ __END__
 
 =head1 NAME
 
-  Bio::ViennaNGS::Tutorial - A collection of basic tutorials
-  demonstrating of the core components and features of the
-  L<Bio::ViennaNGS> suite
+Bio::ViennaNGS::Tutorial - A collection of basic tutorials
+demonstrating of the core components and features of the
+L<Bio::ViennaNGS> suite
 
 =head1 DESCRIPTION
 
-  The L<Bio::ViennaNGS> tutorial is a collection of fully documented
-  pipeline scripts that have been built as a showcase for the usage
-  of the L<Bio::ViennaNGS> distribution with real NGS data.
+The L<Bio::ViennaNGS> tutorial is a collection of fully documented
+pipeline scripts that have been built as a showcase for the usage of
+the L<Bio::ViennaNGS> distribution with real NGS data.
 
 =head2 DISCLAIMER
 
-  Many example pipelines covered here work and depend on fairly large
-  real world NGS data sets in the gigabyte scale. Be prepared that
-  each tutorial takes a couple of hours of CPU time to finish. When
-  running the scripts locally you need to ensure that your system has
-  enough hardware resources available.
+Many example pipelines covered here work and depend on fairly large
+real world NGS data sets in the gigabyte scale. Be prepared that each
+tutorial takes a couple of hours of CPU time to finish. When running
+the scripts locally you need to ensure that your system has enough
+hardware resources available.
 
 =head2 DATA DOWNLOAD
 
-  All input data required for the individual tutorial pipelines can be
-  downloaded from the L<ViennaNGS data
-  repository|http://nibiru.tbi.univie.ac.at/ViennaNGS/>.
+All input data required for the individual tutorial pipelines can be
+downloaded from the L<ViennaNGS data
+repository|http://nibiru.tbi.univie.ac.at/ViennaNGS/>.
 
 =head1 TUTORIALS
 
