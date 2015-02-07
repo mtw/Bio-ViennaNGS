@@ -93,7 +93,7 @@ from genomic sequence and annotation
 =head1 SYNOPSIS
 
 assembly_hub_constructor.pl [--fa I<FILE>] [--infolder I<PATH>] [--out
-I<PATH>] [--baseurl -I<URL>] [--bigwigs -I<URL,URL*URL>] [options]
+I<PATH>] [--baseurl -I<URL>] [--bigwigs -I<URL,URL#URL>] [options]
 
 =head1 DESCRIPTION
 
@@ -129,9 +129,9 @@ valid, else the resulting Assembly Hub will be broken.
 =item  B<--bigwigs -bw>
 
 URLs pointing to big wig files to be included in the trackhub. Multiple URLs are
-separated by the star character *. It is possible to create a multiwig container by
+separated by the star character #. It is possible to create a multiwig container by
 providing 2 URLs instead of one separated by comma character ,. E.g.
-http://foo.com/bar.bw,http://foo.com/bar2.bw*http://foo.com/bar3.bw yields a multi
+http://foo.com/bar.bw,http://foo.com/bar2.bw#http://foo.com/bar3.bw yields a multi
 big wig container displaying bar as positive reads in green and bar2 as negative
 3 red colored reads in the same track and additionally bar3 in an own track
 colored blue.
