@@ -31,7 +31,6 @@ sub make_assembly_hub{
   my ($fasta_path, $filesdir, $basedir, $baseURL, $big_wig_ids, $log) = @_;
   my ($basename,$dir,$ext);
   my $this_function = (caller(0))[3];
-
   #check arguments
   croak ("ERROR [$this_function] \$fasta_path does not exist\n") 
     unless (-e $fasta_path);
@@ -59,7 +58,8 @@ sub make_assembly_hub{
     croak ("ERROR [$this_function] bedToBigBed is not installed!");
 
   # bedfiles path
-  my @parsedHeader = parse_fasta_header($fasta_path,$this_function);
+  my $parsedHeaderRef = parse_fasta_header($fasta_path,$this_function);
+  my @parsedHeader = @$parsedHeaderRef;
   my $unchecked_accession = $parsedHeader[0];
   my $scientificName = $parsedHeader[1];
   my $accession = valid_ncbi_accession($unchecked_accession);
@@ -390,7 +390,7 @@ sub retrieve_bigwig_tracks{
   my ($directoryPath,$baseURL,$assembly_hub_name,$accession,$bigwigpaths) = @_;
   my $currentDirectory = getcwd;
   chdir $directoryPath or croak $!;
-  my @big_wig_array = split('\*', $bigwigpaths);
+  my @big_wig_array = split('\#', $bigwigpaths);
   my $bigwigtracks = "";
   foreach my $bigwig_entry (@big_wig_array){
     if($bigwig_entry=~/,/){
@@ -558,7 +558,7 @@ sub parse_fasta_header{
   chomp $fastaheader;
   close $file;
   #>gi|556503834|ref|NC_000913.3| Escherichia coli str. K-12 substr. MG1655
-  if($fastaheader=~/^>gi|/){
+  if($fastaheader=~/^>gi/){
     print LOG "#NCBI fasta header detected\n";
     my @headerfields = split(/\|/, $fastaheader);
     my $accession = $headerfields[3];
@@ -566,16 +566,15 @@ sub parse_fasta_header{
     my @ids;
     push(@ids,$accession);
     push(@ids,$scientificName);
-    return @ids;
+    return \@ids;
   }else{
-    my $fastaid = $fastaheader;
-    $fastaid=~s/^>//;
-    if(valid_ncbi_accession($fastaid)){
+    $fastaheader=~s/^>//;
+    if(valid_ncbi_accession($fastaheader)){
       print LOG "#Header contains just valid NCBI accession number\n";
       my @ids;
-      push(@ids,$fastaid);
+      push(@ids,$fastaheader);
       push(@ids,"scientific name not set");
-      return @ids;
+      return \@ids;
     }else{
       print LOG "#No valid accession/ ncbi header\n";
       croak ("ERROR [$this_function] \$fasta_path does not contain a valid accession/ ncbi header\n");
