@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-27 16:24:20 fabian>
+# Last changed Time-stamp: <2015-02-09 15:30:27 fabian>
 
 =head1 NAME
 
@@ -117,9 +117,10 @@ the auxiliary information stored in the BAM file produced by
 I<segemehl>. Toggle it to '1' if your input file is from this origin,
 as it is the case of the provided C1R1.bam. Otherwise set to '0'.
 
+=cut
 
 my @bams     = qw# C1R1.bam #;
-#next unless ($bam[0] eq $bam[-1] && $bam[0] eq "C1R1.bam");
+next unless ($bams[0] eq $bams[-1] && $bams[0] eq "C1R1.bam");
 my $odir     = './';
 my $rlibpath = '/usr/bin/R';
 my %data     = ();
@@ -141,6 +142,7 @@ Initialize new BamStatSummary object capable of representing data from
  where beside standard read quantification also the edit distance
  (C<<< control_edit => 1 >>>) of each read will be stored.
 
+=cut
 
 my $bamsummary = Bio::ViennaNGS::BamStatSummary->new(files          => \@bams,
 						     outpath        => $odir,
@@ -169,7 +171,7 @@ L<BIO::ViennaNGS::BamStat> is called like this,
 This calls internally L<Bio::DB::Sam> library within
 L<Bio::ViennaNGS::BamStat>.
 
-To examine the content of of this new object, please use C< print
+To examine the content of this new object, please use C< print
 Dumper($bamsummary); >. As you will see its content depends on the way
 it is initialized, and the data specified to be stored.
 
@@ -205,7 +207,7 @@ in $odir.
 The output file format is *.csv which can easily be screened with any
 text editor or spreadsheet program.
 
-  =cut
+=cut
 
 $bamsummary->dump_countStat("csv");
 
