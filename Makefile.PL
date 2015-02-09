@@ -17,7 +17,7 @@ WriteMakefile(
 	      'PREREQ_PM'       => {
 				    "Getopt::Long"	           => '2.0',
 				    "Bio::Root::Version" 	   => '1.00690001',
-				    "Bio::DB::Sam"                 => '1.39',
+				    "Bio::DB::Sam"                 => '1.37',
 				    "Bio::DB::Fasta"               => '0',
 				    "Bio::Tools::GFF"              => '0',
 				    "Data::Dumper"                 => '0',

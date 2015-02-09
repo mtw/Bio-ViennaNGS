@@ -1,11 +1,11 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-06 16:29:00 mtw>
+# Last changed Time-stamp: <2015-02-09 09:19:47 mtw>
 
 
 package Bio::ViennaNGS::Util;
 
 use Exporter;
-use version; our $VERSION = qv('0.12_15');
+use version; our $VERSION = qv('0.12_16');
 use strict;
 use warnings;
 use Data::Dumper;
@@ -533,21 +533,23 @@ The conversion from BED to bigBed is done by a third-party utility
 
 =head1 DEPENDENCIES
 
-=over 7
+=over
 
-=item  L<Bio::Perl> >= 1.00690001
+=item L<Bio::ViennaNGS::FeatureChain>
 
-=item  L<BIO::DB::Sam> >= 1.39
+=item L<Bio::Perl> >= 1.00690001
 
-=item  L<File::Basename>
+=item L<File::Basename>
 
-=item  L<File::Temp>
+=item L<File::Path>
 
-=item  L<Path::Class>
+=item L<Path::Class>
 
-=item  L<IPC::Cmd>
+=item L<IPC::Cmd>
 
-=item  L<Carp>
+=item L<Math::Round>
+
+=item L<Carp>
 
 =back
 
@@ -566,7 +568,7 @@ L<BEDtools|https://github.com/arq5x/bedtools2> on your system.
 
 =item Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
-=item Jörg Fallmann E<lt>fall@tbi.univie.ac.atE<gt>
+=item Joerg Fallmann E<lt>fall@tbi.univie.ac.atE<gt>
 
 =back
 

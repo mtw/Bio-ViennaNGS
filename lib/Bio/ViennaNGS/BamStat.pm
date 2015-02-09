@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-06 16:28:13 mtw>
+# Last changed Time-stamp: <2015-02-09 09:17:24 mtw>
 
 package Bio::ViennaNGS::BamStat;
 
-use version; our $VERSION = qv('0.12_15');
-use Bio::DB::Sam 1.39;
+use version; our $VERSION = qv('0.12_16');
+use Bio::DB::Sam 1.37;
 use Moose;
 use Carp;
 use Data::Dumper;
@@ -567,7 +567,7 @@ a single BAM file. It builds on L<Bio::DB::Sam>.
 
 =over
 
-=item L<Bio::DB::Sam> >= 1.39
+=item L<Bio::DB::Sam> >= 1.37
 
 =item L<Moose>
 

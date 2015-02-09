@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-06 13:19:09 mtw>
+# Last changed Time-stamp: <2015-02-09 09:15:06 mtw>
 
 package Bio::ViennaNGS;
 
-use version; our $VERSION = qv('0.12_15');
+use version; our $VERSION = qv('0.12_16');
 
 1;
 
@@ -156,7 +156,7 @@ modules, some of which are part of the Perl core distribution:
 
 =item L<Bio::Perl> >= 1.00690001
 
-=item L<Bio::DB::Sam> >= 1.39
+=item L<Bio::DB::Sam> >= 1.37
 
 =item L<Bio::DB::Fasta>
 
