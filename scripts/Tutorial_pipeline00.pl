@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-09 15:30:27 fabian>
+# Last changed Time-stamp: <2015-02-09 16:41:50 mtw>
 
 =head1 NAME
 
@@ -119,11 +119,22 @@ as it is the case of the provided C1R1.bam. Otherwise set to '0'.
 
 =cut
 
+my $VERBOSE = 0;
 my @bams     = qw# C1R1.bam #;
 next unless ($bams[0] eq $bams[-1] && $bams[0] eq "C1R1.bam");
 my $odir     = './';
 my $rlibpath = '/usr/bin/R';
 my %data     = ();
+
+###############
+###Command Line Options
+###############
+Getopt::Long::config('no_ignore_case');
+pod2usage(-verbose => 0) unless GetOptions(
+					   "help|h"    => sub{pod2usage(-verbose => 1)},
+					   "man|m"     => sub{pod2usage(-verbose => 2)},
+					   "verbose"   => sub{ $VERBOSE++ }
+					  );
 
 
 =head2 Creating new BamStatSummary object.
