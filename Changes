@@ -94,8 +94,9 @@ Revision history for Perl extension ViennaNGS.
 	- ship demo files in share/ folder
 	- updated POD and README
 	
-0.12_15
+0.12_16
 	- requires Perl >= 5.10.0
+	- minimum version of Bio::DB::Sam is 1.37
 	- integrated Bio::ViennaNGS::Bam
 	- integrated Bio::ViennaNGS::BamStat
 	- integrated Bio::ViennaNGS::BamStatSummary
