@@ -15,7 +15,7 @@ use File::Share ':all';
 use Path::Class;
 use Data::Dumper;
 use Carp;
-use Bio::ViennaNGS::UCSC;
+use Bio::ViennaNGS::Util qw(fetch_chrom_sizes);
 
 our @ISA = qw(Exporter);
 
@@ -28,10 +28,9 @@ our @EXPORT = ();
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 sub make_assembly_hub{
-  my ($fasta_path, $filesdir, $basedir, $baseURL, $log) = @_;
+  my ($fasta_path, $filesdir, $basedir, $baseURL, $big_wig_ids, $log) = @_;
   my ($basename,$dir,$ext);
   my $this_function = (caller(0))[3];
-
   #check arguments
   croak ("ERROR [$this_function] \$fasta_path does not exist\n") 
     unless (-e $fasta_path);
@@ -59,7 +58,8 @@ sub make_assembly_hub{
     croak ("ERROR [$this_function] bedToBigBed is not installed!");
 
   # bedfiles path
-  my @parsedHeader = parse_fasta_header($fasta_path,$this_function);
+  my $parsedHeaderRef = parse_fasta_header($fasta_path,$this_function);
+  my @parsedHeader = @$parsedHeaderRef;
   my $unchecked_accession = $parsedHeader[0];
   my $scientificName = $parsedHeader[1];
   my $accession = valid_ncbi_accession($unchecked_accession);
@@ -169,19 +169,28 @@ sub make_assembly_hub{
   $template->process($group_txt_file,$group_txt_vars,$group_txt_path) or
     croak "Template process failed: ", $template->error(), "\n";
 
-
-  my $chromosome_size = retrieve_chromosome_size($fasta_path);
-  my $chromosome_size_filepath = file($genome_assembly_directory,"$accession.chrom.sizes");
-  write_chromosome_size_file($chromosome_size_filepath,$accession,$chromosome_size);
-  convert_tracks($filesdir, $genome_assembly_directory, $accession, $bedToBigBed, $chromosome_size_filepath);
-  my @trackfiles = retrieve_tracks($genome_assembly_directory, $baseURL, $assembly_hub_name, $accession);
-
+  #construct big bed
   my $tracksList;
-  foreach my $track (@trackfiles){
-    my $trackString = make_track(@$track);
-    $tracksList .= $trackString;
+  #Bigbeds are only created from infolder
+  unless($filesdir =~ /-/){
+    my $chromosome_size = retrieve_chromosome_size($fasta_path);
+    my $chromosome_size_filepath = file($genome_assembly_directory,"$accession.chrom.sizes");
+    write_chromosome_size_file($chromosome_size_filepath,$accession,$chromosome_size);
+    convert_tracks($filesdir, $genome_assembly_directory, $accession, $bedToBigBed, $chromosome_size_filepath);
+    my @trackfiles = retrieve_tracks($genome_assembly_directory, $baseURL, $assembly_hub_name, $accession);
+    
+    foreach my $track (@trackfiles){
+      my $trackString = make_track(@$track);
+      $tracksList .= $trackString;
+    }
   }
-
+  
+  #big wigs
+  my $bigwig_tracks_string = "";
+  unless($big_wig_ids=~/^-$/){
+    $bigwig_tracks_string = retrieve_bigwig_tracks($genome_assembly_directory, $baseURL, $assembly_hub_name, $accession, $big_wig_ids);
+  }
+  $tracksList .= $bigwig_tracks_string;
   #construct trackDb.txt
   my $trackDb_txt_path = file($genome_assembly_directory, "trackDb.txt")->stringify;
   my $trackDb_txt_file = 'trackDb.txt';
@@ -199,7 +208,7 @@ sub make_assembly_hub{
 }
 
 sub make_track_hub{
-  my ($species, $filesdir, $basedir, $baseURL, $chrom_sizes_file, $chrom_size_file, $log) = @_;
+  my ($species, $filesdir, $basedir, $baseURL, $chrom_sizes_file, $big_wig_ids, $log) = @_;
   my ($basename,$dir,$ext);
   my $this_function = (caller(0))[3];
 
@@ -281,22 +290,31 @@ sub make_track_hub{
   $template->process($genometxt_file,$genometxt_vars,$genometxt_path) or
     croak "Template process failed: ", $template->error(), "\n";
 
-  if(-e $chrom_sizes_file){
-    convert_tracks($filesdir, $genome_assembly_directory, $species, $bedToBigBed, $chrom_sizes_file);
-  }else{
-    my $chromosome_sizes = fetch_chrom_sizes($species);
-    my $chromosome_size_filepath = file($genome_assembly_directory,"$species.chrom.sizes");
-    write_chromosome_sizes_file($chromosome_size_filepath,$chromosome_sizes);
-    convert_tracks($filesdir, $genome_assembly_directory, $species, $bedToBigBed, $chromosome_size_filepath);
-  }
-  my @trackfiles = retrieve_tracks($genome_assembly_directory, $baseURL, $track_hub_name, $species);
-
   my $tracksList;
-  foreach my $track (@trackfiles){
-    my $trackString = make_track(@$track);
-    $tracksList .= $trackString;
-  }
+  #Bigbeds are only created from infolder
+  unless($filesdir =~ /-/){
+    if(-e $chrom_sizes_file){
+      convert_tracks($filesdir, $genome_assembly_directory, $species, $bedToBigBed, $chrom_sizes_file);
+    }else{
+      my $chromosome_sizes = fetch_chrom_sizes($species);
+      my $chromosome_size_filepath = file($genome_assembly_directory,"$species.chrom.sizes");
+      write_chromosome_sizes_file($chromosome_size_filepath,$chromosome_sizes);
+      convert_tracks($filesdir, $genome_assembly_directory, $species, $bedToBigBed, $chromosome_size_filepath);
+    }
+    my @trackfiles = retrieve_tracks($genome_assembly_directory, $baseURL, $track_hub_name, $species);
 
+    #big beds
+    foreach my $track (@trackfiles){
+      my $trackString = make_track(@$track);
+      $tracksList .= $trackString;
+    }
+  }
+  #big wigs
+  my $bigwig_tracks_string = "";
+  unless($big_wig_ids=~/^-$/){
+    $bigwig_tracks_string = retrieve_bigwig_tracks($genome_assembly_directory, $baseURL, $track_hub_name, $species, $big_wig_ids);
+  }
+  $tracksList .= $bigwig_tracks_string;
   #construct trackDb.txt
   my $trackDb_txt_path = file($genome_assembly_directory, "trackDb.txt")->stringify;
   my $trackDb_txt_file = 'trackDb.txt';
@@ -354,8 +372,7 @@ sub retrieve_tracks{
     my $autoScale = "off";
     my $bedNameLabel = "Gene Id";
     my $searchIndex = "name";
-    #my $colorByStrand = "100,205,255 55,155,205";
-    my $colorByStrand = retrieve_color($counter );
+    my $colorByStrand = retrieve_color($counter);
     my $visibility = "pack";
     my $group = "annotation";
     my $priority = "10";
@@ -367,6 +384,92 @@ sub retrieve_tracks{
   chdir $currentDirectory or croak $!;
   return @tracks;
 }
+
+
+sub retrieve_bigwig_tracks{
+  my ($directoryPath,$baseURL,$assembly_hub_name,$accession,$bigwigpaths) = @_;
+  my $currentDirectory = getcwd;
+  chdir $directoryPath or croak $!;
+  my @big_wig_array = split('\#', $bigwigpaths);
+  my $bigwigtracks = "";
+  foreach my $bigwig_entry (@big_wig_array){
+    if($bigwig_entry=~/,/){
+      #multi bigwig container detected
+      my @big_wig_pair = split(',', $bigwig_entry);
+      my $pos_wig;
+      my $neg_wig;
+      if ($big_wig_pair[0] =~ /\.pos\./){
+        $pos_wig = $big_wig_pair[0];
+      }elsif($big_wig_pair[1] =~ /\.pos\./){
+        $pos_wig = $big_wig_pair[1];
+      }else{
+        my $this_function = (caller(0))[3];
+        croak ("ERROR [$this_function] \no positive big wig file for container provided\n");
+      }
+      if ($big_wig_pair[0] =~ /\.neg\./){
+        $neg_wig = $big_wig_pair[0];
+      }elsif($big_wig_pair[1] =~ /\.neg\./){
+        $neg_wig = $big_wig_pair[1];
+      }else{
+        my $this_function = (caller(0))[3];
+        croak ("ERROR [$this_function] \no negative big wig file for container provided\n");
+      }
+      my ($basename1,$dir1,$ext1) = fileparse($pos_wig,qr/\..*/);
+      my ($basename2,$dir2,$ext2) = fileparse($pos_wig,qr/\..*/);
+      #construct container
+      my $id = lc($basename1);
+      my $tag = $id;
+      my $track = $id;
+      my $shortLabel = $tag;
+      my $longLabel = $tag;
+      my $type = "bigWig";
+      my $autoScale = "on";
+      my $visibility = "full";
+      my $priority = "1500";
+      my $container_string = make_multi_bigwig_container_track($tag, $track, $shortLabel, $longLabel, $type, $autoScale, $visibility, $priority);
+      $bigwigtracks .= $container_string;
+      #construct positive track
+      my $track1 = $track . "_pos";
+      my $bigDataUrl1 = $pos_wig;
+      my $shortLabel1 = $track1;
+      my $longLabel1 = $track1;
+      my $type1 = "bigWig";
+      my $parent1 = $track;
+      my $color1 = "133,154,0";
+      my $track1_string = make_bigwig_container_track($track1, $bigDataUrl1, $shortLabel1, $longLabel1, $type1, $parent1, $color1);
+      $bigwigtracks .= $track1_string;
+      #construct negative track
+      my $track2 = $track . "_neg";
+      my $bigDataUrl2 = $neg_wig;
+      my $shortLabel2 = $track2;
+      my $longLabel2 = $track2;
+      my $type2 = "bigWig";
+      my $parent2 = $track;
+      my $color2 = "220,51,47";
+      my $track2_string = make_bigwig_container_track($track2, $bigDataUrl2, $shortLabel2, $longLabel2, $type2, $parent2, $color2);
+      $bigwigtracks .= $track2_string;
+    }else{
+      #construct single wig
+      my ($basename,$dir,$ext) = fileparse($bigwig_entry,qr/\..*/);
+      my $id = lc($basename);
+      my $tag = $id;
+      my $track = $id;
+      my $bigDataUrl = $bigwig_entry;
+      my $shortLabel = $tag;
+      my $longLabel = $tag;
+      my $type = "bigWig";
+      my $autoScale = "on";
+      my $visibility = "full";
+      my $priority = "1500";
+      my $color = "38,140,210";
+      my $track_string = make_bigwig_track($tag, $track, $bigDataUrl, $shortLabel, $longLabel, $type, $autoScale, $visibility, $priority, $color);
+      $bigwigtracks .= $track_string;
+    }
+  }
+  chdir $currentDirectory or croak $!;
+  return $bigwigtracks;
+}
+
 
 sub retrieve_color{
   my $counter = shift;
@@ -414,6 +517,24 @@ sub make_track{
   return $trackEntry;
 }
 
+sub make_multi_bigwig_container_track{
+  my ($tag, $track, $shortLabel, $longLabel, $type, $autoScale, $visibility, $priority) = @_;
+  my $trackEntry ="#$tag\ntrack $track\ncontainer multiWig\nnoInherit on\nshortLabel $shortLabel\nlongLabel $longLabel\ntype $type\nconfigureable on\nvisibility $visibility\naggregate transparentOverlay\nshowSubtrackColorOnUi on\nautoScale $autoScale\nwindowingFunction maximum\npriority $priority\nalwaysZero on\nyLineMark 0\nyLineOnOff on\nmaxHeightPixels 125:125:11\n\n";
+  return $trackEntry;
+}
+
+sub make_bigwig_container_track{
+  my ($track, $bigDataUrl, $shortLabel, $longLabel, $type, $parent, $color) = @_;
+  my $trackEntry = "track $track\nbigDataUrl $bigDataUrl\nshortLabel $shortLabel\nlongLabel $longLabel\ntype $type\nparent $parent\ncolor $color\n\n";
+  return $trackEntry;
+}
+
+sub make_bigwig_track{
+  my ($tag, $track, $bigDataUrl, $shortLabel, $longLabel, $type, $autoScale, $visibility, $priority, $color) = @_;
+  my $trackEntry ="#$tag\ntrack $track\nbigDataUrl $bigDataUrl\nshortLabel $shortLabel\nlongLabel $longLabel\ntype $type\nvisibility $visibility\nautoScale $autoScale\npriority $priority\nalwaysZero on\nyLineMark 0\nyLineOnOff on\nmaxHeightPixels 125:125:11\ncolor $color\n\n";
+  return $trackEntry;
+}
+
 sub valid_ncbi_accession{
   # receives a NCBI accession ID, with or without version number
   # returns NCBI accession ID without version number
@@ -437,7 +558,7 @@ sub parse_fasta_header{
   chomp $fastaheader;
   close $file;
   #>gi|556503834|ref|NC_000913.3| Escherichia coli str. K-12 substr. MG1655
-  if($fastaheader=~/^>gi|/){
+  if($fastaheader=~/^>gi/){
     print LOG "#NCBI fasta header detected\n";
     my @headerfields = split(/\|/, $fastaheader);
     my $accession = $headerfields[3];
@@ -445,16 +566,15 @@ sub parse_fasta_header{
     my @ids;
     push(@ids,$accession);
     push(@ids,$scientificName);
-    return @ids;
+    return \@ids;
   }else{
-    my $fastaid = $fastaheader;
-    $fastaid=~s/^>//;
-    if(valid_ncbi_accession($fastaid)){
+    $fastaheader=~s/^>//;
+    if(valid_ncbi_accession($fastaheader)){
       print LOG "#Header contains just valid NCBI accession number\n";
       my @ids;
-      push(@ids,$fastaid);
+      push(@ids,$fastaheader);
       push(@ids,"scientific name not set");
-      return @ids;
+      return \@ids;
     }else{
       print LOG "#No valid accession/ ncbi header\n";
       croak ("ERROR [$this_function] \$fasta_path does not contain a valid accession/ ncbi header\n");

@@ -47,7 +47,8 @@ my $genome_identifier = '-';
 my $folder_in = '-';
 my $dest = '.';
 my $base_URL = '-';
-my $chrom_size_file="-";
+my $chrom_size_file = '-';
+my $big_wig_urls = '-';
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -57,6 +58,7 @@ pod2usage(-verbose => 1) unless GetOptions("gi|g=s"       => \$genome_identifier
 					   "out|o=s"      => \$dest,
 					   "baseurl|b=s"  => \$base_URL,
                                            "chromsize|c=s"  => \$chrom_size_file,
+                                           "bigwigs|bw=s" => \$big_wig_urls,
 					   "man"          => sub{pod2usage(-verbose => 2)},
 					   "help|h"       => sub{pod2usage(1)}
 					  );
@@ -79,7 +81,7 @@ unless (-d $dest){
 }
 $lf = file($dest,$logname);
 
-$track_hub_return_value = make_track_hub($genome_identifier,$folder_in,$dest,$base_URL,$chrom_size_file,$lf);
+$track_hub_return_value = make_track_hub($genome_identifier,$folder_in,$dest,$base_URL,$chrom_size_file,$big_wig_urls,$lf);
 
 
 __END__
@@ -93,7 +95,7 @@ genomic sequence and annotation
 =head1 SYNOPSIS
 
 track_hub_constructor.pl [--gi I<ID>] [--infolder I<PATH>] [--out
-I<PATH>] [--baseurl -I<URL>] [options]
+I<PATH>] [--baseurl -I<URL>] [--bigwigs -I<URL,URL#URL>] [options]
 
 =head1 DESCRIPTION
 
@@ -126,6 +128,16 @@ Destination folder for the output Track Hub.
 BaseURL used within the Track Hub. This URL will be included verbatim
 in the resulting Track Hub. It is crucial that this URl is valid, else
 the resulting Track Hub will be broken.
+
+=item  B<--bigwigs -bw>
+
+URLs pointing to big wig files to be included in the trackhub. Multiple URLs are
+separated by the star character #. It is possible to create a multiwig container by
+providing 2 URLs instead of one separated by comma character ,. E.g.
+http://foo.com/bar.bw,http://foo.com/bar2.bw#http://foo.com/bar3.bw yields a multi
+big wig container displaying bar as positive reads in green and bar2 as negative
+3 red colored reads in the same track and additionally bar3 in an own track
+colored blue.
 
 =item B<--help -h>
 
