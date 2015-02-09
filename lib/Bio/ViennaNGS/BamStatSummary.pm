@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-06 16:28:21 mtw>
+# Last changed Time-stamp: <2015-02-09 16:56:20 fabian>
 
 package Bio::ViennaNGS::BamStatSummary;
 
@@ -38,7 +38,7 @@ has 'outpath' => (
 has 'rlib' => (
 	       is => 'rw',
 	       isa => 'Str',
-	       required => '1',
+	       required => '0',
 	      );
 
 has 'files' => (
@@ -214,7 +214,7 @@ sub make_BarPlot{
 sub plot_barplot { #plot barplot read.table text string
   my ($self, $filename, $ylab, $data_string) = @_;
   my ($bn,$odir,$ext) = fileparse($filename, qr /\..*/);
-  #my $rlibpath        = '/usr/bin/R';
+
   my $rlibpath        = $self->rlib;
 
   $filename .= '.pdf' unless ($ext eq '.pdf');
@@ -226,13 +226,13 @@ sub plot_barplot { #plot barplot read.table text string
   $R->run("pdf('${filename}')") ;
   $R->run("dat<-read.table(text = \"$data_string\", header = TRUE, row.names=1)") ;
   $R->run("dat_m<-as.matrix(dat)") ;
-##$R->run("colors<-terrain.colors(nrow(dat_m), alpha = 1)") ;
+# $R->run("colors<-terrain.colors(nrow(dat_m), alpha = 1)") ;
   $R->run("colors<-c('lightblue','lightgreen','lightcoral', terrain.colors(nrow(dat_m)-3, alpha = 1))") ;
   $R->run("types<-row.names(dat_m)") ;
   $R->run("par(mar = c(15,3,5,5), oma = c(1, 1, 4, 1))") ;
 # $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)+2), col=colors, legend.text = TRUE, args.legend = list(x = ncol(dat_m) + 2, y=max(colSums(dat_m)), bty = 'n' ), ylab='$ylab', xlab='Samples')") ;
 # $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)), col=colors, legend.text = TRUE, args.legend = list(x = ncol(dat_m) + 5, y=-5, bty = 'o' ), ylab='$ylab', xlab='Samples', las=3)") ;
-#  $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)), col=colors, legend.text = TRUE, args.legend = list(\"topright\", horiz = TRUE, bty = 'o' ), ylab='$ylab', xlab='', las=3)") ;
+# $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)), col=colors, legend.text = TRUE, args.legend = list(\"topright\", horiz = TRUE, bty = 'o' ), ylab='$ylab', xlab='', las=3)") ;
   $R->run("barplot(dat_m, xlim=c(0,ncol(dat_m)), col=colors, ylab='$ylab', xlab='', las=3)") ;
   $R->run("par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0),mar = c(0, 0, 0, 0), new = TRUE)") ;
   $R->run("legend('top', types, horiz = TRUE, inset = c(0,0), bty = 'n', fill = colors, cex = 1.2 )") ;
