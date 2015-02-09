@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-09 16:41:50 mtw>
+# Last changed Time-stamp: <2015-02-09 16:57:28 fabian>
 
 =head1 NAME
 
@@ -9,7 +9,7 @@ parameters from an input BAM file.
 
 =head1 SYNOPSIS
 
-  Tutorial_pipeline00.pl
+  Tutorial_pipeline00.pl 
 
 =head1 DESCRIPTION
 
@@ -79,7 +79,6 @@ visualize stored in the BamStat object.
 
  @bams     = qw# C1R1.bam #;
  $odir     = '.';
- $rlibpath = '/usr/bin/R';
 
  $edit_control     = 1;
  $segemehl_control = 1;
@@ -123,7 +122,6 @@ my $VERBOSE = 0;
 my @bams     = qw# C1R1.bam #;
 next unless ($bams[0] eq $bams[-1] && $bams[0] eq "C1R1.bam");
 my $odir     = './';
-my $rlibpath = '/usr/bin/R';
 my %data     = ();
 
 ###############
@@ -141,7 +139,6 @@ pod2usage(-verbose => 0) unless GetOptions(
 
  $bamsummary = Bio::ViennaNGS::BamStatSummary->new(files          => \@bams,
 						   outpath        => $odir,
-						   rlib           => $rlibpath,
 						   is_segemehl    => $segemehl_control,
 						   control_edit   => $edit_control,
 						  );
@@ -157,7 +154,6 @@ Initialize new BamStatSummary object capable of representing data from
 
 my $bamsummary = Bio::ViennaNGS::BamStatSummary->new(files          => \@bams,
 						     outpath        => $odir,
-						     rlib           => $rlibpath,
                                                      is_segemehl    => 1,
                                                      control_edit   => 1,
                                                      control_flag   => 1,
