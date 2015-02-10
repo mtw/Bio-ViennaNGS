@@ -15,7 +15,7 @@ use File::Share ':all';
 use Path::Class;
 use Data::Dumper;
 use Carp;
-use Bio::ViennaNGS::Util qw(fetch_chrom_sizes);
+use Bio::ViennaNGS::Util qw(fetch_chrom_sizes bed2bigBed);
 
 our @ISA = qw(Exporter);
 
@@ -53,9 +53,6 @@ sub make_assembly_hub{
     unless (-d $template_path);
   my $faToTwoBit = can_run('faToTwoBit') or
     croak ("ERROR [$this_function] faToTwoBit is not installed!");
-
-  my $bedToBigBed = can_run('bedToBigBed') or
-    croak ("ERROR [$this_function] bedToBigBed is not installed!");
 
   # bedfiles path
   my $parsedHeaderRef = parse_fasta_header($fasta_path,$this_function);
@@ -176,7 +173,7 @@ sub make_assembly_hub{
     my $chromosome_size = retrieve_chromosome_size($fasta_path);
     my $chromosome_size_filepath = file($genome_assembly_directory,"$accession.chrom.sizes");
     write_chromosome_size_file($chromosome_size_filepath,$accession,$chromosome_size);
-    convert_tracks($filesdir, $genome_assembly_directory, $accession, $bedToBigBed, $chromosome_size_filepath);
+    convert_tracks($filesdir, $genome_assembly_directory, $chromosome_size_filepath, $log);
     my @trackfiles = retrieve_tracks($genome_assembly_directory, $baseURL, $assembly_hub_name, $accession);
     
     foreach my $track (@trackfiles){
@@ -235,9 +232,6 @@ sub make_track_hub{
   my $faToTwoBit = can_run('faToTwoBit') or
     croak ("ERROR [$this_function] faToTwoBit is not installed!");
 
-  my $bedToBigBed = can_run('bedToBigBed') or
-    croak ("ERROR [$this_function] bedToBigBed is not installed!");
-
   # create track hub directory structure
   my $track_hub_name = "trackHub";
   my $track_hub_directory = dir($basedir, $track_hub_name);
@@ -294,12 +288,12 @@ sub make_track_hub{
   #Bigbeds are only created from infolder
   unless($filesdir =~ /-/){
     if(-e $chrom_sizes_file){
-      convert_tracks($filesdir, $genome_assembly_directory, $species, $bedToBigBed, $chrom_sizes_file);
+      convert_tracks($filesdir, $genome_assembly_directory, $chrom_sizes_file, $log);
     }else{
       my $chromosome_sizes = fetch_chrom_sizes($species);
       my $chromosome_size_filepath = file($genome_assembly_directory,"$species.chrom.sizes");
       write_chromosome_sizes_file($chromosome_size_filepath,$chromosome_sizes);
-      convert_tracks($filesdir, $genome_assembly_directory, $species, $bedToBigBed, $chromosome_size_filepath);
+      convert_tracks($filesdir, $genome_assembly_directory, $chromosome_size_filepath, $log);
     }
     my @trackfiles = retrieve_tracks($genome_assembly_directory, $baseURL, $track_hub_name, $species);
 
@@ -332,7 +326,7 @@ sub make_track_hub{
 }
 
 sub convert_tracks{
-  my ($filesdir,$genome_assembly_directory,$accession,$bedToBigBed,$chromosome_size_filepath) = @_;
+  my ($filesdir,$genome_assembly_directory,$chromosome_size_filepath,$log) = @_;
   my $currentDirectory = getcwd;
   chdir $filesdir or croak $!;
   my @bedfiles = <*.bed>;
@@ -340,10 +334,7 @@ sub convert_tracks{
     my $bed_file_path = file($filesdir,$bedfile);
     my $filename = $bedfile;
     $filename =~ s/.bed$//;
-    my $bigbed_file = $filename . ".bb";
-    my $bigbed_file_path = file($genome_assembly_directory,$bigbed_file);
-    `$bedToBigBed $bed_file_path $chromosome_size_filepath $bigbed_file_path`;
-    print "$bedToBigBed $bed_file_path $chromosome_size_filepath $bigbed_file_path\n";
+    bed2bigBed($bed_file_path,$chromosome_size_filepath,$genome_assembly_directory,$log);
   }
   chdir $currentDirectory or croak $!;
   return 1;
