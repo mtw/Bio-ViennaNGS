@@ -205,7 +205,7 @@ sub make_assembly_hub{
 }
 
 sub make_track_hub{
-  my ($species, $filesdir, $basedir, $baseURL, $chrom_sizes_file, $big_wig_ids, $log) = @_;
+  my ($species, $basedir, $baseURL, $chrom_sizes_file, $big_bed_ids, $big_wig_ids, $log) = @_;
   my ($basename,$dir,$ext);
   my $this_function = (caller(0))[3];
 
@@ -285,24 +285,12 @@ sub make_track_hub{
     croak "Template process failed: ", $template->error(), "\n";
 
   my $tracksList;
-  #Bigbeds are only created from infolder
-  unless($filesdir =~ /-/){
-    if(-e $chrom_sizes_file){
-      convert_tracks($filesdir, $genome_assembly_directory, $chrom_sizes_file, $log);
-    }else{
-      my $chromosome_sizes = fetch_chrom_sizes($species);
-      my $chromosome_size_filepath = file($genome_assembly_directory,"$species.chrom.sizes");
-      write_chromosome_sizes_file($chromosome_size_filepath,$chromosome_sizes);
-      convert_tracks($filesdir, $genome_assembly_directory, $chromosome_size_filepath, $log);
-    }
-    my @trackfiles = retrieve_tracks($genome_assembly_directory, $baseURL, $track_hub_name, $species);
-
-    #big beds
-    foreach my $track (@trackfiles){
-      my $trackString = make_track(@$track);
-      $tracksList .= $trackString;
-    }
+  #bigbeds are only created from urls
+  my $bigbeds_tracks_string = "";
+  unless($big_bed_ids=~/^-$/){
+    $bigbeds_tracks_string = retrieve_bigbed_url_tracks($genome_assembly_directory, $baseURL, $track_hub_name, $big_bed_ids);
   }
+  $tracksList .= $bigbeds_tracks_string;
   #big wigs
   my $bigwig_tracks_string = "";
   unless($big_wig_ids=~/^-$/){
@@ -351,13 +339,10 @@ sub retrieve_tracks{
     my $filename = $trackfile;
     $filename =~ s/.bb$//;
     my @filenameSplit = split(/\./, $filename);
-    #my $fileaccession = $filenameSplit[0];
-    #my $tag = $filenameSplit[1];
     my $id = lc($filename);
     my $tag = $id;
     my $track = $id . "_bed";
     my $dir = dir($baseURL,$assembly_hub_name,$accession);
-    #my $bigDataUrl = file($dir, $trackfile);
     my $bigDataUrl = file($trackfile);
     my $shortLabel = $id;
     my $longLabel = $id;
@@ -378,6 +363,37 @@ sub retrieve_tracks{
   return @tracks;
 }
 
+sub retrieve_bigbed_url_tracks{
+  my ($directoryPath,$baseURL,$assembly_hub_name,$bigbedpaths) = @_;
+  my $currentDirectory = getcwd;
+  chdir $directoryPath or croak $!;
+  my @big_bed_array = split('#', $bigbedpaths);
+  my $bigbedtracks = "";
+  my $counter = 0;
+  foreach my $bigbed_entry (@big_bed_array){
+      #construct single big bed track
+      my ($basename,$dir,$ext) = fileparse($bigbed_entry,qr/\..*/);
+      my $id = lc($basename);
+      my $tag = $id . $ext . "_bed";
+      my $track = $id . $ext  ."_bed";
+      my $bigDataUrl = $bigbed_entry;
+      my $shortLabel = $id;
+      my $longLabel = $id;
+      my $type = "bigBed 12 .";
+      my $autoScale = "off";
+      my $bedNameLabel = "Gene Id";
+      my $searchIndex = "name";
+      my $colorByStrand = retrieve_color($counter);
+      my $visibility = "pack";
+      my $group = "annotation";
+      my $priority = "10";
+      my $track_string = make_track($tag, $track, $bigDataUrl, $shortLabel, $longLabel, $type, $autoScale, $bedNameLabel, $searchIndex, $colorByStrand, $visibility, $group, $priority);
+      $bigbedtracks .= $track_string;
+      $counter++;
+  }
+  chdir $currentDirectory or croak $!;
+  return $bigbedtracks;
+}
 
 sub retrieve_bigwig_tracks{
   my ($directoryPath,$baseURL,$assembly_hub_name,$accession,$bigwigpaths) = @_;
@@ -442,7 +458,7 @@ sub retrieve_bigwig_tracks{
       my $track2_string = make_bigwig_container_track($track2, $bigDataUrl2, $shortLabel2, $longLabel2, $type2, $parent2, $color2);
       $bigwigtracks .= $track2_string;
     }else{
-      #construct single wig
+      #construct single big wig track
       my ($basename,$dir,$ext) = fileparse($bigwig_entry,qr/\..*/);
       my $id = lc($basename);
       my $tag = $id . "_bw";

@@ -48,16 +48,17 @@ my $folder_in = '-';
 my $dest = '.';
 my $base_URL = '-';
 my $chrom_size_file = '-';
+my $big_bed_urls = '-';
 my $big_wig_urls = '-';
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 Getopt::Long::config('no_ignore_case');
 pod2usage(-verbose => 1) unless GetOptions("gi|g=s"       => \$genome_identifier,
-					   "infolder|i=s" => \$folder_in,
 					   "out|o=s"      => \$dest,
 					   "baseurl|b=s"  => \$base_URL,
                                            "chromsize|c=s"  => \$chrom_size_file,
+                                           "bigbeds|bb=s" => \$big_bed_urls,
                                            "bigwigs|bw=s" => \$big_wig_urls,
 					   "man"          => sub{pod2usage(-verbose => 2)},
 					   "help|h"       => sub{pod2usage(1)}
@@ -65,10 +66,6 @@ pod2usage(-verbose => 1) unless GetOptions("gi|g=s"       => \$genome_identifier
 
 unless ($genome_identifier){
   warn "Please provide genome identifier via --g option";
-  pod2usage(-verbose => 0);
-}
-unless (-d $folder_in){
-  warn "An input folder path is required and must be gi ven via --infolder option";
   pod2usage(-verbose => 0);
 }
 unless ($base_URL =~ /^http/) {
@@ -81,8 +78,7 @@ unless (-d $dest){
 }
 $lf = file($dest,$logname);
 
-$track_hub_return_value = make_track_hub($genome_identifier,$folder_in,$dest,$base_URL,$chrom_size_file,$big_wig_urls,$lf);
-
+$track_hub_return_value = make_track_hub($genome_identifier,$dest,$base_URL,$chrom_size_file,$big_bed_urls,$big_wig_urls,$lf);
 
 __END__
 
