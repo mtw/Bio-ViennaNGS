@@ -18,13 +18,24 @@ use IPC::Cmd qw(can_run run);
 ###############
 
 my $VERBOSE = 0;
+my ($track_hub_return_value,$lf);
+my $logname = "log.txt";
+my $genome_identifier = 'hg19';
+my $folder_in = '-';
+my $dest = '.';
 my $base_URL = '-';
+my $chrom_size_file = '-';
+my $big_wig_urls = '-';
 ###############
 ###Command Line Options
 ###############
 Getopt::Long::config('no_ignore_case');
 pod2usage(-verbose => 0) unless GetOptions(
+    "infolder|i=s" => \$folder_in,
+    "out|o=s"      => \$dest,
     "baseurl|b=s"  => \$base_URL,
+    "chromsize|c=s"  => \$chrom_size_file,
+    "bigwigs|bw=s" => \$big_wig_urls,
     "help|h"    => sub{pod2usage(-verbose => 1)},
     "man|m"     => sub{pod2usage(-verbose => 2)},
     "verbose"   => sub{ $VERBOSE++ }
@@ -40,17 +51,17 @@ Tutorial_Pipeline03.pl - Construct a UCSC genome browser trackhub
 
 =head1 SYNOPSIS
 
-  perl Tutorial_Pipeline03.pl [--infolder I<PATH>] [--out
-I<PATH>] [--baseurl -I<URL>] [--bigwigs -I<URL,URL#URL>]
-  Where base_url URL will be included verbatim in the resulting Track Hub. 
-  It is crucial that this URl is valid, else the resulting Track Hub will be broken.
-  If no base_url is provided, trackhub creation will be skipped.
+  perl Tutorial_Pipeline03.pl [--infolder I<PATH>] [--out I<PATH>] [--baseurl -I<URL>] [--bigwigs -I<URL,URL#URL>]
+
+  This tutorial is based on the track_hub_constructor.pl script and the output from Tutorial02_pipeline.pl. While the option descriptions here are specific for the results from tutorial02 the trackhub_hub_constructor.pl can be applied in the same manner to other datasets.
+  Example call Tutorial_Pipeline03.pl --infolder /scratch/egg/projects/viennangs/tutorial02_output --out /scratch/egg/projects/viennangs/tutorial03 --baseurl http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/ --bigwigs http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.pos.bw#http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.neg.bw
 
 =head1 DESCRIPTION
 
 This script demonstrates UCSC genome browser trackhub construction with <Bio::ViennaNGS>.
 
-
+The results of Tutalorial02_pipeline.pl are vizualized, showing genomic region, annotation
+and expression level, which can be interpreted in conjunction to each other. 
 
 =head2 PREREQUITES
 
@@ -61,17 +72,25 @@ L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>):
 
 =over
 
-=item F<hg19_chromchecked.fa>
+=item F<hg19_highlyexpressed.bed >
 
-=item F<hg19_highlyexpressed.bed>
+=item F<hg19_highlyexpressed.ext50_upstream.bed >
 
-=item F<hg19.chrom.sizes>
+=item F<hg19_highlyexpressed.pos.bed>
 
-=item F<C1R1.bam>
+=item F<hg19_highlyexpressed.neg.bed>
+
+=item F<hg19_highlyexpressed.pos.bw>
+
+=item F<hg19_highlyexpressed.neg.bed>
 
 =item F<hg19.chrom.sizes>
 
 =back
+
+For the UCSC genome browser to be able to
+use our trackhub it needs to be accessible via URL. This is the base
+URL you need to provide as commandline argument. 
 
 =head2 DISCLAIMER
 
@@ -82,35 +101,7 @@ our webserver L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>.
 
 =head1 PIPELINE
 
-Let's first initialize some variables and generate a chromosome_sizes
-hash.
-  my ($track_hub_return_value,$lf);
-  my $logname = "log.txt";
-  my $genome_identifier = '-';
-  my $folder_in = '-';
-  my $dest = '.';
-  my $base_URL = '-';
-  my $chrom_size_file = '-';
-  my $big_wig_urls = '-';
-
-=cut
-
-  my ($track_hub_return_value,$lf);
-  my $logname = "log.txt";
-  my $genome_identifier = '-';
-  my $folder_in = '-';
-  my $dest = '.';
-  my $base_URL = '-';
-  my $chrom_size_file = '-';
-  my $big_wig_urls = '-';
-
 =head3 Create UCSC Genome Browser Trackhub
-
-Construction of a UCSC Genome Browser Trackhub trackhub vizualizes the
-results. Genomic region, annotation and expression level can be interpreted
-in conjunction to each other. For the UCSC genome browser to be able to
-use our trackhub it needs to be accessible via URL. This is the base
-URL you need to provide as commandline argument. 
 
 =cut
 
@@ -129,6 +120,37 @@ __END__
 
 
 =over 4
+
+=head1 OPTIONS
+
+=over
+
+
+=item B<--infolder -i>
+
+Directory which contains all track files in BED/bigBed format. The
+resulting Track Hub will contain these files in their respective
+bigFile version.
+
+=item B<--out -o>
+
+Destination folder for the output Track Hub.
+
+=item  B<--baseurl -b>
+
+BaseURL used within the Track Hub. This URL will be included verbatim
+in the resulting Track Hub. It is crucial that this URl is valid, else
+the resulting Track Hub will be broken.
+
+=item  B<--bigwigs -bw>
+
+URLs pointing to big wig files to be included in the trackhub. Multiple URLs are
+separated by the star character #. It is possible to create a multiwig container by
+providing 2 URLs instead of one separated by comma character ,. E.g.
+http://foo.com/bar.bw,http://foo.com/bar2.bw#http://foo.com/bar3.bw yields a multi
+big wig container displaying bar as positive reads in green and bar2 as negative
+3 red colored reads in the same track and additionally bar3 in an own track
+colored blue.
 
 =item B<--help -h>
 

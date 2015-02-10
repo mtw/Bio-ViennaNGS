@@ -343,6 +343,7 @@ sub convert_tracks{
     my $bigbed_file = $filename . ".bb";
     my $bigbed_file_path = file($genome_assembly_directory,$bigbed_file);
     `$bedToBigBed $bed_file_path $chromosome_size_filepath $bigbed_file_path`;
+    print "$bedToBigBed $bed_file_path $chromosome_size_filepath $bigbed_file_path\n";
   }
   chdir $currentDirectory or croak $!;
   return 1;
@@ -359,15 +360,16 @@ sub retrieve_tracks{
     my $filename = $trackfile;
     $filename =~ s/.bb$//;
     my @filenameSplit = split(/\./, $filename);
-    my $fileaccession = $filenameSplit[0];
-    my $tag = $filenameSplit[1];
-    my $id = lc($tag);
-    my $track = "refseq_" . $id;
+    #my $fileaccession = $filenameSplit[0];
+    #my $tag = $filenameSplit[1];
+    my $id = lc($filename);
+    my $tag = $id;
+    my $track = $id . "_bed";
     my $dir = dir($baseURL,$assembly_hub_name,$accession);
     #my $bigDataUrl = file($dir, $trackfile);
     my $bigDataUrl = file($trackfile);
-    my $shortLabel = "RefSeq " . $tag;
-    my $longLabel = "RefSeq " . $tag;
+    my $shortLabel = $id;
+    my $longLabel = $id;
     my $type = "bigBed 12 .";
     my $autoScale = "off";
     my $bedNameLabel = "Gene Id";
@@ -418,8 +420,8 @@ sub retrieve_bigwig_tracks{
       my ($basename2,$dir2,$ext2) = fileparse($pos_wig,qr/\..*/);
       #construct container
       my $id = lc($basename1);
-      my $tag = $id;
-      my $track = $id;
+      my $tag = $id . "_bw";
+      my $track = $id . "_bw";
       my $shortLabel = $tag;
       my $longLabel = $tag;
       my $type = "bigWig";
@@ -452,8 +454,8 @@ sub retrieve_bigwig_tracks{
       #construct single wig
       my ($basename,$dir,$ext) = fileparse($bigwig_entry,qr/\..*/);
       my $id = lc($basename);
-      my $tag = $id;
-      my $track = $id;
+      my $tag = $id . "_bw";
+      my $track = $id . "_bw";
       my $bigDataUrl = $bigwig_entry;
       my $shortLabel = $tag;
       my $longLabel = $tag;
