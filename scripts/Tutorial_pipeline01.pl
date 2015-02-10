@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-09 11:25:51 fall>
+# Last changed Time-stamp: <2015-02-10 15:54:44 fall>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -51,12 +51,12 @@ Tutorial_pipeline01.pl - An example pipeline for the ViennaNGS toolbox
 =head2 DESCRIPTION 
 
 This script is a showcase for using L<Bio::ViennaNGS> components with
-a real NGS example.
+a real-world NGS example.
 
-We start from a file containing ENSEMBL annotation information for
-human protein-coding genes.  We are insterested in finding sequence
-motifs in close proximity to the gene start (50nt upstream, 10nt into
-the gene) to identify regulatory regions.
+We start from a file containing highly-expressed human protein-coding
+genes, retrieved from the GENCODE project. We are insterested in
+finding sequence motifs in close proximity to the gene start (50nt
+upstream, 10nt into the gene) to identify regulatory regions.
 
 =head2 PREREQUITES
 
@@ -84,7 +84,8 @@ The first step is to initialize some variables and generate a chromosome_sizes h
   my $upstream = 50;
   my $into     = 10;
   my $outfile  = "$name.ext$upstream\_fromStart_$into\_downstream.bed";
-  my $outfile2 = "$name.ext$upstream\_upstream.bed";
+  my $outfilebn  = "$name.ext$upstream\_fromStart_$into\_downstream";
+  my $outfilebed  = $outfilebn.".bed";
   my %sizes = %{fetch_chrom_sizes('hg19')};
 
 =cut
@@ -93,8 +94,8 @@ my $bed	     = 'hg19_highlyexpressed.bed';
 my $name     = (split(/\./,$bed))[0];
 my $upstream = 50;
 my $into     = 10;
-my $outfile  = "$name.ext$upstream\_fromStart_$into\_downstream.bed";
-
+my $outfilebn  = "$name.ext$upstream\_fromStart_$into\_downstream";
+my $outfilebed  = $outfilebn.".bed";
 my %sizes = %{fetch_chrom_sizes('hg19')}; ### Requires installation of UCSCs fetchChromSizes script or mysql
 
 =head3 Generate a Bio::ViennaNGS::FeatureChain object
@@ -111,8 +112,10 @@ Now we create a Bio::ViennaNGS::FeatureChain from the Bed extracted featurelist 
 
 =cut
 
+print STDERR "Generating Bio::ViennaNGS::FeatureChain object ...";
 my @featurelist = @{parse_bed6($bed)};
 my $chain	= Bio::ViennaNGS::FeatureChain->new('type'=>'original','chain'=>\@featurelist);
+print STDERR "DONE\n";
 
 =head3 Extend the existing chain for motif analysis
 
@@ -122,24 +125,26 @@ The newly created FeatureChain object will now be extended 50nt upstream of the 
 
 =cut
 
+print STDERR "Extending the chain ...";
 my $extended_chain  = extend_chain(\%sizes,$chain,0,$into,$upstream,0);
 
 =head3 Print extended Bio::ViennaNGS::FeatureChain objects to files
 
 Extended chains are now print out to make them available for external tools like bedtools.
 
+  open (my $Out, ">",$outfilebed) or die "$!";
   my $out = $extended_chain->print_chain();
   print $Out $out;
   close ($Out);
 
 =cut
 
-open (my $Out, ">",$outfile) or die "$!";
-
+open (my $Out, ">",$outfilebed) or die "$!";
 my $out	= $extended_chain->print_chain();
 print $Out $out;
-
 close($Out);
+
+print STDERR "DONE\n";
 
 =head3 Summary of so far used methods
 
@@ -168,9 +173,9 @@ Extends a Bio::ViennaNGS::FeatureChain object by given constraints
 =head3 Sequence analysis
 
  We now generate FASTA files from the extended bed files using bedtools getfasta method.
-  my $bedtools = `bedtools getfasta -s -fi hg19_chromchecked.fa -bed $outfile -fo $name.ext$upstream\_fromStart_$into\_downstream.fa`;
- print STDERR "$bedtools\n" if $?;
-  $bedtools = `bedtools getfasta -s -fi hg19_chromchecked.fa -bed $outfile2 -fo $name.ext$upstream\_upstream.fa`;
+  my $hg19fa    = "hg19_chromchecked.fa";
+  my $outfilefa = $outfilebn.".fa";
+  my $bedtools = `bedtools getfasta -s -fi $hg19fa -bed $outfile -fo $outfilefa`;
   print STDERR "$bedtools\n" if $?;
 
 To analyze putative sequence motifs in the newly generated Fasta
@@ -178,8 +183,8 @@ files, we use two approaches.  First we analyze the k-mer content with
 the Bio::ViennaNGS(kmer_enrichment) method for k-mers of length 6 to 8
 nt.
 
-  open(IN,"<","$name.ext$upstream\_fromStart_$into\_downstream.fa") || die ("Could not open $name.ext$upstream\_fromStart_$into\_downstream.fa!\n@!\n");
-
+  open(IN,"<",$outfilefa) || die ("Could not open $outfilefa!\n@!\n");
+  
   my @fastaseqs;
   while(<IN>){
     chomp (my $raw = $_);
@@ -204,10 +209,15 @@ nt.
 
 =cut
 
-my $bedtools = `bedtools getfasta -s -fi hg19_chromchecked.fa -bed $outfile -fo $name.ext$upstream\_fromStart_$into\_downstream.fa`;
+print STDERR "Generating FASTA files from extended BED ...";
+my $hg19fa    = "hg19_chromchecked.fa";
+my $outfilefa = $outfilebn.".fa";
+my $bedtools = `bedtools getfasta -s -fi $hg19fa -bed $outfilebed -fo $outfilefa`;
 print STDERR "$bedtools\n" if $?;
+print STDERR "DONE\n";
 
-open(IN,"<","$name.ext$upstream\_fromStart_$into\_downstream.fa") || die ("Could not open $name.ext$upstream\_fromStart_$into\_downstream.fa!\n@!\n");
+print STDERR "Building k-mers ...";
+open(IN,"<",$outfilefa) || die ("Could not open $outfilefa!\n@!\n");
 
 my @fastaseqs;
 while(<IN>){
@@ -230,6 +240,7 @@ for (6..8){
     }
     close(KMER);
 }
+print STDERR "DONE\n";
 
 =head3 MEME
 
@@ -239,7 +250,9 @@ over-represented motifs of length 8. This can either be done using the MEME comm
   meme hg19_highexpressed.ext50_fromStart_10_downstream.fa -oc MEME_hg19_highexpressed.ext50_fromStart_10_downstream.fa -w 8 -dna -nmotifs 20
 
 Once the meme run is done, we want to have a nice figure which shows
-the e-value and site coverage of the top 10 motifs
+the e-value and site coverage of the top 10 motifs to see how the most
+over-represented motif identified by MEME compares to other motifs in
+terms of site coverage.
 
   my $cmd = "perl ../scripts/MEME_xml_motif_extractor.pl -f Example_Pipeline_meme.xml -r $RLIBPATH -t Example_Pipeline";
   my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run(command => $cmd, verbose => 0);
@@ -254,8 +267,14 @@ the e-value and site coverage of the top 10 motifs
     }
   }
 
+Once the run was successful, one can have a look at the generated .eps
+file to see that the most over-represented motif is not the one found
+on most sites. However it can easily be identified as TATA-box looking
+at its regular-expression.
+
 =cut
 
+print STDERR "Parsing MEME xml output ...";
 my $cmd = "perl ../scripts/MEME_xml_motif_extractor.pl -f Example_Pipeline_meme.xml -r $RLIBPATH -t Example_Pipeline";
 my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run(command => $cmd, verbose => 0);
 
@@ -268,6 +287,8 @@ if(!$success){
 	pod2usage(-verbose => 0);
     }
 }
+
+print STDERR "DONE\n";
 
 =head1 AUTHOR
 
