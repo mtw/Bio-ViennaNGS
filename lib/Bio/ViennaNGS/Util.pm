@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-09 15:09:19 fall>
+# Last changed Time-stamp: <2015-02-11 15:21:25 mtw>
 
 
 package Bio::ViennaNGS::Util;
@@ -331,7 +331,6 @@ sub parse_bed6{
     my $name	     = $line[3];
     my $score	     = $line[4];
     my $strand	     = $line[5];
-    my $extension = '';
 
     if ($line[6]){
       for (6..$#line){
@@ -344,8 +343,7 @@ sub parse_bed6{
 					    end=>$end,
 					    name=>$name,
 					    score=>$score,
-					    strand=>$strand,
-					    extension=>$extension);
+					    strand=>$strand);
     push @featurelist, $feat;
   }
   return (\@featurelist);
@@ -554,7 +552,10 @@ chain.
 
 =item parse_bed6
 
-Takes a path to a bed6 file optionally containing additional fields and returns a reference to an array of L<ViennaNGS::Feature> objects. This array can then easily be used for creation of an L<ViennaNGS::FeatureChain> object.
+Takes a path to a bed6 file optionally containing additional fields
+and returns a reference to an array of L<ViennaNGS::Feature>
+objects. This array can then easily be used for creation of an
+L<ViennaNGS::FeatureChain> object.
 
 =item fetch_chrom_sizes
 
