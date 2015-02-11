@@ -1,4 +1,4 @@
-Bio::ViennaNGS 0.12_18
+Bio::ViennaNGS 0.12
 ==============
 
 Bio::ViennaNGS is a distribution of Perl modules and utilities for
@@ -31,12 +31,15 @@ Bio::ViennaNGS is shipped with a complementary set of modules/classes:
   A Moose interface for computation of normalized gene / transcript
   expression based on read counts.
 
+- Bio::ViennaNGS::ExtFeature
+  A Moose wrapper for extended BED6 elements.
+
 - Bio::ViennaNGS::Fasta
   Routines for accessing genomic sequences implemented through a Moose
   interface to Bio::DB::Fasta.
 
 - Bio::ViennaNGS::Feature
-  A Moose-ish BED6 wrapper.  
+  A Moose-based BED6 wrapper.  
 
 - Bio::ViennaNGS::FeatureChain
   Yet another Moose class for chaining gene annotation features. 

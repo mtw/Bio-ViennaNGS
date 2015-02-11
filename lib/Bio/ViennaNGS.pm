@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-11 14:57:11 mtw>
+# Last changed Time-stamp: <2015-02-11 16:00:17 mtw>
 
 package Bio::ViennaNGS;
 
@@ -42,6 +42,9 @@ genomic interval data in BED format.
 
 =item L<Bio::ViennaNGS::Expression>: An object oriented interface for
 read-count based gene expression analysis.
+
+=item L<Bio::ViennaNGS::ExtFeature>: A L<Moose> wrapper for extended
+BED6 entries.
 
 =item L<Bio::ViennaNGS::Fasta>: Routines for accessing genomic
 sequences implemented through a L<Moose> interface to
@@ -256,6 +259,8 @@ test Windows compatibility.
 
 =item L<Bio::ViennaNGS::Expression>
 
+=item L<Bio::ViennaNGS::ExtFeature>
+
 =item L<Bio::ViennaNGS::Fasta>
 
 =item L<Bio::ViennaNGS::Feature>
@@ -282,7 +287,7 @@ test Windows compatibility.
 
 =item Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
-=item Jörg Fallmann E<lt>fall@tbi.univie.ac.atE<gt>
+=item Joerg Fallmann E<lt>fall@tbi.univie.ac.atE<gt>
 
 =item Florian Eggenhofer E<lt>florian.eggenhofer@tbi.univie.ac.atE<gt>
 

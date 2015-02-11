@@ -9,6 +9,7 @@ lib/Bio/ViennaNGS/BamStat.pm
 lib/Bio/ViennaNGS/BamStatSummary.pm
 lib/Bio/ViennaNGS/Bed.pm
 lib/Bio/ViennaNGS/Expression.pm
+lib/Bio/ViennaNGS/ExtFeature.pm
 lib/Bio/ViennaNGS/Fasta.pm
 lib/Bio/ViennaNGS/Feature.pm
 lib/Bio/ViennaNGS/FeatureChain.pm
@@ -40,6 +41,7 @@ scripts/trim_fastq.pl
 scripts/Tutorial_pipeline00.pl
 scripts/Tutorial_pipeline01.pl
 scripts/Tutorial_pipeline02.pl
+scripts/Tutorial_pipeline03.pl
 share/data1/NC_000913.3.30k.fa
 share/data1/NC_000913.3.30k.gff
 share/data1/NC_000913.3.chrom.sizes

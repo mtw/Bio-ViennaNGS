@@ -94,13 +94,14 @@ Revision history for Perl extension ViennaNGS.
 	- ship demo files in share/ folder
 	- updated POD and README
 	
-0.12_16
+0.12
 	- requires Perl >= 5.10.0
 	- minimum version of Bio::DB::Sam is 1.37
 	- integrated Bio::ViennaNGS::Bam
 	- integrated Bio::ViennaNGS::BamStat
 	- integrated Bio::ViennaNGS::BamStatSummary
 	- integrated Bio::ViennaNGS::Bed
+	- integrated Bio::ViennaNGS::ExtFeature
 	- integrated Bio::ViennaNGS::SpliceJunc
 	- integrated Bio::ViennaNGS::Tutorial
 	- integrated Bio::ViennaNGS::UCSC
@@ -110,6 +111,7 @@ Revision history for Perl extension ViennaNGS.
 	- added scripts/Tutorial_pipeline00.pl
 	- added scripts/Tutorial_pipeline01.pl
 	- added scripts/Tutorial_pipeline02.pl
+	- added scripts/Tutorial_pipeline03.pl
 	- added scripts/track_hub_constructor.pl
 	- renamed Bio::ViennaNGS.pm to Bio::ViennaNGS::Util.pm
 	- migrated BAM specific code from Bio::ViennaNGS::Util 
