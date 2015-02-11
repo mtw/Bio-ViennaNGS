@@ -1,11 +1,11 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-11 15:21:25 mtw>
+# Last changed Time-stamp: <2015-02-11 16:27:51 mtw>
 
 
 package Bio::ViennaNGS::Util;
 
 use Exporter;
-use version; our $VERSION = qv('0.12_16');
+use version; our $VERSION = qv('0.12');
 use strict;
 use warnings;
 use Data::Dumper;
@@ -207,7 +207,7 @@ sub unique_array{
 sub kmer_enrichment{
 
     my @seqs =  @{$_[0]};
-    my $klen     = $_[1]; 
+    my $klen     = $_[1];
 #    my @seq = split( //, $read_tmp );
     my $kstring ='';
 #return variables
@@ -527,19 +527,19 @@ The conversion from BED to bigBed is done by a third-party utility
 (bedToBigBed), which is executed by L<IPC::Cmd>.
 
 
-=item unique_array
+=item unique_array($arrayref)
 
 Takes a reference to an array and uniques entries via hash copy.
 Returns a reference to an array containing unique values.
 
-=item kmer_enrichment
+=item kmer_enrichment($seqs,$klen)
 
 Takes a reference to a sequence array and the length of the desired
-kmer.  Counts occurences of kmers of given length and returns a
+kmer. Counts occurences of kmers of given length and returns a
 reference to a hash containing the kmer as key and occurences as
 value.
 
-=item extend_chain
+=item extend_chain($chromsizes,$chain,$left,$right,$upstream,$downstream,$extension)
 
 Takes a hash containing chromosomes and their corresponding sizes, as
 e.g. returned by the L<fetch_chrom_sizes> method. Second argument is a
@@ -550,14 +550,14 @@ from either the 5' and/or 3' end of the chain or returns only the 5'
 or 3' extended region plus an optional extension into the existing
 chain.
 
-=item parse_bed6
+=item parse_bed6($bedfile)
 
 Takes a path to a bed6 file optionally containing additional fields
 and returns a reference to an array of L<ViennaNGS::Feature>
 objects. This array can then easily be used for creation of an
 L<ViennaNGS::FeatureChain> object.
 
-=item fetch_chrom_sizes
+=item fetch_chrom_sizes($species)
 
 Takes the name of the desired species (e.g. hg19, mm9, ..) and
 retrieves annotated chromosomes and their sizes from UCSC. This
@@ -566,12 +566,12 @@ and their corresponding size as value. Either uses the fetchChromSizes
 util of the UCSC bin collection or alternatively and if mysql is
 available via a mysql command.
 
-=item mkdircheck
+=item mkdircheck(@dirs)
 
 Takes the path to one or more directories, converts them to an OS
 specific path and creates directories.
 
-=item rmdircheck
+=item rmdircheck(@dirs)
 
 Takes the path to one or more directories, converts them to an OS
 specific path and removes directories.
