@@ -47,7 +47,6 @@ my $genome_identifier = '-';
 my $folder_in = '-';
 my $dest = '.';
 my $base_URL = '-';
-my $chrom_size_file = '-';
 my $big_bed_urls = '-';
 my $big_wig_urls = '-';
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -56,10 +55,9 @@ my $big_wig_urls = '-';
 Getopt::Long::config('no_ignore_case');
 pod2usage(-verbose => 1) unless GetOptions("gi|g=s"       => \$genome_identifier,
 					   "out|o=s"      => \$dest,
-					   "baseurl|b=s"  => \$base_URL,
-                                           "chromsize|c=s"  => \$chrom_size_file,
-                                           "bigbeds|bb=s" => \$big_bed_urls,
-                                           "bigwigs|bw=s" => \$big_wig_urls,
+					   "baseurl|u=s"  => \$base_URL,
+                                           "bigbeds|b=s" => \$big_bed_urls,
+                                           "bigwigs|w=s" => \$big_wig_urls,
 					   "man"          => sub{pod2usage(-verbose => 2)},
 					   "help|h"       => sub{pod2usage(1)}
 					  );
@@ -78,7 +76,7 @@ unless (-d $dest){
 }
 $lf = file($dest,$logname);
 
-$track_hub_return_value = make_track_hub($genome_identifier,$dest,$base_URL,$chrom_size_file,$big_bed_urls,$big_wig_urls,$lf);
+$track_hub_return_value = make_track_hub($genome_identifier,$dest,$base_URL,$big_bed_urls,$big_wig_urls,$lf);
 
 __END__
 
@@ -119,13 +117,18 @@ bigFile version.
 
 Destination folder for the output Track Hub.
 
-=item  B<--baseurl -b>
+=item  B<--baseurl -u>
 
 BaseURL used within the Track Hub. This URL will be included verbatim
 in the resulting Track Hub. It is crucial that this URl is valid, else
 the resulting Track Hub will be broken.
 
-=item  B<--bigwigs -bw>
+=item  B<--bigbeds -b>
+
+URLs pointing to big bed files to be included in the trackhub. Multiple URLs are
+separated by the character #. 
+
+=item  B<--bigwigs -w>
 
 URLs pointing to big wig files to be included in the trackhub. Multiple URLs are
 separated by the star character #. It is possible to create a multiwig container by

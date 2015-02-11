@@ -205,7 +205,7 @@ sub make_assembly_hub{
 }
 
 sub make_track_hub{
-  my ($species, $basedir, $baseURL, $chrom_sizes_file, $big_bed_ids, $big_wig_ids, $log) = @_;
+  my ($species, $basedir, $baseURL, $big_bed_ids, $big_wig_ids, $log) = @_;
   my ($basename,$dir,$ext);
   my $this_function = (caller(0))[3];
 
@@ -405,24 +405,8 @@ sub retrieve_bigwig_tracks{
     if($bigwig_entry=~/,/){
       #multi bigwig container detected
       my @big_wig_pair = split(',', $bigwig_entry);
-      my $pos_wig;
-      my $neg_wig;
-      if ($big_wig_pair[0] =~ /\.pos\./){
-        $pos_wig = $big_wig_pair[0];
-      }elsif($big_wig_pair[1] =~ /\.pos\./){
-        $pos_wig = $big_wig_pair[1];
-      }else{
-        my $this_function = (caller(0))[3];
-        croak ("ERROR [$this_function] \no positive big wig file for container provided\n");
-      }
-      if ($big_wig_pair[0] =~ /\.neg\./){
-        $neg_wig = $big_wig_pair[0];
-      }elsif($big_wig_pair[1] =~ /\.neg\./){
-        $neg_wig = $big_wig_pair[1];
-      }else{
-        my $this_function = (caller(0))[3];
-        croak ("ERROR [$this_function] \no negative big wig file for container provided\n");
-      }
+      my $pos_wig=$big_wig_pair[0];
+      my $neg_wig=$big_wig_pair[1];
       my ($basename1,$dir1,$ext1) = fileparse($pos_wig,qr/\..*/);
       my ($basename2,$dir2,$ext2) = fileparse($pos_wig,qr/\..*/);
       #construct container

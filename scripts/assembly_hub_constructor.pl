@@ -56,7 +56,7 @@ pod2usage(-verbose => 1) unless GetOptions("fa|f=s"       => \$fasta_in,
 					   "infolder|i=s" => \$folder_in,
 					   "out|o=s"      => \$dest,
 					   "baseurl|b=s"  => \$base_URL,
-                                           "bigwigs|bw=s" => \$big_wig_urls,
+                                           "bigwigs|w=s" => \$big_wig_urls,
 					   "man"          => sub{pod2usage(-verbose => 2)},
 					   "help|h"       => sub{pod2usage(1)}
 					  );
@@ -126,7 +126,7 @@ BaseURL used within the Assembly Hub. This URL will be included
 verbatim in the resulting Assembly Hub. It is crucial that this URl is
 valid, else the resulting Assembly Hub will be broken.
 
-=item  B<--bigwigs -bw>
+=item  B<--bigwigs -w>
 
 URLs pointing to big wig files to be included in the trackhub. Multiple URLs are
 separated by the star character #. It is possible to create a multiwig container by

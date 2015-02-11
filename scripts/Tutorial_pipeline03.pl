@@ -11,8 +11,9 @@ use Cwd;
 use Getopt::Long qw( :config posix_default bundling no_ignore_case );
 use Pod::Usage;
 use File::Path qw(make_path remove_tree);
-use Bio::ViennaNGS::UCSC qw( make_assembly_hub make_track_hub );
-use IPC::Cmd qw(can_run run);
+use File::Basename;
+use Path::Class;
+use Bio::ViennaNGS::UCSC qw( make_track_hub );
 ###############
 ###Variables
 ###############
@@ -21,21 +22,19 @@ my $VERBOSE = 0;
 my ($track_hub_return_value,$lf);
 my $logname = "log.txt";
 my $genome_identifier = 'hg19';
-my $folder_in = '-';
 my $dest = '.';
 my $base_URL = '-';
-my $chrom_size_file = '-';
-my $big_wig_urls = '-';
+my $big_bed_urls = '';
+my $big_wig_urls = '';
 ###############
 ###Command Line Options
 ###############
 Getopt::Long::config('no_ignore_case');
 pod2usage(-verbose => 0) unless GetOptions(
-    "infolder|i=s" => \$folder_in,
     "out|o=s"      => \$dest,
-    "baseurl|b=s"  => \$base_URL,
-    "chromsize|c=s"  => \$chrom_size_file,
-    "bigwigs|bw=s" => \$big_wig_urls,
+    "baseurl|u=s"  => \$base_URL,
+    "bigbeds|b=s" => \$big_bed_urls,
+    "bigwigs|w=s" => \$big_wig_urls,
     "help|h"    => sub{pod2usage(-verbose => 1)},
     "man|m"     => sub{pod2usage(-verbose => 2)},
     "verbose"   => sub{ $VERBOSE++ }
@@ -44,6 +43,17 @@ pod2usage(-verbose => 0) unless GetOptions(
 ###############
 ### MAIN
 ###############
+print "$base_URL\n";
+unless ($base_URL =~ /^http/) {
+  warn "Base URL must be given in full format, eg http://foo.bar.com/Hubs/";
+  pod2usage(-verbose => 0);
+}
+
+unless ($dest =~ /\/$/){$dest.= "/";}
+unless (-d $dest){
+  mkdir $dest or die $!;
+}
+$lf = file($dest,$logname);
 
 =head1 NAME
 
@@ -51,10 +61,7 @@ Tutorial_Pipeline03.pl - Construct a UCSC genome browser trackhub
 
 =head1 SYNOPSIS
 
-  perl Tutorial_Pipeline03.pl [--infolder I<PATH>] [--out I<PATH>] [--baseurl -I<URL>] [--bigwigs -I<URL,URL#URL>]
-
-  This tutorial is based on the track_hub_constructor.pl script and the output from Tutorial02_pipeline.pl. While the option descriptions here are specific for the results from tutorial02 the trackhub_hub_constructor.pl can be applied in the same manner to other datasets.
-  Example call Tutorial_Pipeline03.pl --infolder /scratch/egg/projects/viennangs/tutorial02_output --out /scratch/egg/projects/viennangs/tutorial03 --baseurl http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/ --bigwigs http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.pos.bw#http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.neg.bw
+  perl Tutorial_Pipeline03.pl [--out I<PATH>] [--baseurl -I<URL>] [--bigbeds -I<URL#URL>] [--bigwigs -I<URL,URL#URL>]
 
 =head1 DESCRIPTION
 
@@ -62,6 +69,14 @@ This script demonstrates UCSC genome browser trackhub construction with <Bio::Vi
 
 The results of Tutalorial02_pipeline.pl are vizualized, showing genomic region, annotation
 and expression level, which can be interpreted in conjunction to each other. 
+
+The result of this tutorial can be viewed by navigating your browser to 
+L<here|http://genome-euro.ucsc.edu/cgi-bin/hgTracks?hubUrl=http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_trackHub/trackHub/hub.txt&position=chr15>
+
+This tutorial is based on the track_hub_constructor.pl script and the output from Tutorial02_pipeline.pl.
+While the option descriptions here are specific for the results from tutorial02 the trackhub_hub_constructor.pl
+can be applied in the same manner to other datasets. The example call uses the bigwig and bedfiles available from our server.
+Example call: Tutorial_pipeline03.pl -o /home/user/public_html/hg19_trackHub -u http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_trackHub -b http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.pos.bb#http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.neg.bb -w http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.pos.bw,http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.neg.bw
 
 =head2 PREREQUITES
 
@@ -72,19 +87,13 @@ L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>):
 
 =over
 
-=item F<hg19_highlyexpressed.bed >
+=item F<hg19_highlyexpressed.pos.bb>
 
-=item F<hg19_highlyexpressed.ext50_upstream.bed >
-
-=item F<hg19_highlyexpressed.pos.bed>
-
-=item F<hg19_highlyexpressed.neg.bed>
+=item F<hg19_highlyexpressed.neg.bb>
 
 =item F<hg19_highlyexpressed.pos.bw>
 
-=item F<hg19_highlyexpressed.neg.bed>
-
-=item F<hg19.chrom.sizes>
+=item F<hg19_highlyexpressed.neg.bw>
 
 =back
 
@@ -105,12 +114,27 @@ our webserver L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>.
 
 =cut
 
-print STDERR "Constructing UCSC genome browser trackhub ...\n";
+print "Constructing UCSC genome browser trackhub ...\n";
 
-$track_hub_return_value = make_track_hub($genome_identifier,$folder_in,$dest,$base_URL,$chrom_size_file,$big_wig_urls,$lf);
+$track_hub_return_value = make_track_hub($genome_identifier,$dest,$base_URL,$big_bed_urls,$big_wig_urls,$lf);
 
+print "Loading the trackhub into the UCSC genome browser...\n\n";
 
-print STDERR "DONE\n";
+print "1. Point your browser to: http://genome.ucsc.edu/index.html\n\n";
+
+print "2. Select Genome Browser from the left menu\n\n";
+
+print "3. You are now redirected to nearest mirror of the genome browser.\n    Select \"My Data\" from the top menu and then \"Track Hubs\" in the popup list.\n\n";
+
+print "4. The \"Track Data Hubs\" page is displayed. In the register \"My Hubs\" it is possible to add the newly created track hub. Paste the URL to hub.txt into the URL field and click \"Add Hub\" (e.g. http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_trackHub/trackHub/hub.txt).\n\n";
+
+print "5. The track hub now loads into the Hg19 public hub. \n\n";
+
+print "6. Enter chr15 in the postion field and hit go\n\n";
+
+print "7. You should now see 2 annotation tracks and a bigwig container track plotted in red and green\n\n";
+
+print "DONE\n";
 
 =head1 COMMAND LINE OPTIONS
 
@@ -125,27 +149,25 @@ __END__
 
 =over
 
-
-=item B<--infolder -i>
-
-Directory which contains all track files in BED/bigBed format. The
-resulting Track Hub will contain these files in their respective
-bigFile version.
-
 =item B<--out -o>
 
 Destination folder for the output Track Hub.
 
-=item  B<--baseurl -b>
+=item  B<--baseurl -u>
 
 BaseURL used within the Track Hub. This URL will be included verbatim
 in the resulting Track Hub. It is crucial that this URl is valid, else
 the resulting Track Hub will be broken.
 
-=item  B<--bigwigs -bw>
+=item  B<--bigbeds -b>
+
+URLs pointing to big bed files to be included in the trackhub. Multiple URLs are
+separated by the character #. 
+
+=item  B<--bigwigs -w>
 
 URLs pointing to big wig files to be included in the trackhub. Multiple URLs are
-separated by the star character #. It is possible to create a multiwig container by
+separated by the character #. It is possible to create a multiwig container by
 providing 2 URLs instead of one separated by comma character ,. E.g.
 http://foo.com/bar.bw,http://foo.com/bar2.bw#http://foo.com/bar3.bw yields a multi
 big wig container displaying bar as positive reads in green and bar2 as negative
