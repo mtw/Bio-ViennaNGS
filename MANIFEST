@@ -12,6 +12,7 @@ lib/Bio/ViennaNGS/Expression.pm
 lib/Bio/ViennaNGS/Fasta.pm
 lib/Bio/ViennaNGS/Feature.pm
 lib/Bio/ViennaNGS/FeatureChain.pm
+lib/Bio/ViennaNGS/FeatureLine.pm
 lib/Bio/ViennaNGS/MinimalFeature.pm
 lib/Bio/ViennaNGS/SpliceJunc.pm
 lib/Bio/ViennaNGS/Tutorial.pm
