@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-09 17:02:46 egg>
+# Last changed Time-stamp: <2015-02-11 14:27:50 fall>
 # AUTHOR: Florian Eggenhofer <florian.eggenhofer@univie.ac.at>
 
 ###############
@@ -67,14 +67,15 @@ Tutorial_Pipeline03.pl - Construct a UCSC genome browser trackhub
 
 This script demonstrates UCSC genome browser trackhub construction with <Bio::ViennaNGS>.
 
-The results of Tutalorial02_pipeline.pl are vizualized, showing genomic region, annotation
-and expression level, which can be interpreted in conjunction to each other. 
+The results of Tutalorial02_pipeline.pl are vizualized in UCSC,
+showing genomic region, annotation and expression level, which can be
+interpreted in conjunction to each other.
 
 The result of this tutorial can be viewed by navigating your browser to 
 L<here|http://genome-euro.ucsc.edu/cgi-bin/hgTracks?hubUrl=http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_trackHub/trackHub/hub.txt&position=chr15>
 
 This tutorial is based on the track_hub_constructor.pl script and the output from Tutorial02_pipeline.pl.
-While the option descriptions here are specific for the results from tutorial02 the trackhub_hub_constructor.pl
+While the option descriptions here are specific for the results from Tutorial02 the trackhub_hub_constructor.pl
 can be applied in the same manner to other datasets. The example call uses the bigwig and bedfiles available from our server.
 Example call: Tutorial_pipeline03.pl -o /home/user/public_html/hg19_trackHub -u http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_trackHub -b http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.pos.bb#http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.neg.bb -w http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.pos.bw,http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.neg.bw
 
@@ -82,8 +83,8 @@ Example call: Tutorial_pipeline03.pl -o /home/user/public_html/hg19_trackHub -u 
 
 For running this tutorial on your machine you will need a full
 installation of the L<Bio::ViennaNGS> distribution, and result files
-obtained from tutorial02.pl, which can also be downloaded from 
-L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>):
+obtained from tutorial02.pl, which can alternatively be downloaded
+from L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>):
 
 =over
 
@@ -98,7 +99,7 @@ L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>):
 =back
 
 For the UCSC genome browser to be able to
-use our trackhub it needs to be accessible via URL. This is the base
+visualize our trackhub it needs to be accessible via URL. This is the base
 URL you need to provide as commandline argument. 
 
 =head2 DISCLAIMER
@@ -128,11 +129,11 @@ print "3. You are now redirected to nearest mirror of the genome browser.\n    S
 
 print "4. The \"Track Data Hubs\" page is displayed. In the register \"My Hubs\" it is possible to add the newly created track hub. Paste the URL to hub.txt into the URL field and click \"Add Hub\" (e.g. http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_trackHub/trackHub/hub.txt).\n\n";
 
-print "5. The track hub now loads into the Hg19 public hub. \n\n";
+print "5. The track hub now loads into the hg19 public hub. \n\n";
 
-print "6. Enter chr15 in the postion field and hit go\n\n";
+print "6. Enter e.g. chr15 in the position field and hit go\n\n";
 
-print "7. You should now see 2 annotation tracks and a bigwig container track plotted in red and green\n\n";
+print "7. You should now see 2 annotation tracks and a bigwig multi-track plotted in red and green\n\n";
 
 print "DONE\n";
 

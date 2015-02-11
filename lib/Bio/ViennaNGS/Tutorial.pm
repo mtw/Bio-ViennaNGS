@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-06 16:27:32 mtw>
+# Last changed Time-stamp: <2015-02-11 14:30:08 fall>
 
 package Bio::ViennaNGS::Tutorial;
 
@@ -48,12 +48,13 @@ repository|http://nibiru.tbi.univie.ac.at/ViennaNGS/>.
 
 =item L<Tutorial 00|http://search.cpan.org/dist/Bio-ViennaNGS/scripts/Tutorial_pipeline00.pl>: Inferring detailed mapping statistics from BAM files
 
-=item L<Tutorial 01|http://search.cpan.org/dist/Bio-ViennaNGS/scripts/Tutorial_pipeline01.pl>: Finding sequence motifs in close proximity to gene starts in a set of human protein coding genes
+=item L<Tutorial 01|http://search.cpan.org/dist/Bio-ViennaNGS/scripts/Tutorial_pipeline01.pl>: Generation and analysis of sequence motifs in close proximity to gene starts in a set of ENCODE human protein coding genes
 
-=item L<Tutorial 02|http://search.cpan.org/dist/Bio-ViennaNGS/scripts/Tutorial_pipeline02.pl>: Automatic generation of UCSC genome browser Track Hubs for visualization of ENCODE RNA-seq data 
+=item L<Tutorial 02|http://search.cpan.org/dist/Bio-ViennaNGS/scripts/Tutorial_pipeline02.pl>: Extraction and manipulation of strand-specific ENCODE RNA-seq data and automatic generation of coverage profiles
+
+=item L<Tutorial 03|http://search.cpan.org/dist/Bio-ViennaNGS/scripts/Tutorial_pipeline03.pl>: Automatic generation of UCSC genome browser Track Hubs for visualization of ENCODE RNA-seq data 
 
 =back
-
 
 =head1 AUTHORS
 
