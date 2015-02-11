@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-09 16:57:28 fabian>
+# Last changed Time-stamp: <2015-02-11 17:14:53 fall>
 
 =head1 NAME
 
@@ -13,54 +13,44 @@ parameters from an input BAM file.
 
 =head1 DESCRIPTION
 
-This tutorial illustrates how the libraries L<Bio::ViennaNGS::BamStat> and
-L<Bio::ViennaNGS::BamStatSummary> can be used to count mapped reads, read
-alignments, single-end and paired-end reads and to check and compare
-quality features stored in the BAM file. The latter is exemplify by
-applied it to deduce the distribution of edit distance for all read
-alignments.
+This tutorial illustrates how the libraries L<Bio::ViennaNGS::BamStat>
+and L<Bio::ViennaNGS::BamStatSummary> can be used to count mapped
+reads, read alignments, single-end and paired-end reads and to check
+and compare quality features stored in the BAM file. The latter is
+exemplified by using the module to deduce the distribution of edit
+distances for all read alignments.
 
-Thereby, I would like to point out that this tutorial does not cover
-all feature of L<Bio::ViennaNGS::BamStat> and
-L<Bio::ViennaNGS::BamStatSummary>. It is merely meant to illustrate the
-principles. For more details on L<Bio::ViennaNGS::BamStat> and
-L<Bio::ViennaNGS::BamStatSummary> please refer to their documentation,
+However, I would like to point out that this tutorial does not cover
+all features of L<Bio::ViennaNGS::BamStat> and
+L<Bio::ViennaNGS::BamStatSummary>. It is merely meant to illustrate
+the basic usage principles. For more details please refer to the
+documentation of L<Bio::ViennaNGS::BamStat> and
+L<Bio::ViennaNGS::BamStatSummary>.
 
 =head1 INTRODUCTION
 
-In our toy example we aim to examine the count in an exact way
-different types of reads and visualize the distribution of the edit
-distance between the aligned reads and the reference genome. To this
-end we use the same mapped RNA-seq data as examined in the subsequent
-Tutorials, which together are meant as an exemplary analysis
-pipeline. As usual quality control of the input data has its natural
-place in the beginning.
+In this tutorial we examine the count of different types of reads in
+an exact way and visualize the distribution of the edit distances
+between the aligned reads and the reference genome. 
 
-The input data BAM file can be retrieved
-L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS/C1R1.bam>). Please
-download the file using your browser or a simple bash command C<wget
-http://nibiru.tbi.univie.ac.at/ViennaNGS/C1R1.bam >. From here on, the
-input file C1R1.bam is assumed to be accessible in your working
-directory.
+The input data BAM file can be downloaded
+L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS/C1R1.bam>). From here
+on, the input file C1R1.bam is assumed to be accessible in your
+working directory.
 
 =head1 PROCEDURE
 
 =head2 Include libraries
-
  
  use Bio::ViennaNGS::BamStat;
  use Bio::ViennaNGS::BamStatSummary;
- use Data::Dumper;
 
-
-For this tutorial three special libraries are included. First,
-C<<Bio::ViennaNGS::BamStat>> provides methods to read key aspects
-concerning quality and quantity information from a defined BAM file
-and stores its essential information in a data object. Second, to get
-an impression of the data stored the standard perl library
-C<<Data::Dumper>> is often usefully. Third,
-C<<Bio::ViennaNGS::BamStatSummary>> provides methods to compare and
-visualize stored in the BamStat object.
+For this tutorial following C<<Bio::ViennaNGS>> libraries are
+included. C<<Bio::ViennaNGS::BamStat>> provides methods to read key
+aspects concerning quality and quantity information from a defined BAM
+file and stores essential information in a data
+object. C<<Bio::ViennaNGS::BamStatSummary>> provides methods to
+compare and visualize data stored in the BamStat object.
 
 =cut
 
@@ -85,36 +75,35 @@ visualize stored in the BamStat object.
 
 
 In the first step of this tutorial, control and parameter variables
-are set. The array C<@bams> holds a list to all BAM files intended to
-be used in this analysis. We restrict ourself here to one file named
-C1R1.bam, which should be accessible in the current working directory.
+are set. The array C<@bams> holds a list of all BAM files to be
+analyzed. This tutorial is restricted to a single file C1R1.bam, which
+should be accessible in the current working directory.
 
 Since Tutorial_pipeline00.pl produces several output file, with fixed
 file names, an output directory has to be specified. This is done in
-the C<$odir> variable, setting it here to the current working
-directory.  Please not that if files with same names do already exist
-in this particular directory, they will be overwritten.
+the C<$odir> variable, per default set to the current working
+directory.  Please not that files with same name in this directory
+will be overwritten.
 
 Some methods in L<Bio::ViennaNGS::BamStatSummary> use the
-L<Bio::ViennaNGS::BamStatSummary> use the C<Statistics::R>
-library. Therefore, a absolute and valid path to the a working version
-of R has to be specified. Here, as in the most standard Linux
-installations, the path is set to /usr/bin/R.
+C<Statistics::R> library. Therefore, a valid path to a working version
+of R has to be specified. Please note that per default the path is set
+to /usr/bin/R.
 
-The next control variable C<$edit_control> flags if in the course of
-populating the data object by L<Bio::ViennaNGS::BamStat> information on
-the edit distance of the read alignments should be stored. If so it
-will be usable to visualize this information in a subsequent step by
-L<Bio::ViennaNGS::BamStatSummary>.
+The C<$edit_control> flag has to be set if information on the edit
+distance of the read alignments should be stored by
+L<Bio::ViennaNGS::BamStat> . If set, this information can be
+visualized in a subsequent step by L<Bio::ViennaNGS::BamStatSummary>.
 
 L<Bio::ViennaNGS::BamStat> and L<Bio::ViennaNGS::BamStatSummary> are
 in principle compatible with any BAM file from any read
-aligner. Nevertheless one has to be aware that some aligner differ in
-respect to the BAM dialect or with respect to the information stored
-in the BAM file. Therefore, we introduce here a special flag to use
-the auxiliary information stored in the BAM file produced by
-I<segemehl>. Toggle it to '1' if your input file is from this origin,
-as it is the case of the provided C1R1.bam. Otherwise set to '0'.
+aligner. Nevertheless, one has to be aware that some mapping tools
+differ in BAM dialect or with respect to the information stored in the
+BAM file. A special flag to use the auxiliary information stored in a
+BAM file produced by I<segemehl> is available as
+C<$segemehl_control>. Set to '1' if your input file was mapped with
+I<segemehl>, as it the case for the provided C1R1.bam. Otherwise set
+to '0'.
 
 =cut
 
@@ -135,7 +124,7 @@ pod2usage(-verbose => 0) unless GetOptions(
 					  );
 
 
-=head2 Creating new BamStatSummary object.
+=head2 Creating a new BamStatSummary object.
 
  $bamsummary = Bio::ViennaNGS::BamStatSummary->new(files          => \@bams,
 						   outpath        => $odir,
@@ -144,11 +133,11 @@ pod2usage(-verbose => 0) unless GetOptions(
 						  );
 
 
-Initialize new BamStatSummary object capable of representing data from
- all I<segemehl> flavored BAM files (C<<< is_segemehl => 1 >>>)
- specified in @bams, setting the output directory to $odir ('./'),
- where beside standard read quantification also the edit distance
- (C<<< control_edit => 1 >>>) of each read will be stored.
+  Initializes a new BamStatSummary object representing data from
+  I<segemehl> mapped BAM files (C<<< is_segemehl => 1 >>>)
+  specified in @bams. The output directory is set to $odir ('./'),
+  where beside standard read quantification also the edit distance
+  (C<<< control_edit => 1 >>>) of each read will be stored.
 
 =cut
 
@@ -164,23 +153,15 @@ my $bamsummary = Bio::ViennaNGS::BamStatSummary->new(files          => \@bams,
 
 =head2 Read-in BAM files @bams
 
-In the next step the initialized data object has to be populated with
-data. Therefore, each BAM file has to be read an the essential data
-has to be extracted. 
+In the next step the initialized data object is populated with
+essential data extracted from each read BAM file.
 
  $bamsummary->populate_data();
 
-Thereby, for each BAM file in @bams the method C<< new >> from
+For each BAM file in @bams the method C<< new >> from
 L<BIO::ViennaNGS::BamStat> is called like this, 
 
  $bo = Bio::ViennaNGS::BamStat->new(bam => $bamfile);
-
-This calls internally L<Bio::DB::Sam> library within
-L<Bio::ViennaNGS::BamStat>.
-
-To examine the content of this new object, please use C< print
-Dumper($bamsummary); >. As you will see its content depends on the way
-it is initialized, and the data specified to be stored.
 
 =cut
 
@@ -188,17 +169,14 @@ $bamsummary->populate_data();
 
 =head2 Quantify data from $bamsummary
 
-The most basic step in the course of the assessment of input BAM files
-is the quantification. Namely, how many reads are uniquely or multiply
-mapped? how many alignments are there? Are there single-end or
-paired-end reads, and if the latter how many pairs are complete? To
-this end we can compile needed quantitative information for all reads
-stored in $bamsummary by,
+A basic measure in the quantification of BAM files is how many reads
+are uniquely or multi mapped and how many alignments exist in total.
+Depending on whether single-end or paired-end reads are analyzed, the
+number of mapped pairs is essential for the latter. To this end we
+compile quantitative information for all reads stored in $bamsummary
+by,
 
  $bamsummary->populate_countStat();
-
-Again, you can use C<print Dumper($bamsummary);> to examine the
-object.
 
 =cut
 
@@ -206,13 +184,10 @@ $bamsummary->populate_countStat();
 
 =head2 Produce output for read quantification.
 
-In the next step we will out put the compile information into a file
-in $odir.
+Next, statistical output will be written to a CSV file in $odir, which
+can easily be screened with any text editor or spreadsheet program.
 
  $bamsummary->dump_countStat("csv");
-
-The output file format is *.csv which can easily be screened with any
-text editor or spreadsheet program.
 
 =cut
 
@@ -220,14 +195,12 @@ $bamsummary->dump_countStat("csv");
 
 =head2 Plot read quantification.
 
-Beside the summarized read quantification in tabular form. It can be
-useful to plot the numbers. This can help to get a quick overview of
-the consistency of different examined samples.
+To get a visual overview of the consistency of examined samples,
+bar-plots can be produced via,
 
  $bamsummary->make_BarPlot();
 
-This creates a barplot for the read quantification. The file format
-is *.pdf, and again the file is created in $odir.
+which creates a bar-plot in pdf format of read quantification in $odir.
 
 =cut
 
@@ -235,28 +208,24 @@ $bamsummary->make_BarPlot();
 
 =head2 Plot edit distance distribution.
 
-Finally, we would like to gain a quick overview of the quality of
-different mapped RNA-seq samples. Therefore we like to plot the
-distribution of edit distances for all reads aligned to the reference
-genome for all samples in @bams.
+To gain a quick overview of the quality of different mapped RNA-seq
+samples, we plot the distribution of edit distances for all reads
+aligned to the reference genome for all samples in @bams.
 
  $bamsummary->make_BoxPlot("data_edit") if( $bamsummary->has_control_edit );
 
 =cut
 
-
 $bamsummary->make_BoxPlot("data_edit")  if( $bamsummary->control_edit  && $bamsummary->has_control_edit );
 
 =head2 Summary
 
-In the previous seven sections we used L<Bio::ViennaNGS::BamStat> and
+We used L<Bio::ViennaNGS::BamStat> and
 L<Bio:ViennaNGS::BamStatSummary> to extract, store, summarize, and
-visualize quantity and quality data stored in a BAM file. Only
-exemplary features of the library were illustrated. It's modular
-architecture allows easily to extend its functionality. Further useful
-functions are all ready implemented in the corresponding utility
-bam_quality_stat.pl. Further can be implemented in a customized manner
-according to own needs.
+visualize quantitative and qualitative data stored in a BAM file. Only
+exemplary features of the library were illustrated. Further useful
+functions are implemented in the corresponding script
+bam_quality_stat.pl, or can be implemented according to ones needs.
 
 =head1 AUTHOR
 
