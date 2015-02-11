@@ -1,11 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-06 16:29:45 mtw>
+# Last changed Time-stamp: <2015-02-11 15:26:21 mtw>
 
 package Bio::ViennaNGS::Feature;
 
-use version; our $VERSION = qv('0.12_15');
+use version; our $VERSION = qv('0.12');
 
-#use namespace::autoclean;
 use Moose;
 with 'MooseX::Clone';
 use MooseX::InstanceTracking;
@@ -26,24 +25,16 @@ has 'score' => (
 		predicate => 'has_score',
 	       );
 
-has 'extension' => (
-		    is      => 'rw',
-		    isa     => 'Str',
-		    default => '',
-		   );
-
 sub set_Feature{
-  my ($self,$chromosome,$start,$end,$name,$score,$strand,$extension) = @_;
+  my ($self,$chromosome,$start,$end,$name,$score,$strand) = @_;
   $self->chromosome($chromosome);
   $self->start($start);
   $self->end($end);
   $self->name($name);
   $self->score($score);
   $self->strand($strand);
-  $self->extension($extension);
 }
 
 no Moose;
-#__PACKAGE__=>meta->make_immutable;
 
 1;
