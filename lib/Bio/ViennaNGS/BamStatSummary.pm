@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-09 16:56:20 fabian>
+# Last changed Time-stamp: <2015-02-11 16:32:19 mtw>
 
 package Bio::ViennaNGS::BamStatSummary;
 
-use version; our $VERSION = qv('0.12_15');
+use version; our $VERSION = qv('0.12');
 use Moose;
 use Carp;
 use POSIX qw(floor);
@@ -332,9 +332,9 @@ __END__
 
 =head1 NAME
 
-Bio::ViennaNGS::BamStatSummary - Moose interface to analyze, summarize
-and compare BAM mapping statistics data structure produced by
-Bio::ViennaNGS::BamStat
+Bio::ViennaNGS::BamStatSummary - Moose interface for analyzing,
+summarizing and comparing BAM mapping statistics produced by
+L<Bio::ViennaNGS::BamStat>
 
 =head1 SYNOPSIS
 
@@ -353,12 +353,12 @@ Bio::ViennaNGS::BamStat
 
 =head1 DESCRIPTION
 
-This module provides a L<Moose> interface to process the mapping
-statistics of single BAM file. It uses the data structure as produced
-by L<Bio::ViennaNGS::BamStat>, summarizes the data and compares
-different BAM files. Output is written both as CSV files and graphical
-representation of the results.  Internally, this modules build on
-L<Statistics::R>.
+This module provides a L<Moose> interface for processing the mapping
+statistics of BAM files. Using the data structure populated by
+L<Bio::ViennaNGS::BamStat>, it summarizes all data and compares
+different BAM files. Output is generated both in CSV format and as
+graphical representation of the results.  Internally, this modules
+builds on L<Statistics::R>.
 
 
 =head1 DEPENDENCIES
