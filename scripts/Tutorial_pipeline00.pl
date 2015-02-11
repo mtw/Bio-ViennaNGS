@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-11 17:14:53 fall>
+# Last changed Time-stamp: <2015-02-11 17:36:57 mtw>
 
 =head1 NAME
 
@@ -9,7 +9,7 @@ parameters from an input BAM file.
 
 =head1 SYNOPSIS
 
-  Tutorial_pipeline00.pl 
+  Tutorial_pipeline00.pl
 
 =head1 DESCRIPTION
 
