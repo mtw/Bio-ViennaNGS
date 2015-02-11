@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-11 16:27:51 mtw>
+# Last changed Time-stamp: <2015-02-11 17:06:51 mtw>
 
 
 package Bio::ViennaNGS::Util;
@@ -332,12 +332,6 @@ sub parse_bed6{
     my $score	     = $line[4];
     my $strand	     = $line[5];
 
-    if ($line[6]){
-      for (6..$#line){
-	$extension .= $line[$_]."\t";
-      }
-      $extension = substr($extension,0,-1);
-    }
     my $feat = Bio::ViennaNGS::Feature->new(chromosome=>$chromosome,
 					    start=>$start,
 					    end=>$end,
