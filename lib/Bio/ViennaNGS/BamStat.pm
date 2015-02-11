@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-09 09:17:24 mtw>
+# Last changed Time-stamp: <2015-02-11 16:16:17 mtw>
 
 package Bio::ViennaNGS::BamStat;
 
-use version; our $VERSION = qv('0.12_16');
+use version; our $VERSION = qv('0.12');
 use Bio::DB::Sam 1.37;
 use Moose;
 use Carp;
@@ -561,7 +561,7 @@ Bio::ViennaNGS::BamStat - Moose interface to BAM mapping statistics
 =head1 DESCRIPTION
 
 This module provides a L<Moose> interface to the mapping statistics of
-a single BAM file. It builds on L<Bio::DB::Sam>.
+a single BAM file, internally building on L<Bio::DB::Sam>
 
 =head1 DEPENDENCIES
 

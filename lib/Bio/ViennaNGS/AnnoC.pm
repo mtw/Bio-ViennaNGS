@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-06 16:27:40 mtw>
+# Last changed Time-stamp: <2015-02-11 16:13:20 mtw>
 
 package Bio::ViennaNGS::AnnoC;
 
-use version; our $VERSION = qv('0.12_15');
+use version; our $VERSION = qv('0.12');
 use Bio::ViennaNGS::Util qw(sortbed);
 use Bio::Tools::GFF;
 use Path::Class;
@@ -276,9 +276,9 @@ scenarios, including spliced isoforms.
 =item parse_gff
 
 Title : parse_gff
-Usage : C<<$obj->parse_gff($gff3_file);>>
+Usage : C<$obj-E<gt>parse_gff($gff3_file);>
 Function: Parses GFF3 annotation files of non-spliced genomes into
-          C<<$self->features>>
+          C<$self-E<gt>features>
 Args : The full path to a GFF3 file
 Returns :
 Notes : The GFF3 specification is available at
@@ -288,23 +288,23 @@ Notes : The GFF3 specification is available at
 =item feature_summary
 
 Title : feature_summary
-Usage : C<<$obj->feature_summary($dest);>>
+Usage : C<$obj-E<gt>feature_summary($dest);>
 Function : Generate a summary file for all features present in
-           C<<$self->features>>
+           C<$self-E<gt>features>
 Args : Full output path for summary.txt file
 Returns :
 
 =item features2bed
 
 Title : features2bed
-Usage : C<<$obj->features2bed($feature,$workdir,$bn,$log);>>
-Function : Dumps genomic features from C<$self->features> hash to a
+Usage : C<$obj-E<gt>features2bed($feature,$workdir,$bn,$log);>
+Function : Dumps genomic features from C<$self-E<gt>features> hash to a
            BED12 file.
-Args : C<<$gbkey>> can be either a string corresponding to a genbank
-       key in C<<$self->featstat>> or C<undef>. If defined, only
+Args : C<$gbkey> can be either a string corresponding to a genbank
+       key in C<$self-E<gt>featstat> or C<undef>. If defined, only
        features of the speficied key will be dumped to a single BED12
        file. If C<$gbkey> is C<undef>, BED12 files will be generated
-       for each type present in C<<$self->featstat>>.  C<$dest> is the
+       for each type present in C<$self-E<gt>featstat>.  C<$dest> is the
        output directory and C<$bn> the basename for all output
        files. C<$log> is either be the full path to a logfile or
        C<undef>.

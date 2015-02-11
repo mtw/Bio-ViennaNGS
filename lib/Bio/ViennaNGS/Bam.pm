@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-09 09:20:43 mtw>
+# Last changed Time-stamp: <2015-02-11 17:03:30 mtw>
 
 package Bio::ViennaNGS::Bam;
 
 use Exporter;
-use version; our $VERSION = qv('0.12_16');
+use version; our $VERSION = qv('0.12');
 use strict;
 use warnings;
 use Bio::Perl 1.00690001;
