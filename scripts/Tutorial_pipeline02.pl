@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-10 15:58:26 fall>
+# Last changed Time-stamp: <2015-02-11 17:40:08 mtw>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -57,11 +57,12 @@ a real-world NGS example.
 
 We start from a file containing ENSEMBL annotation information for
 human protein-coding genes, which have a read pileup of at least 1001
-reads in an ENCODE dataset mapped with F<segemehl>. We are insterested
+reads in an ENCODE dataset mapped with F<segemehl>. We are interested
 in visualizing those genes together with a 50nt region upstream of the
-gene start. As such, will go through the individual steps required for
+gene start. We will go through the individual steps required for
 preparation of the files for subsequent UCSC Track Hub visualization
-covered by L<Tutorial_pipeline03.pl|http://search.cpan.org/dist/Bio-ViennaNGS/scripts/Tutorial_pipeline03.pl> .
+covered by
+L<Tutorial_pipeline03.pl|http://search.cpan.org/dist/Bio-ViennaNGS/scripts/Tutorial_pipeline03.pl>.
 
 =head2 PREREQUITES
 
