@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-11 16:17:37 mtw>
+# Last changed Time-stamp: <2015-02-12 20:55:10 mtw>
 
 package Bio::ViennaNGS::Bed;
 
-use version; our $VERSION = qv('0.12');
+use version; our $VERSION = qv('0.13');
 use Carp;
 use Moose;
 use namespace::autoclean;
@@ -145,22 +145,29 @@ L<Bio::ViennaNGS::FeatureLine>.
 =item _build_length
 
 Title   : _build_length
+
 Usage   : C<$obj-E<gt>_build_length();>
+
 Function: Compute the length of a BED12 interval block / line, i.e.
           the sum over the lengths of all intervals that make up a
           BED12 entry.
+
 Args    :
+
 Returns :
 
 =item as_bed_line
 
 Title   : as_bed_line
+
 Usage   : C<$obj-E<gt>as_bed_line($bedtype);>
+
 Function: Dump the contents of the object as BED6 or BED12 line.
+
 Args    : C<$bedtype> can either be 6 or 12, determining BED6 or BED12
           output.
-Returns : A (tab-separated) BED6 or BED12 line as string.
 
+Returns : A (tab-separated) BED6 or BED12 line as string.
 
 =back
 
@@ -168,7 +175,11 @@ Returns : A (tab-separated) BED6 or BED12 line as string.
 
 =over
 
+=item L<Moose>
+
 =item L<Carp>
+
+=item L<namespace::autoclean>
 
 =back
 
