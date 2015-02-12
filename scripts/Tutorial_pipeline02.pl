@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-11 17:40:08 mtw>
+# Last changed Time-stamp: <2015-02-12 23:34:01 mtw>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -73,7 +73,7 @@ L<bedtools|https://github.com/arq5x/bedtools2> as well as the
 F<bedGraphToBigWig> utility from the UCSC source distribution
 (available L<here|http://hgdownload.cse.ucsc.edu/admin/exe/>). In
 addition, the following input files (which can be downloaded
-L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>) will be used
+L<here|http://rna.tbi.univie.ac.at/ViennaNGS>) will be used
 throughout this tutorial:
 
 =over
@@ -89,6 +89,9 @@ throughout this tutorial:
 =item F<hg19.chrom.sizes>
 
 =back
+
+We will assume that all input files are available and accessible in
+your current working directory.
 
 =head2 DISCLAIMER
 
@@ -324,7 +327,7 @@ the [-] strand.
 C<bam_split> returns an array, (C<@ref> in our example) that contains
 six fields: The paths of the BAM files for [+] and [-] strand, number
 of alignments in the [+] and [-] BAM files as well as the paths to the
-interim BED files for [=] and [-] strand, respectively.
+interim BED files for [+] and [-] strand, respectively.
 
 =cut
 
