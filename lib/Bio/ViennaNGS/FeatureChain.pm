@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-11 17:02:53 mtw>
+# Last changed Time-stamp: <2015-02-12 18:23:48 fall>
 
 package Bio::ViennaNGS::FeatureChain;
 
@@ -42,7 +42,6 @@ sub print_chain{
 		 $feature->name,
 		 $feature->score,
 		 $feature->strand);
-    $out .= "\t".$feature->extension if ($feature->extension);
     $out .= "\n";
   }
   return $out;
