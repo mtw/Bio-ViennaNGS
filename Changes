@@ -123,5 +123,6 @@ Revision history for Perl extension ViennaNGS.
 	- added static templates for the Assembly and Track Hub generator
 	- updated POD and README 
 
-0.13
-	- fixed an issue in Bio::ViennaNGS::Feature
+0.13 Thu Feb 14 2015
+	- fixed an issue in Bio::ViennaNGS::FeatureChain
+	- updated POD

@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-11 16:16:17 mtw>
+# Last changed Time-stamp: <2015-02-12 21:03:14 mtw>
 
 package Bio::ViennaNGS::BamStat;
 
-use version; our $VERSION = qv('0.12');
+use version; our $VERSION = qv('0.13');
 use Bio::DB::Sam 1.37;
 use Moose;
 use Carp;
