@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-11 16:14:45 mtw>
+# Last changed Time-stamp: <2015-02-12 22:45:42 mtw>
 
 package Bio::ViennaNGS::Fasta;
 
-use version; our $VERSION = qv('0.12');
+use version; our $VERSION = qv('0.13');
 use Bio::Perl 1.00690001;
 use Bio::DB::Fasta;
 use Moose;
@@ -158,12 +158,16 @@ This module provides a L<Moose> interface to L<Bio::DB::Fasta>.
 =item stranded_subsequence
 
 Title : stranded_subsequence
+
 Usage : C<$obj-E<gt>stranded_subsequence($id,$start,$end,$strand)>
+
 Function : Returns the DNA/RNA sequence for C<$id> from C<$start> to
            C<$end>.
+
 Args : C<$id> is the Fasta ID (a L<Bio::PrimarySeq::Fasta> object).
         C<$start> and C<$end> should be self-explnatory, C<$strand> is
-        1 or -1 for [+] or [-] strand, respectively
+        1 or -1 for [+] or [-] strand, respectively.
+
 Returns : A string.
 
 =back
