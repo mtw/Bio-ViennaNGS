@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-10 15:54:44 fall>
+# Last changed Time-stamp: <2015-02-11 18:38:45 fall>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -69,7 +69,7 @@ L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>):
 
 =item F<hg19_highlyexpressed.bed>
 
-=item F<OPTIONAL: meme.xml>
+=item F<OPTIONAL: Example_pipeline_meme.xml>
 
 =back
 
