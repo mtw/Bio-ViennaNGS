@@ -1,5 +1,5 @@
 Bio::ViennaNGS 0.14
-===================
+==============
 
 Bio::ViennaNGS is a distribution of Perl modules and utilities for
 building efficient Next-Generation Sequencing (NGS) analysis
@@ -9,6 +9,23 @@ mapped data, expression quantification and visualization.
 
 Bio::ViennaNGS is shipped with a complementary set of modules/classes:
 
+- Bio::ViennaNGS::AnnoC
+  A Moose interface for storage and conversion of sequence annotation
+  data.
+
+- Bio::ViennaNGS::Bam
+  Routines for high-level manipulation of BAM files.
+
+- Bio::ViennaNGS::BamStat
+  A Moose-based class for collecting mapping statistics.
+
+- Bio::ViennaNGS::BamStatSummary
+  A Moose interface for processing Bio::ViennaNGS::BamStat objects on
+  a set of BAM files.
+
+- Bio::ViennaNGS::Bed 
+  A Moose interface for manipulation of genomic interval data in BED
+  format.
 
 - Bio::ViennaNGS::Expression
   A Moose interface for computation of normalized gene / transcript
@@ -47,7 +64,7 @@ Bio::ViennaNGS is shipped with a complementary set of modules/classes:
 
 - Bio::ViennaNGS::Util
   A collection of wrapper routines for commonly used third-party NGS
-  utilities, utility functions.
+  utilities as well as a set of utility functions.
 
 
 UTILITIES
