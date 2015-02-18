@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-11 14:27:50 fall>
+# Last changed Time-stamp: <2015-02-18 15:17:19 fall>
 # AUTHOR: Florian Eggenhofer <florian.eggenhofer@univie.ac.at>
 
 ###############
@@ -112,6 +112,28 @@ our webserver L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>.
 =head1 PIPELINE
 
 =head3 Create UCSC Genome Browser Trackhub
+
+  print "Constructing UCSC genome browser trackhub ...\n";
+  
+  $track_hub_return_value = make_track_hub($genome_identifier,$dest,$base_URL,$big_bed_urls,$big_wig_urls,$lf);
+  
+  print "Loading the trackhub into the UCSC genome browser...\n\n";
+  
+  print "1. Point your browser to: http://genome.ucsc.edu/index.html\n\n";
+  
+  print "2. Select Genome Browser from the left menu\n\n";
+  
+  print "3. You are now redirected to nearest mirror of the genome browser.\n    Select \"My Data\" from the top menu and then \"Track Hubs\" in the popup list.\n\n";
+  
+  print "4. The \"Track Data Hubs\" page is displayed. In the register \"My Hubs\" it is possible to add the newly created track hub. Paste the URL to hub.txt into the URL field and click \"Add Hub\" (e.g. http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_trackHub/trackHub/hub.txt).\n\n";
+  
+  print "5. The track hub now loads into the hg19 public hub. \n\n";
+  
+  print "6. Enter e.g. chr15 in the position field and hit go\n\n";
+  
+  print "7. You should now see 2 annotation tracks and a bigwig multi-track plotted in red and green\n\n";
+  
+  print "DONE\n";
 
 =cut
 
