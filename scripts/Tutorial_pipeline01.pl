@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-19 11:02:25 fall>
+# Last changed Time-stamp: <2015-02-19 11:07:17 fall>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -276,7 +276,7 @@ at its regular-expression.
 =cut
 
 print STDERR "Parsing MEME xml output ...";
-my $cmd = "perl MEME_xml_motif_extractor.pl -f Example_Pipeline_meme.xml -r $RLIBPATH -t Example_Pipeline";
+my $cmd = "MEME_xml_motif_extractor.pl -f Example_Pipeline_meme.xml -r $RLIBPATH -t Example_Pipeline";
 my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run(command => $cmd, verbose => 0);
 
 if(!$success){    
