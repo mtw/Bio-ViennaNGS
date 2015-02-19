@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-18 15:28:36 fall>
+# Last changed Time-stamp: <2015-02-19 11:02:25 fall>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -255,7 +255,7 @@ the e-value and site coverage of the top 10 motifs to see how the most
 over-represented motif identified by MEME compares to other motifs in
 terms of site coverage.
 
-  my $cmd = "perl ../scripts/MEME_xml_motif_extractor.pl -f Example_Pipeline_meme.xml -r $RLIBPATH -t Example_Pipeline";
+  my $cmd = "perl MEME_xml_motif_extractor.pl -f Example_Pipeline_meme.xml -r $RLIBPATH -t Example_Pipeline";
   my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run(command => $cmd, verbose => 0);
 
   if(!$success){    
@@ -276,7 +276,7 @@ at its regular-expression.
 =cut
 
 print STDERR "Parsing MEME xml output ...";
-my $cmd = "perl ../scripts/MEME_xml_motif_extractor.pl -f Example_Pipeline_meme.xml -r $RLIBPATH -t Example_Pipeline";
+my $cmd = "perl MEME_xml_motif_extractor.pl -f Example_Pipeline_meme.xml -r $RLIBPATH -t Example_Pipeline";
 my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run(command => $cmd, verbose => 0);
 
 if(!$success){    
