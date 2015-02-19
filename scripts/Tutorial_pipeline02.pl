@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-11 17:40:08 mtw>
+# Last changed Time-stamp: <2015-02-19 16:36:03 fall>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -144,7 +144,7 @@ potential promoter regions.
 
   my $extended_chain = extend_chain(\%sizes,$chain,$upstream,0,0,0);
 
-We'll also extend the entire U6 gene span 50nt upstream for later usage.
+We'll also extend the entire gene span 50nt upstream for later usage.
 
   my $extended_chain2 = extend_chain(\%sizes,$chain,$upstream,0,0,0);
 
