@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-19 16:27:57 fall>
+# Last changed Time-stamp: <2015-02-24 17:06:35 fall>
 # AUTHOR: Florian Eggenhofer <florian.eggenhofer@univie.ac.at>
 
 ###############
@@ -78,6 +78,7 @@ This tutorial is based on the track_hub_constructor.pl script and the output fro
 While the option descriptions here are specific for the results from Tutorial02 the trackhub_hub_constructor.pl
 can be applied in the same manner to other datasets. The example call uses the bigwig and bedfiles available from our server.
 Example call: 
+
   Tutorial_pipeline03.pl -o /home/user/public_html/hg19_trackHub -u http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_trackHub -b http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.pos.bb#http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.neg.bb -w http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.pos.bw,http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.neg.bw
 
 =head2 PREREQUITES
