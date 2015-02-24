@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-24 13:54:46 fall>
+# Last changed Time-stamp: <2015-02-24 14:06:41 mtw>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -82,7 +82,7 @@ throughout this tutorial:
 
 =item F<hg19_highlyexpressed.bed>
 
-=item F<<hg19.chrom.sizes<OPTIONAL>>>
+=item F<hg19.chrom.sizes> (optional)
 
 =item F<C1R1.bam>
 
@@ -159,7 +159,7 @@ potential promoter regions.
 
   my $extended_chain = extend_chain(\%sizes,$chain,$upstream,0,0,0);
 
-We'll also extend the entire U6 gene span 50nt upstream for later usage.
+We'll also extend the entire gene span 50nt upstream for later usage.
 
   my $extended_chain2 = extend_chain(\%sizes,$chain,$upstream,0,0,0);
 
