@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-12 23:34:01 mtw>
+# Last changed Time-stamp: <2015-02-24 13:54:46 fall>
 # AUTHOR: Joerg Fallmann <joerg.fallmann@univie.ac.at>
 
 ###############
@@ -82,11 +82,9 @@ throughout this tutorial:
 
 =item F<hg19_highlyexpressed.bed>
 
-=item F<hg19.chrom.sizes>
+=item F<<hg19.chrom.sizes<OPTIONAL>>>
 
 =item F<C1R1.bam>
-
-=item F<hg19.chrom.sizes>
 
 =back
 
@@ -111,7 +109,15 @@ hash.
   my $upstream    = 50;
   my $outfilebn   = $name.".ext".$upstream."_upstream";
   my $outfilebed  = $outfilebn.".bed";
+
+We now write out the sizes hash as hg19.chrom.sizes for later usage
+
   my %sizes       = %{fetch_chrom_sizes('hg19')};
+  open (CS,">","hg19.chrom.sizes"); 
+  foreach my $chrom (sort keys %sizes ){
+    print CS $chrom."\t".$sizes{$chrom}."\n";
+  }
+  close(CS);
 
 =cut
 
@@ -121,6 +127,12 @@ my $upstream    = 50;
 my $outfilebn   = $name.".ext".$upstream."_upstream";
 my $outfilebed  = $outfilebn.".bed";
 my %sizes       = %{fetch_chrom_sizes('hg19')}; ### Requires installation of UCSCs fetchChromSizes script or mysql
+
+open (CS,">","hg19.chrom.sizes"); ## Write out chrom.sizes.file for later usage
+foreach my $chrom (sort keys %sizes ){
+    print CS $chrom."\t".$sizes{$chrom}."\n";
+}
+close(CS);
 
 =head3 Generate a Bio::ViennaNGS::FeatureChain object
 
