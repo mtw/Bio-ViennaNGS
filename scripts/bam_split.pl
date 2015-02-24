@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-13 23:41:06 mtw>
+# Last changed Time-stamp: <2015-02-24 11:42:00 mtw>
 #
 # Split BAM files according to their strands, optionally filter unique
 # mappers
@@ -8,7 +8,7 @@
 # ***********************************************************************
 # *  Copyright notice
 # *
-# *  Copyright 2014 Michael T. Wolfinger <michael@wolfinger.eu>
+# *  Copyright 2015 Michael T. Wolfinger <michael@wolfinger.eu>
 # *  All rights reserved
 # *
 # *  This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@ use Data::Dumper;
 use File::Basename;
 use Path::Class;
 use Bio::ViennaNGS::Bam qw(split_bam);
-use Bio::ViennaNGS::Util qw(bed_or_bam2bw);
+use Bio::ViennaNGS::Util qw(bed_or_bam2bw mkdircheck);
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
@@ -100,7 +100,7 @@ $bed_n  = $result[5]; # BED file containing fragments of [-] strand
 
 if ($bw == 1) {
   my $od = dir($outdir,"vis");
-  mkdir $od or die $!;
+  mkdircheck($od);
   bed_or_bam2bw("bed",$bed_p,$cs_in,"+",$od,$wantnorm,$size_p,$scale,$lf);
   bed_or_bam2bw("bed",$bed_n,$cs_in,"-",$od,$wantnorm,$size_n,$scale,$lf);
 }

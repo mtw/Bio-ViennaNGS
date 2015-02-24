@@ -1,11 +1,11 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-12 22:41:09 mtw>
+# Last changed Time-stamp: <2015-02-24 11:39:12 mtw>
 
 
 package Bio::ViennaNGS::Util;
 
 use Exporter;
-use version; our $VERSION = qv('0.13');
+use version; our $VERSION = qv('0.14_01');
 use strict;
 use warnings;
 use Data::Dumper;
@@ -401,7 +401,8 @@ sub mkdircheck {
       $dir = dir($dir,shift(@total));
     }
     return if (-d $dir);
-    make_path($dir,{ verbose => 1 }) or croak "Error creating directory: $dir\t$, in $this_function!";
+    make_path($dir,{ verbose => 0 }) or
+      croak "ERROR [$this_function] Cannot create directory $dir";
   }
 }
 
@@ -419,7 +420,8 @@ sub rmdircheck {
       $dir = dir($dir,shift(@total));
     }
     return if (!-d $dir);
-    remove_tree($dir,{ verbose => 1 }) or croak "Error deleting directory: $dir, in $this_function!";
+    remove_tree($dir,{ verbose => 0 }) or 
+      croak "ERROR [$this_function] Cannot remove directory $dir";
   }
 }
 
