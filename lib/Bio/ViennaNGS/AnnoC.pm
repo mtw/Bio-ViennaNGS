@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-12 21:02:51 mtw>
+# Last changed Time-stamp: <2015-02-24 13:54:58 mtw>
 
 package Bio::ViennaNGS::AnnoC;
 
-use version; our $VERSION = qv('0.13');
+use version; our $VERSION = qv('0.14');
 use Bio::ViennaNGS::Util qw(sortbed);
 use Bio::Tools::GFF;
 use Path::Class;

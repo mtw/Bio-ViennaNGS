@@ -127,6 +127,8 @@ Revision history for Perl extension ViennaNGS.
 	- fixed an issue in Bio::ViennaNGS::FeatureChain
 	- updated POD
 
-0.14
+0.14 Tue Feb 24 2015
 	- updated mkdircheck() 
+	- updated rmdircheck()
 	- fixed directory creation in bam_split.pl
+	- updated POD in Tutorials

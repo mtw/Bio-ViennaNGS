@@ -1,6 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-24 13:52:36 mtw>
-
+# Last changed Time-stamp: <2015-02-24 14:01:47 mtw>
 
 package Bio::ViennaNGS::Util;
 
@@ -400,9 +399,10 @@ sub mkdircheck {
       $dir = dir(shift(@total)) unless (defined $dir);
       $dir = dir($dir,shift(@total));
     }
-    return if (-d $dir);
+    my $check = $dir->stringify();
+    return if (-d $check);
     make_path($dir,{ verbose => 0 }) or
-      croak "ERROR [$this_function] Cannot create directory $dir";
+      croak "ERROR [$this_function] Cannot create directory $check";
   }
 }
 
@@ -414,14 +414,15 @@ sub rmdircheck {
   }
   foreach (@dirstorm){
     my @total = split(/[\/\\]/,$_);
-    my $dir='';
+    my $dir;
     while(@total){
       $dir = dir(shift(@total)) unless (defined $dir);
       $dir = dir($dir,shift(@total));
     }
-    return if (!-d $dir);
-    remove_tree($dir,{ verbose => 0 }) or 
-      croak "ERROR [$this_function] Cannot remove directory $dir";
+    my $check = $dir->stringify();
+    return if (!-d $check);
+    remove_tree($dir,{ verbose => 0 }) or
+      croak "ERROR [$this_function] Cannot remove directory $check";
   }
 }
 

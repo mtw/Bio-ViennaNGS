@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-12 22:45:42 mtw>
+# Last changed Time-stamp: <2015-02-24 13:56:20 mtw>
 
 package Bio::ViennaNGS::Fasta;
 
-use version; our $VERSION = qv('0.13');
+use version; our $VERSION = qv('0.14');
 use Bio::Perl 1.00690001;
 use Bio::DB::Fasta;
 use Moose;
