@@ -132,3 +132,6 @@ Revision history for Perl extension ViennaNGS.
 	- updated rmdircheck()
 	- fixed directory creation in bam_split.pl
 	- updated POD in Tutorials
+
+0.15
+	- scripts/bam_to_bigwig.pl can now produce normalized bigWigs
