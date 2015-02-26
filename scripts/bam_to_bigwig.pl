@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-13 01:01:55 mtw>
+# Last changed Time-stamp: <2015-02-26 16:51:53 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -30,18 +30,24 @@ use Getopt::Long qw( :config posix_default bundling no_ignore_case );
 use Pod::Usage;
 use Data::Dumper;
 use Path::Class;
+use File::Basename;
 use Bio::ViennaNGS::Util qw(bed_or_bam2bw);
+use Bio::DB::Sam;
+
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-my ($bam_in,$lf,$bwfile);
-my $logfile = "bam_to_bigwig.log";
+my ($bam_in,$lf,$bwfile,$bam,$read,$header,$basename,$bamdir,$bamext);
+my $logext = ".bam_to_bigwig.log";
 my $outdir = "./";
 my $want_bigbed = 0;
 my $cs_in = "-";
 my $strand = "+";
+my $counter = 0;
+my $scale   = 1000000;
+my $wantnorm = 0;
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
@@ -51,8 +57,10 @@ Getopt::Long::config('no_ignore_case');
 pod2usage(-verbose => 1) unless GetOptions("b|bam=s"    => \$bam_in,
 					   "c|cs=s"     => \$cs_in,
 					   "o=s"        => \$outdir,
-					   "l|log=s"    => \$logfile,
+					   "l|log=s"    => \$logext,
 					   "s|strand=s" => \$strand,
+					   "scale=s"    => \$scale,
+					   "n|norm"     => sub{$wantnorm = 1},
 					   "man"        => sub{pod2usage(-verbose => 2)},
 					   "help|h"     => sub{pod2usage(1)}
 					  );
@@ -67,7 +75,7 @@ unless (-f $cs_in){
   warn "Could not find input file $cs_in given via --cs option";
   pod2usage(-verbose => 0);
 }
-unless ($strand =~ /[\+\-]/) { 
+unless ($strand =~ /[\+\-]/) {
   warn "Invalid value '$strand' given via -s option. Please specify
   either '+' or '-' for positive or negative strand, respectively";
   pod2usage(-verbose => 0);
@@ -76,11 +84,26 @@ unless ($strand =~ /[\+\-]/) {
 #TODO check if we are allowed to write to $outdir
 unless ($outdir =~ /\/$/){$outdir .= "/";}
 unless (-d $outdir){mkdir $outdir or die $!;}
-$lf = file($outdir,$logfile);
 
-$bwfile = bed_or_bam2bw("bam",$bam_in,$cs_in,$strand,$outdir,0,0,1.,$lf);
+($basename,$bamdir,$bamext) = fileparse($bam_in,qr/\..*/);
 
-print "$bwfile\n";
+$lf = file($outdir,$basename.$logext);
+
+if ($wantnorm == 1){
+  # count number of alignments in BAM file
+  $bam = Bio::DB::Bam->open($bam_in, "r");
+  $header = $bam->header;
+  while ($read= $bam->read1() ) {
+    $counter++;
+  }
+  print STDERR "INFO bam_to_bigwig.pl # of alignments is: $counter\n";
+die;
+  $bwfile = bed_or_bam2bw("bam",$bam_in,$cs_in,$strand,$outdir,$wantnorm,$counter,$scale,$lf);
+}
+else {
+  $bwfile = bed_or_bam2bw("bam",$bam_in,$cs_in,$strand,$outdir,0,0,1.,$lf);
+}
+
 
 __END__
 
