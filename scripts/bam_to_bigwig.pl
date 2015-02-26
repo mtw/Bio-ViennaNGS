@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-26 16:51:53 mtw>
+# Last changed Time-stamp: <2015-02-26 22:56:40 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -97,7 +97,6 @@ if ($wantnorm == 1){
     $counter++;
   }
   print STDERR "INFO bam_to_bigwig.pl # of alignments is: $counter\n";
-die;
   $bwfile = bed_or_bam2bw("bam",$bam_in,$cs_in,$strand,$outdir,$wantnorm,$counter,$scale,$lf);
 }
 else {
