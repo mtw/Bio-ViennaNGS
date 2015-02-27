@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-26 22:56:40 mtw>
+# Last changed Time-stamp: <2015-02-27 10:12:27 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -23,7 +23,7 @@
 # *
 # *  This copyright notice MUST APPEAR in all copies of the script!
 # ***********************************************************************
-
+q
 use strict;
 use warnings;
 use Getopt::Long qw( :config posix_default bundling no_ignore_case );
@@ -39,7 +39,7 @@ use Bio::DB::Sam;
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-my ($bam_in,$lf,$bwfile,$bam,$read,$header,$basename,$bamdir,$bamext);
+my ($bam_in,$lf,$bwfile,$bam,$read,$header,$basename);
 my $logext = ".bam_to_bigwig.log";
 my $outdir = "./";
 my $want_bigbed = 0;
@@ -85,8 +85,7 @@ unless ($strand =~ /[\+\-]/) {
 unless ($outdir =~ /\/$/){$outdir .= "/";}
 unless (-d $outdir){mkdir $outdir or die $!;}
 
-($basename,$bamdir,$bamext) = fileparse($bam_in,qr/\..*/);
-
+$basename = basename($bam_in,".bam");
 $lf = file($outdir,$basename.$logext);
 
 if ($wantnorm == 1){
