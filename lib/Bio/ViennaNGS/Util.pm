@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-24 14:01:47 mtw>
+# Last changed Time-stamp: <2015-02-27 10:04:52 mtw>
 
 package Bio::ViennaNGS::Util;
 
@@ -72,8 +72,11 @@ sub bed_or_bam2bw {
       if(defined $log);
   }
 
-  ($bn,$path,$ext) = fileparse($infile, qr /\..*/);
-  $fn_bg_tmp  = file($dest,$bn.".tmp.bg");
+  if ($type eq "bam"){$ext = ".bam";}
+  else{$ext = ".bed";}
+  $bn = basename($infile,$ext);
+
+  $fn_bg_tmp  = file($dest,$infile.".tmp.bg");
   $fn_bg      = file($dest,$bn.".bg");
   if($strand eq "+"){
     $fn_bw  = file($dest,$bn.".pos.bw");
