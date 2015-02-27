@@ -1,11 +1,11 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-27 10:18:49 mtw>
+# Last changed Time-stamp: <2015-02-27 22:18:58 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
 # *
-# *  Copyright 2014 Michael T. Wolfinger <michael@wolfinger.eu>
+# *  Copyright 2015 Michael T. Wolfinger <michael@wolfinger.eu>
 # *  All rights reserved
 # *
 # *  This program is free software: you can redistribute it and/or modify
@@ -95,7 +95,7 @@ if ($wantnorm == 1){
   while ($read= $bam->read1() ) {
     $counter++;
   }
-  print STDERR "INFO bam_to_bigwig.pl # of alignments is: $counter\n";
+  print STDERR "INFO bam_to_bigwig.pl >$bam_in<  | # of alignments is: $counter\n";
   $bwfile = bed_or_bam2bw("bam",$bam_in,$cs_in,$strand,$outdir,$wantnorm,$counter,$scale,$lf);
 }
 else {
