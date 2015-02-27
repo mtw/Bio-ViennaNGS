@@ -1,14 +1,14 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-27 10:04:52 mtw>
+# Last changed Time-stamp: <2015-02-27 12:00:03 mtw>
 
 package Bio::ViennaNGS::Util;
 
 use Exporter;
-use version; our $VERSION = qv('0.14');
+use version; our $VERSION = qv('0.15');
 use strict;
 use warnings;
 use Data::Dumper;
-use File::Basename qw(fileparse);
+use File::Basename qw(fileparse basename);
 use IPC::Cmd qw(can_run run);
 use Path::Class qw(dir file);
 use File::Path qw(make_path remove_tree);
