@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-27 10:12:27 mtw>
+# Last changed Time-stamp: <2015-02-27 10:18:49 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -23,7 +23,7 @@
 # *
 # *  This copyright notice MUST APPEAR in all copies of the script!
 # ***********************************************************************
-q
+
 use strict;
 use warnings;
 use Getopt::Long qw( :config posix_default bundling no_ignore_case );
