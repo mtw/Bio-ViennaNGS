@@ -1,5 +1,4 @@
-Bio::ViennaNGS 0.14
-==============
+# Bio::ViennaNGS 0.15_01
 
 Bio::ViennaNGS is a distribution of Perl modules and utilities for
 building efficient Next-Generation Sequencing (NGS) analysis
@@ -67,7 +66,7 @@ Bio::ViennaNGS is shipped with a complementary set of modules/classes:
   utilities as well as a set of utility functions.
 
 
-UTILITIES
+## UTILITIES
 
 In addition, Bio::ViennaNGS comes with a collection of utility
 programs for accomplishing routine tasks often required in NGS data
@@ -147,66 +146,84 @@ trim_fastq.pl:
 Trim sequence and quality string fields in a Fastq file by user
 defined length.
 
-TUTORIAL
+
+## TUTORIAL
 
 See Bio::ViennaNGS::Tutorial 
 
-INSTALLATION
 
-To install this module type the following:
+## INSTALLATION
+
+We have compiled a comprehensive `ViennaNGS Installation HOWTO` which
+covers the setup of third part and Perl dependencies in detail:
+
+http://rna-seq.at/blog/2015/03/03/viennangs-installation-howto/
+
+If you have already installed all dependencies, the ViennaNGS distribution
+can be installed with the following commands:
 
    perl Makefile.PL
    make
    make test
    make install
 
+However, we highly recommend using *cpanminus* for installing ViennaNGS. If
+you have cpanm available on your system, simply type
 
-DEPENDENCIES
+  cpanm Bio::ViennaNGS
 
-Bio::ViennaNGS and its submodules require a set of third-party libraries
-and packages that are not part of the Perl core distribution:
-
-  Bio::Perl >= 1.00690001
-  Bio::DB::Sam >= 1.37
-  Bio::DB::Fasta
-  Bio::Tools::GFF
-  File::Share	
-  File::Path
-  Template
-  Moose
-  Moose::Util::TypeConstraints
-  Path::Class
-  namespace::autoclean
-  Tie::Hash::Indexed
-  MooseX::Clone
-  MooseX::InstanceTracking
-
-The modules listed below are only reuqired by some of the utilities. You
-will only need to install them if you intend to use the reference
-utilities:
-
-  PerlIO::gzip
-  Math::Round
-  XML::Simple
-  Statistics::R
-
-Computation of BigWig files from BAM is accomplished via two calls to
-third-party tools: 'genomeCoverageBed' from the BEDtools suite
-(http://bedtools.readthedocs.org/en/latest/content/tools/genomecov.html) is
-used to create a BedGraph coverage file at first place. In a second step,
-the BedGraph is converted to BigWig by 'bedGraphToBigWig', a UCSC Genome
-Browser utility (http://hgdownload.cse.ucsc.edu/admin/exe/). Please ensure
-that all third-party utilities are available on your system and accessible
-to the Perl interpreter.
+This command will grab the lastest ViennaNGS release from CPAN together
+with all Perl dependencies and install the suite automatically (provided
+you have samtools <= 0.1.19 installed, see the HOWTO link above).
 
 
-SOURCE AVAILABILITY
+## DEPENDENCIES
+
+Bio::ViennaNGS depends on a set of third-party tools and libraries which
+are required for specific filtering and file format conversion tasks as
+well as for building internally used Perl modules:
+
+* bedtools2 >= 2.17 (https://github.com/arq5x/bedtools2) 
+* bedGraphToBigWig and fetchChromSizes from the UCSC Genome Browser
+  applications (http://hgdownload.cse.ucsc.edu/admin/exe/)   
+* the R Statistics software (http://www.r-project.org/)
+* samtools <= v0.1.19 for building Bio::DB::Sam. Please note that more
+  recent HTSlib-based versions of samtools will not work with Bio::DB::Sam 
+
+Please ensure that all third-party utilities are available on your system
+and accessible to the Perl interpreter.
+
+Moreover, Bio::ViennaNGS requires the following Perl packages that are not
+shipped with the Perl core distribution:
+
+* Bio::Perl >= 1.00690001
+* Bio::DB::Sam >= 1.37
+* Bio::DB::Fasta
+* Bio::Tools::GFF
+* File::Share	
+* File::Path
+* Template
+* Moose
+* Moose::Util::TypeConstraints
+* MooseX::Clone
+* MooseX::InstanceTracking
+* Path::Class
+* namespace::autoclean
+* Tie::Hash::Indexed
+* Statistics::R
+* PerlIO::gzip
+* Math::Round
+* XML::Simple
+* Template
+
+
+## SOURCE AVAILABILITY
 
 This source is available on Github: 
               https://github.com/mtw/Bio-ViennaNGS
 
 
-PAPERS
+## ViennaNGS PAPER
 
 If the Bio::ViennaNGS suite is useful for your work or if you use any
 component of ViennaNGS in a custom pipeline, please cite the following
@@ -215,10 +232,11 @@ publication:
 "ViennaNGS - A toolbox for building efficient next-generation sequencing
 analysis pipelines"
 Michael T. Wolfinger, Joerg Fallmann, Florian Eggenhofer and Fabian Amman
-bioRxiv doi: http://dx.doi.org/10.1101/013011
+F1000Research 4:50 (2015)
+DOI: http://dx.doi.org/10.12688/f1000research.6157.1
 
 
-NOTES
+## NOTES
 
 The Bio::ViennaNGS suite is actively developed and tested on different
 flavours of Linux and Mac OS X. We have taken care of writing
@@ -228,13 +246,13 @@ Windows. As such, we have not tested and will not test Windows
 compatibility.
 
 
-BUGS
+## BUGS
 
 Please report bugs through the Github issue tracker at
 https://github.com/mtw/Bio-ViennaNGS/issues
 
 
-AUTHORS
+## AUTHORS
 
 Michael T. Wolfinger <michael@wolfinger.eu>
 Joerg Fallmann <fall@tbi.univie.ac.at>
@@ -242,7 +260,7 @@ Florian Eggenhofer <florian.eggenhofer@tbi.univie.ac.at>
 Fabian Amman <fabian@tbi.univie.ac.at>
 
 
-COPYRIGHT AND LICENCE
+## COPYRIGHT AND LICENCE
 
 Copyright (C) 2014-2015 Michael T. Wolfinger <michael@wolfinger.eu>
 
