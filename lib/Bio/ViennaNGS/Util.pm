@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-27 12:00:03 mtw>
+# Last changed Time-stamp: <2015-03-06 12:03:20 mtw>
 
 package Bio::ViennaNGS::Util;
 
 use Exporter;
-use version; our $VERSION = qv('0.15');
+use version; our $VERSION = qv('0.15_01');
 use strict;
 use warnings;
 use Data::Dumper;
@@ -36,8 +36,7 @@ my %unique = ();
 
 sub bed_or_bam2bw {
   my ($type,$infile,$chromsizes,$strand,$dest,$want_norm,$size,$scale,$log) = @_;
-  my ($fn_bg_tmp,$fn_bg,$fn_bw);
-  my ($bn,$path,$ext,$cmd);
+  my ($fn_bg_tmp,$fn_bg,$fn_bw,$fn,$bn,$path,$ext,$cmd);
   my @processed_files = ();
   my $factor = 1.;
   my $this_function = (caller(0))[3];
@@ -75,8 +74,9 @@ sub bed_or_bam2bw {
   if ($type eq "bam"){$ext = ".bam";}
   else{$ext = ".bed";}
   $bn = basename($infile,$ext);
+  $fn = fileparse($infile);
 
-  $fn_bg_tmp  = file($dest,$infile.".tmp.bg");
+  $fn_bg_tmp  = file($dest,$fn.".tmp.bg");
   $fn_bg      = file($dest,$bn.".bg");
   if($strand eq "+"){
     $fn_bw  = file($dest,$bn.".pos.bw");

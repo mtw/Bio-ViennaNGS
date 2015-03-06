@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-13 01:05:02 mtw>
+# Last changed Time-stamp: <2015-03-06 10:43:36 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -28,8 +28,9 @@ use strict;
 use warnings;
 use Getopt::Long qw( :config posix_default bundling no_ignore_case );
 use Pod::Usage;
+use Path::Class;
 use Data::Dumper;
-use Bio::ViennaNGS::Util  qw(bed2bigBed);
+use Bio::ViennaNGS::Util  qw(bed2bigBed mkdircheck);
 use Bio::ViennaNGS::SpliceJunc qw(bed6_ss_from_bed12 bed6_ss_from_rnaseq intersect_sj);
 use Bio::ViennaNGS::Fasta;
 
@@ -103,12 +104,11 @@ if($want_bigbed==1){
 }
 
 #TODO check if we are allowed to write to $outdir
-unless ($outdir =~ /\/$/){$outdir .= "/";}
-unless (-d $outdir){mkdir $outdir or die $!;}
-$path_annot = $outdir.$dirname_annot;
-unless (-d $path_annot){mkdir $path_annot or die $!;}
-$path_ss = $outdir.$dirname_ss;
-unless (-d $path_ss){mkdir $path_ss or die $!;}
+$path_annot = dir($outdir,$dirname_annot);
+$path_ss    = dir($outdir,$dirname_ss);
+mkdircheck($outdir);
+mkdircheck($path_annot);
+mkdircheck($path_ss);
 
 if($want_canonical){
   $fastaO = Bio::ViennaNGS::Fasta->new(fa=>$fa_in);

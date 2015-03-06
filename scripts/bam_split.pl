@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-24 11:42:00 mtw>
+# Last changed Time-stamp: <2015-03-06 10:23:17 mtw>
 #
 # Split BAM files according to their strands, optionally filter unique
 # mappers
@@ -83,8 +83,7 @@ if ($bw == 1) {
 }
 
 #TODO check if we are allowed to write to $outdir
-#unless ($outdir =~ /\/$/){$outdir .= "/";}
-unless (-d $outdir){mkdir $outdir or die $!;}
+unless (-d $outdir){mkdircheck($outdir)}
 
 ($basename,$bamdir,$bamext) = fileparse($bam_in,qr/\..*/);
 
