@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-24 13:57:15 mtw>
+# Last changed Time-stamp: <2015-03-06 16:31:12 mtw>
 
 package Bio::ViennaNGS::SpliceJunc;
 
 use Exporter;
-use version; our $VERSION = qv('0.14');
+use version; our $VERSION = qv('0.15_01');
 use strict;
 use warnings;
 use Data::Dumper;
@@ -512,9 +512,9 @@ strand. In 5' to 3' direction of the forward strandm this junction
 reads CT->AC. A splice junction is canonical if its motif corresponds
 to one of the following cases:
 
-5'===]GT|CT....AG|AC[====3' ie GT->AG or CT->AC
-5'===]GC|CT....AG|GC[====3' ie GC->AG or CT->GC
-5'===]AT|GT....AC|AT[====3' ie AT->AC or GT->AT
+  5'===]GT|CT....AG|AC[====3' ie GT->AG or CT->AC
+  5'===]GC|CT....AG|GC[====3' ie GC->AG or CT->GC
+  5'===]AT|GT....AC|AT[====3' ie AT->AC or GT->AT
 
 =back
 
