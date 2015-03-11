@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-03-06 16:31:12 mtw>
+# Last changed Time-stamp: <2015-03-11 15:06:55 mtw>
 
 package Bio::ViennaNGS::SpliceJunc;
 
@@ -30,7 +30,7 @@ our @EXPORT_OK = qw(bed6_ss_from_bed12 bed6_ss_from_rnaseq
 sub bed6_ss_from_bed12{
   my ($bed12,$dest,$window,$can,$fastaobjR) = @_;
   my ($i,$tr_name,$pos5,$pos3);
-  my ($splicesites,$c,$totalsj,$cansj) = 0x4;
+  my ($splicesites,$c,$totalsj,$cansj) = (0)x4;
   my @bedline = ();
   my $this_function = (caller(0))[3];
 
