@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-03-11 15:05:57 mtw>
+# Last changed Time-stamp: <2015-03-13 11:16:41 mtw>
 
 package Bio::ViennaNGS::Bed;
 

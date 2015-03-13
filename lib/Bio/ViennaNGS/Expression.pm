@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-03-11 15:06:31 mtw>
+# Last changed Time-stamp: <2015-03-12 19:47:14 mtw>
 
 package Bio::ViennaNGS::Expression;
 
-use version; our $VERSION = qv('0.15_01');
+use version; our $VERSION = qv('0.15_02');
 use Moose;
 use Carp;
 use Data::Dumper;
@@ -36,7 +36,6 @@ has 'nr_features' => (
 		      isa => 'Int',
 		      predicate => 'has_features',
 		     );
-
 
 sub parse_readcounts_bed12 {
   my ($self,$file) = @_;
