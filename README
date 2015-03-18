@@ -155,7 +155,7 @@ See Bio::ViennaNGS::Tutorial
 ## INSTALLATION
 
 We have compiled a comprehensive `ViennaNGS Installation HOWTO` which
-covers the setup of third part and Perl dependencies in detail:
+covers the setup of third party and Perl dependencies in detail:
 
 http://rna-seq.at/blog/2015/03/03/viennangs-installation-howto/
 
