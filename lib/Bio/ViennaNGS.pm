@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-24 13:57:49 mtw>
+# Last changed Time-stamp: <2015-03-11 15:09:03 mtw>
 
 package Bio::ViennaNGS;
 
-use version; our $VERSION = qv('0.14');
+use version; our $VERSION = qv('0.15_01');
 
 1;
 

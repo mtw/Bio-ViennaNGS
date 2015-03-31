@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-24 13:55:56 mtw>
+# Last changed Time-stamp: <2015-03-12 19:47:14 mtw>
 
 package Bio::ViennaNGS::Expression;
 
-use version; our $VERSION = qv('0.14');
+use version; our $VERSION = qv('0.15_02');
 use Moose;
 use Carp;
 use Data::Dumper;
@@ -37,11 +37,10 @@ has 'nr_features' => (
 		      predicate => 'has_features',
 		     );
 
-
 sub parse_readcounts_bed12 {
   my ($self,$file) = @_;
   my @mcData = ();
-  my ($i,$n) = 0x2;
+  my ($i,$n) = (0)x2;
   my $this_function = (caller(0))[3];
 
   croak "ERROR [$this_function] readcount / multicov file $self->readcountfile not available\n"

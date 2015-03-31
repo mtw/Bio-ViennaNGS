@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-01-26 00:38:37 mtw>
+# Last changed Time-stamp: <2015-03-12 20:02:45 mtw>
 #
 # Compute normalized expression data in TPM from (raw) read
 # counts in multicov.
@@ -57,11 +57,11 @@ pod2usage(-verbose => 1) unless GetOptions("i=s"             => \$infile,
 					   "man"             => sub{pod2usage(-verbose => 2)},
 					   "help|h"          => sub{pod2usage(1)}
 					  );
-
 unless(-f $infile){
   warn "Could not find input multicov file provided via -i option";
   pod2usage(-verbose => 0);
-  }
+}
+
 $cwd = getcwd();
 unless ($infile =~ /^\// || $infile =~ /^\.\//){$infile = file($cwd,$infile);}
 unless ($dest =~ /\/$/){$dest .= "/";}
@@ -70,8 +70,11 @@ unless (-d $dest){mkdir $dest;}
 
 # parse multicov file
 my $exp = Bio::ViennaNGS::Expression->new();
+
 $exp->parse_readcounts_bed12("$infile"); # stringified Path::Class object
 #print Dumper($exp->nr_features);
+#print Dumper($exp->data);
+
 
 # compute TPM values for all genes in each condition
 for ($i=0;$i<$exp->conds;$i++){

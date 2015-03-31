@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-24 13:55:45 mtw>
+# Last changed Time-stamp: <2015-03-13 11:16:41 mtw>
 
 package Bio::ViennaNGS::Bed;
 
-use version; our $VERSION = qv('0.14');
+use version; our $VERSION = qv('0.15_01');
 use Carp;
 use Moose;
 use namespace::autoclean;
@@ -60,7 +60,7 @@ has 'length' => (
 
 sub _build_length {
   my ($self) = @_;
-  my ($i,$len) = 0x2;
+  my ($i,$len) = (0)x2;
   my $this_function = (caller(0))[3];
   my @blockSizes = split (/,/ ,$self->blockSizes);
   my $bc = scalar @blockSizes;
