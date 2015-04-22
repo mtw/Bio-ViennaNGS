@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-13 01:04:39 mtw>
+# Last changed Time-stamp: <2015-03-31 16:33:47 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -102,16 +102,15 @@ sj_visualizer.pl - Produce BED12 from BED6 splice junction files.
 
 =head1 SYNOPSIS
 
-sj_visualizer.pl [-s I<FILE>] [-f I<FILE>]
-[options]
+sj_visualizer.pl [-s I<FILE>] [options]
 
 =head1 DESCRIPTION
 
 Convert splice junctions from mapped RNA-seq data to BED12 format for
-easy visualization in genome browsers. The program expects BED6 input
-in segemehl splice junction format (see the L<segemehl
+easy genome browser visualization. The program expects BED6 input in
+segemehl splice junction format (see the L<segemehl
 documentation|http://www.bioinf.uni-leipzig.de/Software/segemehl/segemehl_manual_0_1_7.pdf>
-for details).
+for details) and produces BED12 and optionally bigBed output.
 
 =head1 OPTIONS
 
@@ -145,7 +144,6 @@ Filter circular splice junctions
 =item B<-o>
 
 Relative output path
-
 
 =item B<--help -h>
 
