@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-24 13:57:38 mtw>
+# Last changed Time-stamp: <2015-04-22 15:01:10 mtw>
 
 package Bio::ViennaNGS::UCSC;
 
 use Exporter;
-use version; our $VERSION = qv('0.14');
+use version; our $VERSION = qv('0.15_01');
 use strict;
 use warnings;
 use Template;
@@ -19,7 +19,10 @@ use Bio::ViennaNGS::Util qw(fetch_chrom_sizes bed2bigBed);
 
 our @ISA = qw(Exporter);
 
-our @EXPORT_OK = qw( make_assembly_hub make_track_hub );
+our @EXPORT_OK = qw( make_assembly_hub make_track_hub retrieve_color
+make_track make_multi_bigwig_container_track
+make_bigwig_container_track retrieve_bigwig_tracks
+retrieve_bigbed_url_tracks );
 
 our @EXPORT = ();
 

@@ -137,3 +137,4 @@ Revision history for Perl extension ViennaNGS.
 	- fixed path creation in bed_or_bam2bw()
 	- fixed scalar initialization bug
 	- scripts/bam_to_bigwig.pl can now produce normalized bigWigs
+	- added tests for UCSC.pm
