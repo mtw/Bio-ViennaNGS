@@ -10,13 +10,13 @@ use Bio::ViennaNGS::UCSC qw ( make_assembly_hub
 
 use File::Share ':all';
 use Test::Files;
-use Test::More qw(no_plan);
+use Test::More tests => 8;
 use Test::File::Contents;
 use Test::Deep;
 use Data::Dumper;
 
 my $fasta  = dist_file('Bio-ViennaNGS','data1/NC_000913.3.30k.fa');
-
+print Dumper($fasta);
 # Make assembly hub
 make_assembly_hub ( $fasta,
                     ".",
