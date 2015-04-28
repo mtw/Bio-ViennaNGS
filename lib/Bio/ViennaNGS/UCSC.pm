@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-04-22 15:01:10 mtw>
+# Last changed Time-stamp: <2015-04-28 12:25:09 mtw>
 
 package Bio::ViennaNGS::UCSC;
 
 use Exporter;
-use version; our $VERSION = qv('0.15_01');
+use version; our $VERSION = qv('0.15_02');
 use strict;
 use warnings;
 use Template;
@@ -22,7 +22,9 @@ our @ISA = qw(Exporter);
 our @EXPORT_OK = qw( make_assembly_hub make_track_hub retrieve_color
 make_track make_multi_bigwig_container_track
 make_bigwig_container_track retrieve_bigwig_tracks
-retrieve_bigbed_url_tracks );
+retrieve_bigbed_url_tracks parse_fasta_header valid_ncbi_accession
+modify_fasta_header make_group retrieve_chromosome_size
+write_chromosome_size_file convert_tracks);
 
 our @EXPORT = ();
 
