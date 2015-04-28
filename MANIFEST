@@ -59,4 +59,3 @@ t/01-basics.t
 t/02-thirdparty.t
 t/04-UCSC-TrackHub.t
 t/05-UCSC-AssemblyHub.t
-t/NC_000913.3.30k.fa

@@ -15,6 +15,9 @@ use Data::Dumper;
 my $data1_fa  = dist_file('Bio-ViennaNGS','NC_000913.3.30k.fa');
 my $data1_gff = dist_file('Bio-ViennaNGS','NC_000913.3.30k.gff');
 
+print Dumper($data1_fa);
+print Dumper($data1_gff);
+
 BEGIN { use_ok('Bio::ViennaNGS') };
 BEGIN { use_ok('Bio::ViennaNGS::AnnoC') };
 BEGIN { use_ok('Bio::ViennaNGS::Bam') };

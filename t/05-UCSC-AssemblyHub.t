@@ -1,4 +1,12 @@
+
 use strict;
+use warnings;
+use File::Share ':all';
+use Test::Files;
+use Test::More tests => 8;
+use Test::File::Contents;
+use Test::Deep;
+use Data::Dumper;
 use Bio::ViennaNGS::UCSC qw ( make_assembly_hub
                               parse_fasta_header
                               valid_ncbi_accession
@@ -8,15 +16,12 @@ use Bio::ViennaNGS::UCSC qw ( make_assembly_hub
                               write_chromosome_size_file
                               convert_tracks );
 
-use File::Share ':all';
-use Test::Files;
-use Test::More tests => 8;
-use Test::File::Contents;
-use Test::Deep;
-use Data::Dumper;
+# this needs to be here in order for the next line to work..dubious...
+BEGIN { use_ok('Bio::ViennaNGS') };
 
 my $fasta  = dist_file('Bio-ViennaNGS','data1/NC_000913.3.30k.fa');
 print Dumper($fasta);
+
 # Make assembly hub
 make_assembly_hub ( $fasta,
                     ".",
