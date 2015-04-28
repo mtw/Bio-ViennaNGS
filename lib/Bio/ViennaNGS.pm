@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-03-11 15:09:03 mtw>
+# Last changed Time-stamp: <2015-04-28 14:56:24 mtw>
 
 package Bio::ViennaNGS;
 
-use version; our $VERSION = qv('0.15_01');
+use version; our $VERSION = qv('0.15_02');
 
 1;
 
@@ -20,7 +20,7 @@ pipelines. It covers various aspects of NGS data analysis, including
 (but not limited to) conversion of sequence annotation, evaluation of
 mapped data, expression quantification and visualization.
 
-The main Bio::ViennaNGS module is shipped with a complementary set of 
+The main Bio::ViennaNGS module is shipped with a complementary set of
 (sub)modules:
 
 =over

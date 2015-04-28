@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-04-28 12:25:09 mtw>
+# Last changed Time-stamp: <2015-04-28 13:59:00 mtw>
 
 package Bio::ViennaNGS::UCSC;
 
@@ -535,13 +535,13 @@ sub make_bigwig_track{
 
 sub valid_ncbi_accession{
   # receives a NCBI accession ID, with or without version number
-  # returns NCBI accession ID without version number
+  # checks for validity and returns the accession number as is
   my $acc = shift;
   if ($acc =~ /^(N[CST]\_\d{6})\.\d+?$/){
-    return $acc; # NCBI accession ID without version
+    return $acc;
   }
   elsif ($acc =~ /^(N[CST]\_\d{6})$/){
-    return $1; # NCBI accession ID without version
+    return $1;
   }
   else {
     return 0;
@@ -557,7 +557,6 @@ sub parse_fasta_header{
   close $file;
   #>gi|556503834|ref|NC_000913.3| Escherichia coli str. K-12 substr. MG1655
   if($fastaheader=~/^>gi/){
-    print LOG "#NCBI fasta header detected\n";
     my @headerfields = split(/\|/, $fastaheader);
     my $accession = $headerfields[3];
     my $scientificName = $headerfields[4];
@@ -568,13 +567,11 @@ sub parse_fasta_header{
   }else{
     $fastaheader=~s/^>//;
     if(valid_ncbi_accession($fastaheader)){
-      print LOG "#Header contains just valid NCBI accession number\n";
       my @ids;
       push(@ids,$fastaheader);
       push(@ids,"scientific name not set");
       return \@ids;
     }else{
-      print LOG "#No valid accession/ ncbi header\n";
       croak ("ERROR [$this_function] \$fasta_path does not contain a valid accession/ ncbi header\n");
     }
   }
