@@ -1,29 +1,25 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl ViennaNGS.t'
-
-#########################
-
-# change 'tests => 1' to 'tests => last_test_to_print';
-
 use strict;
 use warnings;
 #use IPC::Cmd qw(can_run);
-use File::ShareDir::Install;
-use Test::More tests => 24;
+use File::Share ':all';
+use Test::More tests => 25;
 use Test::File::Contents;
 use Data::Dumper;
 use Path::Class;
-use Cwd;
-use Bio::ViennaNGS::SpliceJunc qw(bed6_ss_from_bed12 bed6_ss_from_rnaseq intersect_sj);
+use Bio::ViennaNGS::SpliceJunc qw(bed6_ss_from_bed12
+    			        bed6_ss_from_rnaseq 
+				intersect_sj);
 use Bio::ViennaNGS::Fasta;
 
-my $cwd = getcwd();
-my $data_dir_name = 'data-splicejunc-input';
+# this needs to be here in order for the next line to work..dubious...
+BEGIN { use_ok('Bio::ViennaNGS') };
 
-my $data_dir = dir($cwd,$data_dir_name);
+my $infile_bed12 = dist_file('Bio-ViennaNGS', 'data2/MIOS.bed12');
+my $infile_bed6  = dist_file('Bio-ViennaNGS', 'data2/MIOS_sj.bed');
 
-my $datasj_bed12_in = file($data_dir,'MIOS.bed12');
-my $datasj_bed6_in = file($data_dir,'MIOS_sj.bed');
+my $datasj_bed12_in = $infile_bed12;
+my $datasj_bed6_in = $infile_bed6;
+
 my $datasj_bed_ex = 'exist.SS.bed';
 my $datasj_bed_nov = 'novel.SS.bed';
 my $datasj_fasta_in = 'hg19_chromchecked.fa';
@@ -79,7 +75,7 @@ my $fastaO = Bio::ViennaNGS::Fasta->new(fa=>$datasj_fasta_in);
 unless ($path_annot =~ /\/$/){$path_annot .= "/";}
 unless (-d $path_annot){mkdir $path_annot or die $!;}
 
-print STDERR "Testing routine bed6_ss_from_bed12...\n";
+#print STDERR "Testing routine bed6_ss_from_bed12...\n";
 bed6_ss_from_bed12($datasj_bed12_in,$path_annot,$window,$want_canonical,$fastaO);
 
 foreach my $el (keys %bed6_ss_from_bed12_results) {
@@ -87,21 +83,18 @@ foreach my $el (keys %bed6_ss_from_bed12_results) {
   $count++;
 }
 
-
-print STDERR "\nTesting routine bed6_ss_from_rnaseq...\n";
+#print STDERR "\nTesting routine bed6_ss_from_rnaseq...\n";
 unless ($dest_ss =~ /\/$/){$dest_ss .= "/";}
 unless (-d $dest_ss){mkdir $dest_ss or die $!;}
 
 bed6_ss_from_rnaseq($datasj_bed6_in,$dest_ss,$window,$mincov,$want_canonical,$fastaO);
-
 
 foreach my $el (keys %bed6_ss_from_rnaseq) {
   file_md5sum_is $dest_ss.$el, $bed6_ss_from_rnaseq{$el}, "output $count is the same";
   $count++;
 }
 
-
-print STDERR "\nTesting routine intersect_sj...\n";
+#print STDERR "\nTesting routine intersect_sj...\n";
 unless ($outdir =~ /\/$/){$outdir .= "/";}
 unless (-d $outdir){mkdir $outdir or die $!;}
 
@@ -110,18 +103,5 @@ my ($exist,$novel) = @result;
 
 file_md5sum_is $outdir.$datasj_bed_ex, $intersect_sj{$datasj_bed_ex}, "output 23 is the same";
 file_md5sum_is $outdir.$datasj_bed_nov, $intersect_sj{$datasj_bed_nov}, "output 24 is the same";
-
-
-
-
-#my @data1_ids = $f->fastaids;
-#ok (scalar @data1_ids, 1);
-#my $ps = $f->primaryseq;
-
-
-# Insert your test code below, the Test::More module is use()ed here so read
-# its man page ( perldoc Test::More ) for help writing this test script.
-
-
 
 done_testing;

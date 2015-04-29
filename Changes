@@ -133,8 +133,9 @@ Revision history for Perl extension ViennaNGS.
 	- fixed directory creation in bam_split.pl
 	- updated POD in Tutorials
 
-0.15_01
+0.15_02
 	- fixed path creation in bed_or_bam2bw()
 	- fixed scalar initialization bug
 	- scripts/bam_to_bigwig.pl can now produce normalized bigWigs
 	- added tests for UCSC.pm
+	- added tests for SpliceJunc.pm
