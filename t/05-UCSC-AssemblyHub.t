@@ -7,6 +7,7 @@ use Test::More tests => 8;
 use Test::File::Contents;
 use Test::Deep;
 use Data::Dumper;
+use Path::Class;
 use Bio::ViennaNGS::UCSC qw ( make_assembly_hub
                               parse_fasta_header
                               valid_ncbi_accession
@@ -19,12 +20,17 @@ use Bio::ViennaNGS::UCSC qw ( make_assembly_hub
 # this needs to be here in order for the next line to work..dubious...
 BEGIN { use_ok('Bio::ViennaNGS') };
 
-my $fasta  = dist_file('Bio-ViennaNGS','data1/NC_000913.3.30k.fa');
-print Dumper($fasta);
+my $infile_path = dist_dir('Bio-ViennaNGS');
+my $infile_fasta  = dist_file('Bio-ViennaNGS','data1/NC_000913.3.30k.fa');
+my $bed_path = dir($infile_path,"data1");
+my $bed_file = file($bed_path,"NC_000913.CDS.bed");
+my $infile_bed = "$bed_file";
+print Dumper($infile_path);
+print Dumper($infile_bed);
 
 # Make assembly hub
-make_assembly_hub ( $fasta,
-                    ".",
+make_assembly_hub ( $infile_fasta,
+                    $bed_path,
                     ".",
                     "http://tbi.univie.ac.at/~egg/assemblyHub_test",
                     "-",
@@ -34,7 +40,7 @@ make_assembly_hub ( $fasta,
 # Check if functions work correctly
 subtest 'parse_fasta_header' => sub {
   plan tests => 1;
-  my @arguments = ("NC_000913.3.30k.fa", "Bio::ViennaNGS::UCSC::make_assembly_hub");
+  my @arguments = ($infile_fasta, "Bio::ViennaNGS::UCSC::make_assembly_hub");
   my $expected = bag ('NC_000913.3', 'scientific name not set');
 
   cmp_deeply ( parse_fasta_header (@arguments), $expected, 'parse fasta header');
@@ -49,7 +55,7 @@ is ( valid_ncbi_accession ($argument), $expected, 'valid ncbi accession');
 
 subtest 'modify_fasta_header' => sub {
   plan tests => 1;
-  my @arguments = ( "NC_000913.3.30k.fa", "assemblyHub/NC_000913.3.fa", "NC_000913.3" );
+  my @arguments = ( $infile_fasta, "assemblyHub/NC_000913.3.fa", "NC_000913.3" );
   my $expected = "1";
 is ( modify_fasta_header (@arguments), $expected, 'modify fasta header');
 };
@@ -68,7 +74,7 @@ is ( make_group (@arguments), $expected, 'make group');
 
 subtest 'retrieve_chromosome_size' => sub {
   plan tests => 1;
-  my $argument = "NC_000913.3.30k.fa";
+  my $argument = $infile_fasta;
   my $expected = "29442";
 is ( retrieve_chromosome_size ($argument), $expected, 'retrieve chromosome size');
 };
