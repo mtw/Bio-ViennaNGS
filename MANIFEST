@@ -45,6 +45,7 @@ scripts/Tutorial_pipeline03.pl
 share/data1/NC_000913.3.30k.fa
 share/data1/NC_000913.3.30k.gff
 share/data1/NC_000913.3.chrom.sizes
+share/data1/NC_000913.CDS.bed
 share/data1/SRR794848.8k.bam
 share/template-AssemblyHub/description.html
 share/template-AssemblyHub/genome.txt
