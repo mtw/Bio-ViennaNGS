@@ -1,4 +1,4 @@
-# Bio::ViennaNGS 0.15_01
+# Bio::ViennaNGS 0.15_03
 
 Bio::ViennaNGS is a distribution of Perl modules and utilities for
 building efficient Next-Generation Sequencing (NGS) analysis
@@ -126,9 +126,9 @@ Create a new genome database to a locally installed instance of the UCSC
 genome browser in order to add a novel organism for visualization.
 
 normalize_multicov.pl: 
-Compute normalized expression data in TPM from (raw) read counts in
-bedtools multicov format. TPM reference: Wagner et al, Theory
-Biosci. 131(4), pp 281-85 (2012)
+Compute normalized expression data in TPM and RPKM from (raw) read counts
+in bedtools multicov format. TPM reference: Wagner et al, Theory
+Biosci. 131(4), pp 281-85 (2012).
 
 sj_visualizer.pl:
 Convert splice junctions from mapped RNA-seq data in segemehl BED6 splice

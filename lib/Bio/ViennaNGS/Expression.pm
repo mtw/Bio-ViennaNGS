@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-06-01 12:39:49 mtw>
+# Last changed Time-stamp: <2015-06-01 16:34:38 mtw>
 
 package Bio::ViennaNGS::Expression;
 
@@ -140,7 +140,10 @@ sub write_expression_bed12 {
       push @mcLine, ${${$self->data}[$i]}{$feat}{$item};
 
     }
-   print MULTICOV_OUT join("\t",@mcLine)."\n";
+    #print MULTICOV_OUT join("\t",@mcLine)."\n";
+    my @bed12 = splice @mcLine,0,1;
+    print MULTICOV_OUT join("\t",@bed12)."\t";
+    print MULTICOV_OUT join("\t", map { sprintf "%20.4f", $_ }@mcLine),"\n";
   }
   close(MULTICOV_OUT);
 
@@ -176,10 +179,60 @@ sub computeTPM {
  # print Dumper(${$self->data}[$sample]);
  # print "totalTPM=$totalTPM | meanTPM=$meanTPM\n";
 
-
   return $meanTPM;
 }
 
+sub computeRPKM {
+  my ($self,$sample) = @_;
+  my ($R,$length,$count,$totalRPKM) = (0)x4;
+  my ($i,$meanRPKM);
+
+  # iterate through $self->data[$i] twice:
+  # 1. compute the total number of reads for a sample
+  foreach $i (keys %{${$self->data}[$sample]}){
+    $R += ${${$self->data}[$sample]}{$i}{count};
+  }
+
+  # 2. for computing actual RPKM values
+  foreach $i (keys %{${$self->data}[$sample]}){
+    $count  = ${${$self->data}[$sample]}{$i}{count};
+    $length = ${${$self->data}[$sample]}{$i}{length};
+    my $RPKM = ( $count * 1000000000 ) / ( $length * $R );
+    ${${$self->data}[$sample]}{$i}{RPKM} = $RPKM;
+    $totalRPKM += $RPKM;
+  }
+  $meanRPKM = $totalRPKM/$self->nr_features;
+  return $meanRPKM;
+}
+
+sub computeRPKMfromTPM {
+  my ($self,$sample,$rl) = @_;
+  my ($R,$T,$length,$count,$totalRPKM) = (0)x5;
+  my ($i,$meanRPKM);
+
+  # iterate through $self->data[$i] twice:
+  # 1. compute T (denominator in TPM formula) and total number of reads
+  foreach $i (keys %{${$self->data}[$sample]}){
+    $count  = ${${$self->data}[$sample]}{$i}{count};
+    $length =  ${${$self->data}[$sample]}{$i}{length};
+    #print "count: $count\nlength: $length\n";
+    $T += $count * $rl / $length;
+    $R += $count;
+  }
+ # print "T: $T\tR: $R\n";
+
+  # 2. compute RPKM from TPM
+  foreach $i (keys %{${$self->data}[$sample]}){
+     my $RPKMfromTPM = ${${$self->data}[$sample]}{$i}{TPM} * ( $T * 1000 ) / ( $R * $rl);
+     ${${$self->data}[$sample]}{$i}{RPKMfromTPM} =  $RPKMfromTPM;
+     $totalRPKM += $RPKMfromTPM;
+  }
+  $meanRPKM = $totalRPKM/$self->nr_features;
+
+ # print Dumper(${$self->data}[$sample]);
+
+  return $meanRPKM;
+}
 
 __PACKAGE__->meta->make_immutable;
 
@@ -190,7 +243,7 @@ __END__
 =head1 NAME
 
 Bio::ViennaNGS::Expression - An object oriented interface for
-read-count based gene expression
+computing read-count based gene expression as TPm or RPKM
 
 =head1 SYNOPSIS
 
@@ -205,8 +258,12 @@ read-count based gene expression
   # Million (TPM)
   $expression->computeTPM($i, $readlength);
 
-  # write extended BED12 file with TPM for each condition past
-  # the 12th column
+  # compute normalized expression of ith sample in Reads per Kilobase
+  # per Million Reads (RPKM)
+  $expression->computeRPKM($i);
+
+  # write extended BED12 file with normalized expression in TPM for
+  # each condition past the 12th column
   $expression->write_expression_bed12("TPM", $dest, $basename);
 
 =head1 DESCRIPTION
@@ -248,14 +305,15 @@ Title : computeTPM
 
 Usage : C<$obj-E<gt>computeTPM($sample, $readlength);>
 
-Function : Computes expression of each gene/feature present in
-           C<$self-E<gt>data> in Transcript per Million (TPM) [Wagner
-           et.al. Theory Biosci. (2012)].  is a reference to a Hash of
-           Hashes data straucture where keys are feature names and
-           values hold a hash that must at least contain length and
-           raw read counts. Practically, C<$featCount_sample> is
-           represented by _one_ element of C<@featCount>, which is
-           populated from a multicov file by C<parse_multicov()>.
+Function : Computes expression values of each gene/feature present in
+           C<$self-E<gt>data> in I<Transcript per Million (TPM)>
+           [Wagner et.al. Theory Biosci. (2012)]. C<$self-E<gt>data>
+           is a reference to a Hash of Hashes data strqucture where
+           keys are feature names and values hold a hash that must at
+           least contain length and raw read counts. Practically,
+           C<$featCount_sample> is represented by _one_ element of
+           C<@featCount>, which is populated from a multicov file by
+           C<parse_multicov()>.
 
 Args : C<$sample> is the sample index of C<@{$self-E<gt>data}>. This is
         especially handy if one is only interested in computing
@@ -268,25 +326,39 @@ Returns : Returns the mean TPM of the processed sample, which is
           concentration and thus fulfills the invariant average
           criterion.)
 
+=item ComputeRPKM
+
+Title : computeRPKM
+
+Usage :  C<$obj-E<gt>computeRPKM($sample);>
+
+Function : Computes expression values of each gene/feature present in
+           C<$self-E<gt>data> in I<Reads per Kilobase per Million
+           Reads (RPKM)>. C<$self-E<gt>data> is a reference to a Hash
+           of Hashes data structure where keys are feature names and
+           values hold a hash that must at least contain length and
+           raw read counts.
+
+Returns: Returns the mean RPKM of the processed sample.
+
 =item write_expression_bed12
 
 Title : write_expression_bed12
 
-Usage : C<$obj-E<gt>write_expression_bed12($measure,
-$dest,$basename);>
+Usage : C<$obj-E<gt>write_expression_bed12($measure,$dest,$basename);>
 
 Function : Writes normalized expression data to a bedtools multicov
            (multiBamCov)-type BED12 file.
 
 Args : C<$measure> specifies the type in which normalized expression
-       data from C<@{$self-E<gt>data}> is dumped. Currently supports
-       'TPM', however 'RPKM' support will be added in a future
-       release. These values must have been computed and inserted into
-       C<@{self-E<gt>data}> beforehand by
-       e.g. C<$self-E<gt>computeTPM()>. C<$dest> and C<$base_name>
-       give path and base name of the output file, respectively.
+       data from C<@{$self-E<gt>data}> is dumped. Allowed values are
+       'TPM' and 'RPKM'. Corresponding TPM/RPKM values must have been
+       computed and inserted into C<@{self-E<gt>data}> beforehand by
+       C<$self-E<gt>computeTPM()> and C<$self-E<gt>computeRPKM()>,
+       respectively. C<$dest> and C<$base_name> give path and base
+       name of the output file, respectively.
 
-Returns : None. The output is position-sorted extended BED12 file.
+Returns : None. The output is a position-sorted extended BED12 file.
 
 =back
 
