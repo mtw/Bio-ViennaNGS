@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-03-12 19:47:14 mtw>
+# Last changed Time-stamp: <2015-06-01 12:39:49 mtw>
 
 package Bio::ViennaNGS::Expression;
 
-use version; our $VERSION = qv('0.15_02');
+use version; our $VERSION = qv('0.15_03');
 use Moose;
 use Carp;
 use Data::Dumper;
@@ -15,15 +15,15 @@ use namespace::autoclean;
 
 
 has 'readcountfile' => (
-		    is => 'rw',
-		    predicate => 'has_readcountfile',
-		  );
+			is => 'rw',
+			predicate => 'has_readcountfile',
+		       );
 
 has 'data' => (
 	       is => 'rw',
 	       isa => 'ArrayRef',
 	       default => sub { [] },
-		   );
+	      );
 
 has 'conds' => (
 		is => 'rw',
@@ -201,7 +201,8 @@ read-count based gene expression
   # parse read counts from an extended BED12 file
   $expression->parse_readcounts_bed12("$bed12");
 
-  # compute normalized expression of ith sample in Transcript per Million (TPM)
+  # compute normalized expression of ith sample in Transcript per
+  # Million (TPM)
   $expression->computeTPM($i, $readlength);
 
   # write extended BED12 file with TPM for each condition past
