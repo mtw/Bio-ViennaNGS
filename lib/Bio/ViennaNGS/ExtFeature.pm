@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-24 13:56:09 mtw>
+# Last changed Time-stamp: <2015-06-29 15:49:02 mtw>
 
 package Bio::ViennaNGS::ExtFeature;
 
-use version; our $VERSION = qv('0.14');
+use version; our $VERSION = qv('0.15');
 
 use Moose;
 with 'MooseX::Clone';

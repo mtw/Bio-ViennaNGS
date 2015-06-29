@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-03-13 11:16:41 mtw>
+# Last changed Time-stamp: <2015-06-29 15:50:56 mtw>
 
 package Bio::ViennaNGS::Bed;
 
-use version; our $VERSION = qv('0.15_01');
+use version; our $VERSION = qv('0.15');
 use Carp;
 use Moose;
 use namespace::autoclean;

@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-06-01 11:48:19 mtw>
+# Last changed Time-stamp: <2015-06-29 15:58:19 mtw>
 
 package Bio::ViennaNGS;
 
-use version; our $VERSION = qv('0.15_03');
+use version; our $VERSION = qv('0.15');
 
 1;
 
@@ -134,8 +134,8 @@ organism for visualization. Based on L<this Genomewiki
 article|http://genomewiki.ucsc.edu/index.php/Building_a_new_genome_database>.
 
 =item F<normalize_multicov.pl>: Compute normalized expression data in
-TPM from (raw) read counts in bedtools multicov format. TPM reference:
-Wagner et al, Theory Biosci. 131(4), pp 281-85 (2012)
+RPKM and TPM from (raw) read counts in bedtools multicov format. TPM
+reference: Wagner et al, Theory Biosci. 131(4), pp 281-85 (2012)
 
 =item F<sj_visualizer.pl>: Convert splice junctions from mapped
 RNA-seq data in segemehl BED6 splice junction format to BED12 for easy
@@ -232,7 +232,7 @@ analysis pipelines">
 
 I<Michael T. Wolfinger, Joerg Fallmann, Florian Eggenhofer and Fabian Amman>
 
-bioRxiv L<doi:10.1101/013011|http://dx.doi.org/10.1101/013011>.
+F1000Research 2015, 4:50 (doi: L<10.12688/f1000research.6157.1|http://dx.doi.org/10.12688/f1000research.6157.1>)
 
 =head1 NOTES
 
