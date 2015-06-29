@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-24 13:55:35 mtw>
+# Last changed Time-stamp: <2015-06-29 15:40:26 mtw>
 
 package Bio::ViennaNGS::BamStatSummary;
 
-use version; our $VERSION = qv('0.14');
+use version; our $VERSION = qv('0.15');
 use Moose;
 use Carp;
 use POSIX qw(floor);
@@ -51,49 +51,49 @@ has 'files' => (
 has 'control_match' => ( # provides stats how many mapped bases match the reference genome
 			is => 'rw',
 			isa => 'Bool',
-			default => '1',
+			default => '0',
 			predicate => 'has_control_match',
 		       );
 
 has 'control_clip' => ( # provides stats how many bases are soft or hard clipped
 		       is => 'rw',
 		       isa => 'Bool',
-		       default => '1',
+		       default => '0',
 		       predicate => 'has_control_clip',
 		       );
 
 has 'control_split' => ( # provides stats how many/often  mapped reads are split
 			is => 'rw',
 			isa => 'Bool',
-			default => '1',
+			default => '0',
 			predicate => 'has_control_split',
 		       );
 
 has 'control_qual' => ( # provides stats on quality of the match
 		       is => 'rw',
 		       isa => 'Bool',
-		       default => '1',
+		       default => '0',
 		       predicate => 'has_control_qual',
 		      );
 
 has 'control_edit' => ( # provides stats on the edit distance between read and mapped reference
 		       is => 'rw',
 		       isa => 'Bool',
-		       default => '1',
+		       default => '0',
 		       predicate => 'has_control_edit',
 		      );
 
 has 'control_flag' => ( # analyses the sam bit flag for qual/strands/pair_vs_single reads
 		       is => 'rw',
 		       isa => 'Bool',
-		       default => '1',
+		       default => '0',
 		       predicate => 'has_control_flag',
 		      );
 
 has 'control_score' => ( # provides stats on per-base quality scores
 			is => 'rw',
 			isa => 'Bool',
-			default => '1',
+			default => '0',
 			predicate => 'has_control_score',
 		       );
 
@@ -113,9 +113,22 @@ has 'is_segemehl' => ( # toggles to consider segemehl specific bam feature
 
 sub populate_data {
   my ($self) = @_;
+
   foreach my $bamfile (@{$self->files}){
     #carp ">> processing $bamfile\n";
-    my $bo = Bio::ViennaNGS::BamStat->new(bam => $bamfile);
+    
+    my $bo = Bio::ViennaNGS::BamStat->new(bam            => $bamfile,
+					  control_edit   => $self->control_edit,
+					  control_flag   => $self->control_flag,
+					  control_score  => $self->control_score,
+					  control_match  => $self->control_match,
+					  control_clip   => $self->control_clip,
+					  control_split  => $self->control_split,
+					  control_qual   => $self->control_qual,
+					  control_uniq   => $self->control_uniq,
+					  is_segemehl    => $self->is_segemehl,
+					 );
+
     $bo->stat_singleBam();
     push (@{$self->data}, $bo);
   }
@@ -174,7 +187,6 @@ sub dump_countStat {
     print OUT join ("\t", @line)."\n";
   }
 
-#  print Dumper($self->countStat);
   close (OUT);
 }
 
@@ -345,10 +357,10 @@ L<Bio::ViennaNGS::BamStat>
   $bamsummary->dump_countStat("csv");
   $bamsummary->make_BarPlot();
 
-  $bamsummary->make_BoxPlot("data_edit" ) if( $bamsummary->has_control_edit   );
-  $bamsummary->make_BoxPlot("data_clip" ) if( $bamsummary->has_control_clip   );
-  $bamsummary->make_BoxPlot("data_match") if( $$bamsummary->has_control_match );
-  $bamsummary->make_BoxPlot("data_qual" ) if( $bamsummary->has_control_qual   );
+  $bamsummary->make_BoxPlot("data_edit" ) if( $bamsummary->control_edit   );
+  $bamsummary->make_BoxPlot("data_clip" ) if( $bamsummary->control_clip   );
+  $bamsummary->make_BoxPlot("data_match") if( $$bamsummary->control_match );
+  $bamsummary->make_BoxPlot("data_qual" ) if( $bamsummary->control_qual   );
 
 
 =head1 DESCRIPTION

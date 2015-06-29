@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-02-24 13:55:23 mtw>
+# Last changed Time-stamp: <2015-06-29 15:39:27 mtw>
 
 package Bio::ViennaNGS::BamStat;
 
-use version; our $VERSION = qv('0.14');
+use version; our $VERSION = qv('0.15');
 use Bio::DB::Sam 1.37;
 use Moose;
 use Carp;
@@ -26,7 +26,7 @@ has 'data' => (
 has 'control_match' => ( # provides stats how many mapped bases match the reference genome
 			is => 'rw',
 			isa => 'Bool',
-			default => '1',
+			default => '0',
 			clearer => 'clear_control_match',
 			predicate => 'has_control_match',
 		       );
@@ -34,7 +34,7 @@ has 'control_match' => ( # provides stats how many mapped bases match the refere
 has 'control_clip' => ( # provides stats how many bases are soft or hard clipped
 		       is => 'rw',
 		       isa => 'Bool',
-		       default => '1',
+		       default => '0',
 		       clearer => 'clear_control_clip',
 		       predicate => 'has_control_clip',
 		       );
@@ -42,7 +42,7 @@ has 'control_clip' => ( # provides stats how many bases are soft or hard clipped
 has 'control_split' => ( # provides stats how many/often  mapped reads are split
 			is => 'rw',
 			isa => 'Bool',
-			default => '1',
+			default => '0',
 			clearer => 'clear_control_split',
 			predicate => 'has_control_split',
 		       );
@@ -50,7 +50,7 @@ has 'control_split' => ( # provides stats how many/often  mapped reads are split
 has 'control_qual' => ( # provides stats on quality of the match
 		       is => 'rw',
 		       isa => 'Bool',
-		       default => '1',
+		       default => '0',
 		       clearer => 'clear_control_qual',
 		       predicate => 'has_control_qual',
 		      );
@@ -58,7 +58,7 @@ has 'control_qual' => ( # provides stats on quality of the match
 has 'control_edit' => ( # provides stats on the edit distance between read and mapped reference
 		       is => 'rw',
 		       isa => 'Bool',
-		       default => '1',
+		       default => '0',
 		        clearer => 'clear_control_edit',
 		       predicate => 'has_control_edit',
 		      );
@@ -66,7 +66,7 @@ has 'control_edit' => ( # provides stats on the edit distance between read and m
 has 'control_flag' => ( # analyses the sam bit flag for qual/strands/pair_vs_single reads
 		       is => 'rw',
 		       isa => 'Bool',
-		       default => '1',
+		       default => '0',
 		       clearer => 'clear_control_flag',
 		       predicate => 'has_control_flag',
 		      );
@@ -74,7 +74,7 @@ has 'control_flag' => ( # analyses the sam bit flag for qual/strands/pair_vs_sin
 has 'control_score' => ( # provides stats on per-base quality scores
 			is => 'rw',
 			isa => 'Bool',
-			default => '1',
+			default => '0',
 			clearer => 'clear_control_score',
 			predicate => 'has_control_score',
 		       );
@@ -158,21 +158,22 @@ has 'data_uniq' => (
 		   );
 
 sub stat_singleBam {
+
   my ($self) = @_;
   my $this_function = (caller(0))[3];
   confess "ERROR [$this_function] Attribute 'bam' not found $!"
     unless ($self->has_bam);
 
   ## read in bam file using Bio::DB::Sam
-  #my $sam = Bio::DB::Sam->new(-bam   => $self->bam);
   my $bam = Bio::DB::Bam->open($self->bam);
-
+  
   my $header       = $bam->header;
   my $target_count = $header->n_targets;
   my @chromosomes = @{$header->target_name};
   my $target_names = \@chromosomes;
 
   while (my $align = $bam->read1) {
+    
     my %flags = ();
     my $qname      = $align->qname;
     my $seqid      = $target_names->[$align->tid];
@@ -184,16 +185,16 @@ sub stat_singleBam {
     my $match_qual = $align->qual;
     my $flag       = $align->flag;
     my $attributes = $align->aux;
-    #    print "\$seqid: $seqid\t \$qname: $qname\t $start: $start\t \$end: $end\t \$cigar: $cigar\t\$strand: $strand\t \$match_qual: $match_qual\t \$attributes: $attributes\n";
+
     my @tags = $align->get_all_tags;
-    #    print ">> tags: @tags\n";
+
 
     #############################
     ### flag
-    if ($self->has_control_flag){
+    if ($self->control_flag) {
 
       my $multisplit_weight = 1;
-      if ($self->has_is_segemehl && $align->has_tag('XL') ) {
+      if ($self->is_segemehl && $align->has_tag('XL') ) {
 	$multisplit_weight = (1/($align->aux_get('XL')));
       }
 
@@ -229,10 +230,9 @@ sub stat_singleBam {
 
     #############################
     ### uniq
-    if ($self->has_control_uniq){
-
+    if ($self->control_uniq){
       my $multisplit_weight = 1;
-      if ($self->has_is_segemehl && $align->has_tag('XL') ) {
+      if ($self->is_segemehl && $align->has_tag('XL') ) {
 	$multisplit_weight = ($align->aux_get('XL'));
       }
 
@@ -249,8 +249,8 @@ sub stat_singleBam {
 
     #############################
     ### Quality Score read
-    if($self->has_control_qual){
-      if($self->has_is_segemehl && $match_qual == 255){
+    if($self->control_qual){
+      if($self->is_segemehl && $match_qual == 255){
 	#carp "WARN [$this_function] no match_qual for segemehl";
 	$self->clear_control_qual;
       }
@@ -259,34 +259,34 @@ sub stat_singleBam {
       }
       else{
 	carp "WARN [$this_function] No matchqual for read $qname";
-	carp "WARN [$this_function] Setting \$self->has_control_qual to zero";
+	carp "WARN [$this_function] Setting \$self->has_control_qual to undef()";
 	$self->clear_control_qual;
       }
     }
 
     #############################
     #### Edit distance
-    if($self->has_control_edit){
+    if($self->control_edit){
       if( $align->has_tag('NM') ){
 	push @{$self->data_edit}, $align->aux_get('NM');
       }
       else{
 	carp "WARN [$this_function] No <NM> attribute for read $qname";
-	carp "WARN [$this_function] Setting \$self->has_control_edit to zero";
+	carp "WARN [$this_function] Setting \$self->has_control_edit to undef()";
 	$self->clear_control_edit;
       }
     }
 
     #############################
     ### Match bases
-    if($self->has_control_match){
+    if($self->control_match){
       if($cigar){
 	push @{$self->data_match},
 	  sprintf("%.2f", 100*(&cigarmatch($cigar))/(&cigarlength($cigar)));
       }
       else{
 	carp "WARN [$this_function] No CIGAR string for read $qname";
-	carp "WARN [$this_function] Setting \$self->has_control_match to zero";
+	carp "WARN [$this_function] Setting \$self->has_control_match to undef()";
 	$self->clear_control_match;
       }
     }
@@ -299,7 +299,7 @@ sub stat_singleBam {
       }
       else{
 	carp "WARN [$this_function] No CIGAR string for read $qname";
-	carp "WARN [$this_function] Setting \$self->has_control_clip to zero";
+	carp "WARN [$this_function] Setting \$self->control_clip to undef()";
 	$self->clear_control_clip;
         }
       }
@@ -307,12 +307,12 @@ sub stat_singleBam {
     #############################
     ### Split reads
     if($self->control_split){
-      if ($self->has_is_segemehl && $align->has_tag('XL') ) {
+      if ($self->is_segemehl && $align->has_tag('XL') ) {
 	my $split_counts = $align->aux_get('XL');
 	${$self->data_split}{$split_counts}+=1/($split_counts);
 	${$self->data_split}{'total'}+=1/($split_counts);
       }
-      elsif ( $self->has_is_segemehl ){ }
+      elsif ( $self->is_segemehl ){ }
       else{
 	if($cigar){
 	  my $split_counts = cigarsplit($cigar);
@@ -321,14 +321,14 @@ sub stat_singleBam {
 	}
 	else{
 	  carp "WARN [$this_function] No CIGAR string for read $qname";
-	  carp "WARN [$this_function] Setting \$self->has_control_split to zero";
+	  carp "WARN [$this_function] Setting \$self->has_control_split to undef()";
 	  $self->clear_control_split;
 	}
       }
     }
 
+    undef($align);
   } # end while
-
 
   #############################
   ### Extract reference genome/chromosome sizes from BAM header
@@ -340,7 +340,7 @@ sub stat_singleBam {
 
   #############################
   #### uniq
-  if ($self->has_control_uniq){
+  if ($self->control_uniq){
     ${$self->data_out}{'uniq'}->{'uniq_mapped_reads'}=${$self->data_uniq}{'uniq'};
     ${$self->data_out}{'uniq'}->{'mapped_reads'}=sprintf("%d", ${$self->data_uniq}{'mapped'});
     ${$self->data_out}{'uniq'}->{'uniq_mapped_reads_percent'}=
@@ -350,14 +350,15 @@ sub stat_singleBam {
 	(${$self->data_uniq}{'multiplicity'}->{$multiplicity}/$multiplicity);
     }
   }
-
+  
   #############################
   ##### quality stats
-  if($self->has_control_qual){
+  if($self->control_qual){
     my %qual_stats=%{stats(@${$self->data_qual})};
+    
     if ($qual_stats{'min'} == 255 && $qual_stats{'max'} == 255){
       carp "WARN [$this_function] No matchqual (all values set to 255)";
-      carp "WARN [$this_function] Setting \$self->has_control_qual to zero";
+      carp "WARN [$this_function] Setting \$self->has_control_qual to undef()";
       $self->clear_control_qual;
     }
     else{
@@ -369,10 +370,10 @@ sub stat_singleBam {
       ${$self->data_out}{'qual'}->{'max'}  = $qual_stats{'max'};
     }
   }
-
+  
   #############################
   ### Clip data
-  if($self->has_control_clip){
+  if($self->control_clip){
     my %clip_stats=%{stats(@{$self->data_clip})};
 
     ${$self->data_out}{'clip'}->{'min'}  = $clip_stats{'min'};
@@ -382,10 +383,10 @@ sub stat_singleBam {
     ${$self->data_out}{'clip'}->{'3q'}   = $clip_stats{'3q'};
     ${$self->data_out}{'clip'}->{'max'}  = $clip_stats{'max'};
   }
-
+  
   #############################
   ##### Match data
-  if($self->has_control_match){
+  if($self->control_match){
     my %match_stats=%{stats(@{$self->data_match})};
 
     ${$self->data_out}{'match'}->{'min'}  = $match_stats{'min'};
@@ -395,10 +396,10 @@ sub stat_singleBam {
     ${$self->data_out}{'match'}->{'3q'}   = $match_stats{'3q'};
     ${$self->data_out}{'match'}->{'max'}  = $match_stats{'max'};
   }
-
+  
   #############################
   ##### Edit distance
-  if($self->has_control_edit){
+  if($self->control_edit){
     my %edit_stats=%{stats(@{$self->data_edit})};
 
     ${$self->data_out}{'edit'}->{'min'}  = $edit_stats{'min'};
@@ -408,10 +409,10 @@ sub stat_singleBam {
     ${$self->data_out}{'edit'}->{'3q'}   = $edit_stats{'3q'};
     ${$self->data_out}{'edit'}->{'max'}  = $edit_stats{'max'};
   }
-
+  
   #############################
   ###### flags
-  if ($self->has_control_flag){
+  if ($self->control_flag){
 
     ${$self->data_flag}{'pairs'}->{'mapped_pair'}   = 0
       unless ( defined(${$self->data_flag}{'pairs'}->{'mapped_pair'})   );
@@ -433,7 +434,6 @@ sub stat_singleBam {
     ${$self->data_out}{'aln_count'}->{'mapped_single'} =
       ${$self->data_flag}{'paired'}->{'single-end'};
     ${$self->data_out}{'aln_count'}->{'total'} = $total_mapped;
-
     ${$self->data_flag}{'strand'}->{'forward'}   = 0
       unless ( defined(${$self->data_flag}{'strand'}->{'forward'})   );
     ${$self->data_flag}{'strand'}->{'reverse'}   = 0 
@@ -445,16 +445,15 @@ sub stat_singleBam {
     ${$self->data_out}{'strand'}->{'forward'} = ${$self->data_flag}{'strand'}->{'forward'};
     ${$self->data_out}{'strand'}->{'reverse'} = ${$self->data_flag}{'strand'}->{'reverse'};
   }
-
+  
   #############################
   ###### split
-  if ($self->has_control_split){
+  if ($self->control_split){
     foreach my $splits (sort {$a cmp $b} keys %{$self->data_split}) {
       my $split_counts=( defined(${$self->data_split}{$splits}) )?(${$self->data_split}{$splits}):(0);
       ${$self->data_out}{'split'}->{'distribution_of_multisplit'}->{"$splits"}=$split_counts;
     }
   }
-
 }
 
 __PACKAGE__->meta->make_immutable;
@@ -464,6 +463,7 @@ no Moose;
 
 sub stats{
   # usage: %h = %{stats(@a)};
+
   my @vals = sort {$a <=> $b} @_;
   my %stats = ();
   my $median = '';
