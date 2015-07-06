@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-06-29 15:58:19 mtw>
+# Last changed Time-stamp: <2015-07-06 12:44:38 mtw>
 
 package Bio::ViennaNGS;
 
@@ -207,14 +207,27 @@ In addition the following modules are required by the L<Bio::ViennaNGS> utilitie
 
 =back
 
-L<Bio::ViennaNGS> uses third-party tools for computing intersections
-of BED files: F<bedtools intersect> from the
-L<BEDtools|http://bedtools.readthedocs.org/en/latest/content/tools/intersect.html>
-suite is used to compute overlaps and F<bedtools sort> is used to sort
-BED output files. Make sure that those third-party utilities are
-available on your system, and that hey can be found and executed by
-the Perl interpreter. We recommend installing the latest version of
-L<BEDtools|https://github.com/arq5x/bedtools2> on your system.
+L<Bio::ViennaNGS> depends on a set of third-party tools and libraries which
+are required for specific filtering and file format conversion tasks as
+well as for building internally used Perl modules:
+
+=over
+
+=item L<bedtools2|https://github.com/arq5x/bedtools2>
+
+=item F<bedGraphToBigWig>, F<fetchChromSizes>, F<faToTwoBit> from the
+  L<UCSC Genome Browser
+  applications|http://hgdownload.cse.ucsc.edu/admin/exe>
+
+=item L<R|http://www.r-project.org/>
+
+=item samtools E<lt>=v0.1.19 for building L<Bio::DB::Sam>.
+
+=back
+
+Please ensure that all third-party utilities are available on your
+system, and that hey can be found and executed by the Perl
+interpreter.
 
 =head1 SOURCE AVAILABILITY
 
@@ -232,7 +245,7 @@ analysis pipelines">
 
 I<Michael T. Wolfinger, Joerg Fallmann, Florian Eggenhofer and Fabian Amman>
 
-F1000Research 2015, 4:50 (doi: L<10.12688/f1000research.6157.1|http://dx.doi.org/10.12688/f1000research.6157.1>)
+F1000Research 2015, 4:50 (doi: L<10.12688E<sol>f1000research.6157.1|http://dx.doi.org/10.12688/f1000research.6157.1>)
 
 =head1 NOTES
 
