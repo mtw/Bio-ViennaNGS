@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use Test::More tests => 9;
+use Test::More tests => 10;
 use IPC::Cmd qw(can_run);
 
 SKIP: {
@@ -52,6 +52,12 @@ SKIP: {
      skip ('sortBed seemingly is not available',1)
        unless defined(can_run('sortBed'));
      ok( defined(can_run('sortBed')), 'sortBed available and executable');
+}
+
+SKIP: {
+     skip ('fetchChromSizes seemingly is not available',1)
+       unless defined(can_run('fetchChromSizes'));
+     ok( defined(can_run('fetchChromSizes')), 'fetchChromSizes available and executable');
 }
 
 SKIP: {
