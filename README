@@ -184,8 +184,8 @@ are required for specific filtering and file format conversion tasks as
 well as for building internally used Perl modules:
 
 * bedtools2 >= 2.17 (https://github.com/arq5x/bedtools2) 
-* bedGraphToBigWig and fetchChromSizes from the UCSC Genome Browser
-  applications (http://hgdownload.cse.ucsc.edu/admin/exe/)   
+* bedGraphToBigWig, fetchChromSizes, faToTwoBit from the UCSC Genome
+  Browser applications (http://hgdownload.cse.ucsc.edu/admin/exe/)
 * the R Statistics software (http://www.r-project.org/)
 * samtools <= v0.1.19 for building Bio::DB::Sam. Please note that more
   recent HTSlib-based versions of samtools will not work with Bio::DB::Sam 
