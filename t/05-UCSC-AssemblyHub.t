@@ -98,7 +98,7 @@ subtest 'convert_tracks' => sub {
 
 # Check files
 subtest 'Check files' => sub {
-  plan tests => 12;
+  plan tests => 8;
   # hub.txt
   file_md5sum_is ( "assemblyHub/hub.txt", "4b7e702e98019beb600a3493e55d37b6", "compare hub.txt files" );
 
