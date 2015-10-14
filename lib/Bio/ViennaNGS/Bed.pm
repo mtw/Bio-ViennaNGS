@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-06-29 15:50:56 mtw>
+# Last changed Time-stamp: <2015-10-13 14:32:08 mtw>
 
 package Bio::ViennaNGS::Bed;
 
@@ -7,6 +7,7 @@ use version; our $VERSION = qv('0.15');
 use Carp;
 use Moose;
 use namespace::autoclean;
+use Data::Dumper;
 
 extends 'Bio::ViennaNGS::Feature';
 
@@ -76,6 +77,9 @@ sub _build_length {
 sub as_bed_line {
   my ($self,$n) = @_;
   my $this_function = (caller(0))[3];
+  croak "ERROR [$this_function] no argument provided"
+    unless (defined $n);
+  print Dumper(\$n);
   croak "ERROR [$this_function] argument of as_bed_line() must be 6 or 12"
     unless ( ($n == 6) | ($n == 12) );
   my $bed6= join ("\t",

@@ -141,3 +141,6 @@ Revision history for Perl extension ViennaNGS.
 	- added functionality to compute RPKM in Bio::ViennaNGS::Expression
 	- added tests for UCSC.pm
 	- added tests for SpliceJunc.pm
+
+0.16_01
+	- added Bio::ViennaNGS::Peak

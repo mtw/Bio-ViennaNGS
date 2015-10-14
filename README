@@ -1,4 +1,4 @@
-# Bio::ViennaNGS 0.15
+# Bio::ViennaNGS 0.16_01
 
 Bio::ViennaNGS is a distribution of Perl modules and utilities for
 building efficient Next-Generation Sequencing (NGS) analysis
@@ -48,7 +48,10 @@ Bio::ViennaNGS is shipped with a complementary set of modules/classes:
   Bio::ViennaNGS::FeatureChain objects.
 
 - Bio::ViennaNGS::MinimalFeature
-  A Moose interface for handling elementary gene annotation. 
+  A Moose interface for handling elementary gene annotation.
+
+- Bio::ViennaNGS::Peak
+  A Moose interface for finding Peaks in RNA-seq data.
 
 - Bio::ViennaNGS::SpliceJunc
   A collection of routines for alternative splicing analysis.  
