@@ -107,6 +107,9 @@ Convert BED files to (strand specific) bedGraph files, allowing
 additional annotation and automatic generation of bedGraph files which can
 easily be converted to big-type files for easy UCSC visualization.
 
+bed2nt2aa.pl:
+Provide nucleotide and amino acid sequences for BED6 intervals.
+
 extend_bed.pl:
 Extend genomic features in BED files by a certain number of nucleotides,
 either on both sides or specifically at the 5' or 3' end, respectively.
@@ -132,6 +135,10 @@ normalize_multicov.pl:
 Compute normalized expression data in TPM and RPKM from (raw) read counts
 in bedtools multicov format. TPM reference: Wagner et al, Theory
 Biosci. 131(4), pp 281-85 (2012).
+
+rnaseq_peakfinder.pl:
+Find and characterize peaks/enriched regions of certain size and coverage
+in RNA-seq data.
 
 sj_visualizer.pl:
 Convert splice junctions from mapped RNA-seq data in segemehl BED6 splice
@@ -203,7 +210,8 @@ shipped with the Perl core distribution:
 * Bio::DB::Sam >= 1.37
 * Bio::DB::Fasta
 * Bio::Tools::GFF
-* File::Share	
+* File::Share
+* File::Slurp	
 * File::Path
 * Template
 * Moose
@@ -218,6 +226,8 @@ shipped with the Perl core distribution:
 * Math::Round
 * XML::Simple
 * Template
+* Test::Files
+* Test::File::Contents
 
 
 ## SOURCE AVAILABILITY
@@ -236,7 +246,7 @@ publication:
 analysis pipelines"
 Michael T. Wolfinger, Joerg Fallmann, Florian Eggenhofer and Fabian Amman
 F1000Research 4:50 (2015)
-DOI: http://dx.doi.org/10.12688/f1000research.6157.1
+DOI: http://dx.doi.org/10.12688/f1000research.6157.2
 
 
 ## NOTES

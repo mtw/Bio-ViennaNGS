@@ -7,7 +7,7 @@ use File::ShareDir::Install;
 
 install_share dist => 'share';
 
-my @scripts = qw (assembly_hub_constructor.pl bam_quality_stat.pl bam_split.pl bam_to_bigwig.pl bam_uniq.pl bed2bedGraph.pl extend_bed.pl gff2bed.pl kmer_analysis.pl MEME_xml_motif_extractor.pl newUCSCdb.pl normalize_multicov.pl rnaseq_peakfinder.pl sj_visualizer.pl splice_site_summary.pl track_hub_constructor.pl trim_fastq.pl Tutorial_pipeline00.pl Tutorial_pipeline01.pl Tutorial_pipeline02.pl Tutorial_pipeline03.pl);
+my @scripts = qw (assembly_hub_constructor.pl bam_quality_stat.pl bam_split.pl bam_to_bigwig.pl bam_uniq.pl bed2bedGraph.pl bed2nt2aa.pl extend_bed.pl gff2bed.pl kmer_analysis.pl MEME_xml_motif_extractor.pl newUCSCdb.pl normalize_multicov.pl rnaseq_peakfinder.pl sj_visualizer.pl splice_site_summary.pl track_hub_constructor.pl trim_fastq.pl Tutorial_pipeline00.pl Tutorial_pipeline01.pl Tutorial_pipeline02.pl Tutorial_pipeline03.pl);
 WriteMakefile(
 	      'NAME'            => 'Bio::ViennaNGS',
 	      'AUTHOR'          => q{Michael T. Wolfinger},
@@ -23,6 +23,7 @@ WriteMakefile(
 				    "Data::Dumper"                 => '0',
 				    "File::Basename"     	   => '0',
 				    "File::Temp" 	           => '0',
+				    "File::Slurp"                  => '0',
 				    "IPC::Cmd" 		           => '0',
 				    "Path::Class" 	           => '0',
 				    "Math::Round"                  => '0',
@@ -39,6 +40,8 @@ WriteMakefile(
 				    "File::Share"                  => '0',
 				    "Template"                     => '0',
 				    "Statistics::R"                => '0',
+				    "Test::Files"                  => '0',
+				    "Test::File::Contents"         => '0',
 				   },
 	      'MIN_PERL_VERSION'          => '5.010',
 	      'EXE_FILES'                 => [ map { "scripts/$_" } @scripts ],

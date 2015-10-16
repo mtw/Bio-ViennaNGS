@@ -15,7 +15,7 @@ lib/Bio/ViennaNGS/Feature.pm
 lib/Bio/ViennaNGS/FeatureChain.pm
 lib/Bio/ViennaNGS/FeatureLine.pm
 lib/Bio/ViennaNGS/MinimalFeature.pm
-lib/bio/ViennaNGS/Peak.pm
+lib/Bio/ViennaNGS/Peak.pm
 lib/Bio/ViennaNGS/SpliceJunc.pm
 lib/Bio/ViennaNGS/Tutorial.pm
 lib/Bio/ViennaNGS/UCSC.pm
@@ -29,6 +29,7 @@ scripts/bam_split.pl
 scripts/bam_to_bigwig.pl
 scripts/bam_uniq.pl
 scripts/bed2bedGraph.pl
+scripts/bed2nt2aa.pl
 scripts/extend_bed.pl
 scripts/gff2bed.pl
 scripts/kmer_analysis.pl

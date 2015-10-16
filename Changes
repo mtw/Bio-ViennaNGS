@@ -1,4 +1,4 @@
-Revision history for Perl extension ViennaNGS.
+Revision history for Perl extension Bio::ViennaNGS.
 
 0.01  Fri Sep 13 12:02:47 2013
 	- original version; created by h2xs 1.23 with options
@@ -144,3 +144,6 @@ Revision history for Perl extension ViennaNGS.
 
 0.16_01
 	- added Bio::ViennaNGS::Peak
+	- added scripts/rnaseq_peakfinder.pl
+	- added scripts/bed2nt2aa.pl
+	- updated POD and README
