@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-07-06 12:44:38 mtw>
+# Last changed Time-stamp: <2015-10-16 13:46:11 mtw>
 
 package Bio::ViennaNGS;
 
-use version; our $VERSION = qv('0.15');
+use version; our $VERSION = qv('0.16_01');
 
 1;
 
@@ -113,6 +113,9 @@ bedGraph files, allowing additional annotation and automatic
 generation of bedGraph files which can easily be converted to big-type
 files for easy UCSC visualization.
 
+=item F<bed2nt2aa.pl>: Provide nucleotide and amino acid sequences for
+BED6 intervals.
+
 =item F<extend_bed.pl>: Extend genomic features in BED files by a
 certain number of nucleotides, either on both sides or specifically at
 the 5' or 3' end, respectively.
@@ -135,7 +138,10 @@ article|http://genomewiki.ucsc.edu/index.php/Building_a_new_genome_database>.
 
 =item F<normalize_multicov.pl>: Compute normalized expression data in
 RPKM and TPM from (raw) read counts in bedtools multicov format. TPM
-reference: Wagner et al, Theory Biosci. 131(4), pp 281-85 (2012)
+reference: Wagner et al, Theory Biosci. 131(4), pp 281-85 (2012).
+
+=item F<rnaseq_peakfinder.pl>: Find and characterize peaks/enriched
+regions of certain size and coverage in RNA-seq data.
 
 =item F<sj_visualizer.pl>: Convert splice junctions from mapped
 RNA-seq data in segemehl BED6 splice junction format to BED12 for easy
@@ -169,6 +175,8 @@ modules, some of which are part of the Perl core distribution:
 
 =item L<File::Share>
 
+=item L<File::Slurp>
+
 =item L<File::Temp>
 
 =item L<Path::Class>
@@ -190,6 +198,10 @@ modules, some of which are part of the Perl core distribution:
 =item L<MooseX::InstanceTracking>
 
 =item L<Tie::Hash::Indexed>
+
+=item L<Test::Files>
+
+=item L<Test::File::Contents>
 
 =back
 
@@ -245,7 +257,7 @@ analysis pipelines">
 
 I<Michael T. Wolfinger, Joerg Fallmann, Florian Eggenhofer and Fabian Amman>
 
-F1000Research 2015, 4:50 (doi: L<10.12688E<sol>f1000research.6157.1|http://dx.doi.org/10.12688/f1000research.6157.1>)
+F1000Research 2015, 4:50 (doi: L<10.12688E<sol>f1000research.6157.2|http://dx.doi.org/10.12688/f1000research.6157.2>)
 
 =head1 NOTES
 
@@ -291,6 +303,8 @@ test Windows compatibility.
 =item L<Bio::ViennaNGS::UCSC>
 
 =item L<Bio::ViennaNGS::Util>
+
+=item L<Bio::ViennaNGS::Peak>
 
 =back
 
