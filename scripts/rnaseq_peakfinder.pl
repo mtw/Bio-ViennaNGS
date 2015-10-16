@@ -1,8 +1,10 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-14 16:10:02 mtw>
+# Last changed Time-stamp: <2015-10-16 16:28:29 mtw>
 #
 # Find peaks/enriched regions of certain size in RNA-seq data
+#
+# usage: rnaseq_peakfinder --bgpos pos.bg --bgneg neg.pg
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -61,7 +63,7 @@ pod2usage(-verbose => 1) unless GetOptions("bgpos=s"         => \$infile1,
 					   "w|winsize=i"     => \$winsize,
 					   "i|interval=i"    => \$wininterval,
 					   "m|mincov=i"      => \$mincov,
-					   "e|length=i"      => \$maxlen,
+					   "l|length=i"      => \$maxlen,
 					   "t|threshold=f"   => \$threshold,
 					   "out|o=s"         => \$dest,
 					   "d|debug"         => sub{$debug=1},
@@ -94,7 +96,91 @@ my $peaks = Bio::ViennaNGS::Peak->new(winsize    => $winsize,
 				     );
 $peaks->parse_coverage_bedgraph($infile1,$infile2);
 
+# identify covered regions
 $peaks->raw_peaks($dest, "rnaseq_peakfinder", $lf);
 
-#print Dumper(\$peaks);
+# characterize peaks
+$peaks->final_peaks($dest, "rnaseq_peakfinder", $lf);
+
+
+__END__
+
+
+=head1 NAME
+
+rnaseq_peakfinder.pl - Identify peaks/enriched regions in RNA-seq data
+
+=head1 SYNOPSIS
+
+rnaseq_peakfinder.pl [--bgpos I<FILE>] [--bgneg I<FILE>] [options]
+
+=head1 DESCRIPTION
+
+This program identifies peaks in RNA-seq data. Starting from coverage
+information in bedGraph format, this tools applies a two-step sliding
+window approach to characterize enriched regions with predefined
+properties, including maximum length, minimum coverage or maximum
+coverage at both enads of the genomic inerval.
+
+B<Please note>: It is highly recommended to use I<normalized> input
+data.
+
+=head1 OPTIONS
+
+=over
+
+=item B<--bgpos>
+
+BedGraph input file containing coverage of the [+] strand.
+
+=item B<--bgneg>
+
+BedGraph input file containing coverage of the [-] strand.
+
+=item B<--winsize -w>
+
+Size of the sliding window in nt.
+
+=item B<--interval -i>
+
+Size of the interval the sliding window is shifted at each step ('step
+size').
+
+=item B<--mincov -m>
+
+Minimum coverage required for an enriched region to be considered.
+
+=item B<--length -l>
+
+Maximum length of a peak in nt.
+
+=item B<--threshold -t>
+
+Percentage of the maximum coverage value allowed at both ends of the
+peaks (default 0.1). This value is used to identify peak boundaries.
+
+=item B<--out -o>
+
+Output directory.
+
+=item B<--help -h>
+
+Print short help
+
+=item B<--man>
+
+Prints the manual page and exits
+
+=back
+
+
+=head1 AUTHOR
+
+Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+
+=cut
+
+
+
+
 

@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-14 16:42:35 mtw>
+# Last changed Time-stamp: <2015-10-16 15:52:02 mtw>
 
 package Bio::ViennaNGS::Peak;
 
@@ -143,7 +143,7 @@ sub raw_peaks {
   my ($fn,$fn_u,$outfile,$maxidx,$have_pstart,$pstart,$pend,$chr);
   my ($winstart, $winend, $winsum, $mean, $lastmax, $from, $to);
   my ($index_of_maxwin);
-  my $suffix_raw = "rawpeaks.bed";
+  my $suffix = "rawpeaks.bed";
   my $this_function = (caller(0))[3];
 
   croak "ERROR [$this_function]: $dest does not exist\n"
@@ -154,8 +154,8 @@ sub raw_peaks {
   }
   else {croak "ERROR [$this_function] \$log not defined";}
 
-  $fn   = $prefix.".".$suffix_raw;
-  $fn_u = $prefix.".u.".$suffix_raw;
+  $fn   = $prefix.".".$suffix;
+  $fn_u = $prefix.".u.".$suffix;
   $outfile = file($dest,$fn_u);
 
   croak "ERROR [$this_function]: $self->data not available\n"
@@ -271,16 +271,99 @@ sub raw_peaks {
       }
     } # end for
 
-    print LOG Dumper($self->peaks);
-
+    #print LOG Dumper($self->peaks);
 
   } # end foreach
   close(RAWPEAKS);
   close(LOG);
-  
 }
 
+sub final_peaks {
+  my ($self,$dest,$prefix,$log) = @_;
+  my ($fn,$fn_u,$outfile,$strand,$max,$idx,$val,$peak,$position,$pleft,$pright,$str);
+  my $suffix = "candidatepeaks.bed";
+  my $this_function = (caller(0))[3];
 
+  croak "ERROR [$this_function]: $dest does not exist\n"
+    unless (-d $dest);
+
+  if (defined $log){
+    open(LOG, ">>", $log) or croak "$!";
+  }
+  else {croak "ERROR [$this_function] \$log not defined";}
+
+  $fn   = $prefix.".".$suffix;
+  $fn_u = $prefix.".u.".$suffix;
+  $outfile = file($dest,$fn_u);
+
+  croak "ERROR [$this_function]: $self->data not available\n"
+    unless ($self->has_data);
+
+  croak "ERROR [$this_function]: $self->peaks not available\n"
+    unless ($self->has_peaks);
+
+  open(CANDIDATEPEAKS, ">", $fn_u) or croak $!;
+
+  foreach my $chr (keys (%{$self->peaks})){
+    print LOG "filtering candidate peaks in $chr\n";
+
+    foreach $peak ( @{$self->peaks->{$chr}}){
+      my $have_pleft = 0; # we have found a proper left end
+      my $have_pright = 0; # we have found a proper right end
+      $strand = $$peak{strand};
+      $max = max @{$self->data->{$chr}{$strand}}[$$peak{start}..$$peak{end}]; # max peak elevation
+      next if ($max < $self->mincov);
+      $idx = first { @{$self->data->{$chr}{$strand}}[$_] eq $max } $$peak{start}..$$peak{end}; # coordinate
+      #print LOG Dumper(\$peak);
+      print LOG "max in window $$peak{start}..$$peak{end} is $max at $idx\n";
+
+      # process regions left/right of the maximum to identify peak boundaries
+      # validity check first
+      die "maximum at $idx is not within peak region"
+	if ( $idx<$$peak{start} || $idx>$$peak{end} );
+
+      # find left end
+      for ($position = $idx; $position>$$peak{start}; $position--){
+	$val =  ${$self->data->{$chr}{$strand}}[$position];
+	#print "* VAL_L at pos $position $val - \$have_pleft=$have_pleft ";
+	if ( $val < $max*$self->threshold){
+	  $have_pleft = 1;
+	  #print "exiting 'cause $val < ".$max*$threshold." - \$have_pleft=$have_pleft\n";
+	  last;
+	}
+	#print "\n";
+      }
+      $pleft = $position;
+
+      # find right end
+      for ($position = $idx; $position<=$$peak{end}; $position++){
+	$val =  ${$self->data->{$chr}{$strand}}[$position];
+	#print "* VAL_R at pos $position $val - \$have_pright=$have_pright ";
+	if ( $val < $max*$self->threshold){
+	  $have_pright = 1;
+	  #print "exiting 'cause $val < ".$max*$threshold."- \$have_pright=$have_pright\n";
+	  last;
+	}
+	#print "\n";
+      }
+      $pright = $position;
+      if ($strand eq "neg"){
+	$str = '-';
+      }
+      else{
+	$str = '+';
+      }
+      #print LOG "# PEAK characterized at $chr:$pleft-$pright\n";
+
+      if ($have_pleft == 1 && $have_pright == 1){ # print only if its a proper peak
+	if ($pright-$pleft<=$self->length){ # filter peak length 
+	  print CANDIDATEPEAKS "$chr\t$pleft\t$pright\tCANDIDATE\t$max\t$str\n";
+	}
+      }
+    } # end foreach $peak
+  } # end foreach $chr
+  close(CANDIDATEPEAKS);
+}
 __PACKAGE__->meta->make_immutable;
 
 1;
