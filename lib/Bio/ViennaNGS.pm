@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-23 15:02:20 mtw>
+# Last changed Time-stamp: <2015-10-23 15:46:31 mtw>
 
 package Bio::ViennaNGS;
 
@@ -190,6 +190,8 @@ modules, some of which are part of the Perl core distribution:
 =item L<File::Slurp>
 
 =item L<File::Temp>
+
+=item L<List::Util>
 
 =item L<Path::Class>
 

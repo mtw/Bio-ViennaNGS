@@ -223,6 +223,7 @@ shipped with the Perl core distribution:
 * File::Share
 * File::Slurp	
 * File::Path
+* List::Util
 * Template
 * Moose
 * Moose::Util::TypeConstraints

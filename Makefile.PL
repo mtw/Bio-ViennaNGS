@@ -24,6 +24,7 @@ WriteMakefile(
 				    "File::Basename"     	   => '0',
 				    "File::Temp" 	           => '0',
 				    "File::Slurp"                  => '0',
+				    "List::Util"                   => '0',
 				    "IPC::Cmd" 		           => '0',
 				    "Path::Class" 	           => '0',
 				    "Math::Round"                  => '0',
