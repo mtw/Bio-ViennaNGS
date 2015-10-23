@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-23 12:15:01 mtw>
+# Last changed Time-stamp: <2015-10-23 12:51:06 mtw>
 
 package Bio::ViennaNGS::Peak;
 
@@ -495,4 +495,20 @@ Notes :
 
 =back
 
+=head1 AUTHOR
 
+Michael T. Wolfinger, E<lt>michael@wolfinger.euE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2015 by Michael T. Wolfinger
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.10.0 or,
+at your option, any later version of Perl 5 you may have available.
+
+This software is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut
