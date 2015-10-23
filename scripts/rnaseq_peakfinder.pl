@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-23 12:36:14 mtw>
+# Last changed Time-stamp: <2015-10-23 12:53:38 mtw>
 #
 # Find peaks/enriched regions of certain size in RNA-seq data
 #
@@ -131,7 +131,7 @@ rnaseq_peakfinder.pl [--bgpos I<FILE>] [--bgneg I<FILE>] [options]
 =head1 DESCRIPTION
 
 This program identifies peaks in RNA-seq data. Starting from coverage
-information in bedGraph format, this tools applies a two-step sliding
+information in bedGraph format, this tool applies a two-step sliding
 window approach to characterize enriched regions with predefined
 properties, including maximum length, minimum coverage or maximum
 coverage at both enads of the genomic inerval.
