@@ -143,7 +143,10 @@ Revision history for Perl extension Bio::ViennaNGS.
 	- added tests for SpliceJunc.pm
 
 0.16_01
+	- added Bio::ViennaNGS::FeatureInterval
+	- added Bio::ViennaNGS::BedGraphLine
 	- added Bio::ViennaNGS::Peak
+	- make Bio::ViennaNGS::MinimalFeature subclass of Bio::ViennaNGS::FeatureInterval
 	- added scripts/rnaseq_peakfinder.pl
 	- added scripts/bed2nt2aa.pl
 	- updated POD and README
