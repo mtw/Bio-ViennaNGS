@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-23 16:07:24 mtw>
+# Last changed Time-stamp: <2015-10-23 16:25:34 mtw>
 
 package Bio::ViennaNGS::FeatureInterval;
 
@@ -37,7 +37,7 @@ __END__
 
 =head1 NAME
 
-Bio::ViennaNGS::FeatureInterval - A Moose class for storing elementary
+Bio::ViennaNGS::FeatureInterval - A Moose class for unstranded, elementary
 genomic intervals.
 
 =head1 SYNOPSIS
@@ -52,9 +52,21 @@ genomic intervals.
 =head1 DESCRIPTION
 
 This module provides an object-oriented interface for storing
-elementary genomic intervals characterized via chromosome, start and
-end position. As such, it can be regarded a simple wrapper for BED3
-elements.
+unstranded, elementary genomic intervals characterized via chromosome,
+start and end position. As such, it can be regarded a simple wrapper
+for BED3 elements.
+
+This is the base class for L<Bio::ViennaNGS::MinimalFeature>.
+
+=head1 SEE ALSO
+
+=over
+
+=item L<Bio::ViennaNGS>
+
+=item L<Bio::ViennaNGS::MinimalFeature>
+
+=back
 
 =head1 AUTHORS
 
