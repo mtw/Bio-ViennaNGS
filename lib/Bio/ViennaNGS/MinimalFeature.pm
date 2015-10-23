@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-06-29 15:50:03 mtw>
+# Last changed Time-stamp: <2015-10-21 11:43:34 mtw>
 
 package Bio::ViennaNGS::MinimalFeature;
 
-use version; our $VERSION = qv('0.15');
+use version; our $VERSION = qv('0.16_01');
 use namespace::autoclean;
 
 use Moose::Util::TypeConstraints;
@@ -16,26 +16,7 @@ no Moose::Util::TypeConstraints;
 use Moose;
 with 'MooseX::Clone';
 
-has 'chromosome' => (
-		     is  => 'rw',
-		     isa => 'Str',
-		     required => 1,
-		     predicate => 'has_chromosome',
-	     );
-
-has 'start' => (
-		is      => 'rw',
-		isa     => 'Int',
-		required => 1,
-		predicate => 'has_start',
-	       );
-
-has 'end' => (
-	      is      => 'rw',
-	      isa     => 'Int',
-	      required => 1,
-	      predicate => 'has_end',
-	     );
+extends 'Bio::ViennaNGS::FeatureInterval';
 
 has 'strand' => (
 		 is      => 'rw',
