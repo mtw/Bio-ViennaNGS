@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-23 11:28:35 mtw>
+# Last changed Time-stamp: <2015-10-23 14:27:20 mtw>
 
 package Bio::ViennaNGS::Expression;
 
@@ -243,7 +243,7 @@ __END__
 =head1 NAME
 
 Bio::ViennaNGS::Expression - An object oriented interface for
-computing read-count based gene expression as TPm or RPKM
+computing read-count based gene expression as TPM or RPKM
 
 =head1 SYNOPSIS
 
