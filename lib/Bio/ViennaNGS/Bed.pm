@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-13 14:32:08 mtw>
+# Last changed Time-stamp: <2015-10-22 19:39:12 mtw>
 
 package Bio::ViennaNGS::Bed;
 
-use version; our $VERSION = qv('0.15');
+use version; our $VERSION = qv('0.16_01');
 use Carp;
 use Moose;
 use namespace::autoclean;
@@ -135,12 +135,12 @@ genomic interval data in BED format
 
 =head1 DESCRIPTION
 
-This module provides a Moose interface for storage and manipulation of
-genomic interval data. It is primarily used as a convenience wrapper
-for BED data with more generic L<Bio::ViennaNGS> classes for feature
-annotation, such as L<Bio::ViennaNGS::MinimalFeature>,
-L<Bio::ViennaNGS::Feature>, L<Bio::ViennaNGS::FeatureChain> and
-L<Bio::ViennaNGS::FeatureLine>.
+This module provides a L<Moose> interface for storage and manipulation
+of genomic interval data. It is primarily used as a convenience
+wrapper for BED data with more generic L<Bio::ViennaNGS> classes for
+feature annotation, such as L<Bio::ViennaNGS::FeatureInterval>,
+L<Bio::ViennaNGS::MinimalFeature>, L<Bio::ViennaNGS::Feature>,
+L<Bio::ViennaNGS::FeatureChain> and L<Bio::ViennaNGS::FeatureLine>.
 
 =head1 METHODS
 
