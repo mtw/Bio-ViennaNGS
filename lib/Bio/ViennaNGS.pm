@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-16 13:46:11 mtw>
+# Last changed Time-stamp: <2015-10-23 14:37:00 mtw>
 
 package Bio::ViennaNGS;
 
@@ -40,6 +40,9 @@ processing L<Bio::ViennaNGS::BamStat> objects on a set of BAM files.
 =item L<Bio::ViennaNGS::Bed>: A L<Moose> interface for manipulation of
 genomic interval data in BED format.
 
+=item L<Bio::ViennaNGS::BedGraphEntry>: A L<Moose> interface for
+storing genomic cvoerage and interval data in bedGraph format.
+
 =item L<Bio::ViennaNGS::Expression>: An object oriented interface for
 read-count based gene expression analysis.
 
@@ -55,11 +58,20 @@ L<Bio::DB::Fasta>.
 =item L<Bio::ViennaNGS::FeatureChain>: Yet another L<Moose> class for
 chaining gene annotation features.
 
+=item L<Bio::ViennaNGS::FeatureInterval>: A L<Moose> interface for
+handling elementary genomic intervals, corresponding to BED3.
+
+=item L<Bio::ViennaNGS::FeatureIO>: A L<Moose> interface for efficient
+input/output handling of genomic annotation formats.
+
 =item L<Bio::ViennaNGS::FeatureLine>: An abstract L<Moose> class for
 combining several L<Bio::ViennaNGS::FeatureChain> objects.
 
 =item L<Bio::ViennaNGS::MinimalFeature>: A L<Moose> interface for
-handling elementary gene annotation.
+handling elementary gene annotation, corresponding to BED4.
+
+=item L<Bio::ViennaNGS::Peak>: A L<Moose> interface for identification
+and characterization of peaks/enriched regions in RNA-seq data.
 
 =item L<Bio::ViennaNGS::SpliceJunc>: A collection of routines for
 alternative splicing analysis.
