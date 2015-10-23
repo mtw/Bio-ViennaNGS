@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-06-29 15:51:58 mtw>
+# Last changed Time-stamp: <2015-10-23 11:28:35 mtw>
 
 package Bio::ViennaNGS::Expression;
 
-use version; our $VERSION = qv('0.15');
+use version; our $VERSION = qv('0.16_01');
 use Moose;
 use Carp;
 use Data::Dumper;
@@ -326,7 +326,7 @@ Returns : Returns the mean TPM of the processed sample, which is
           concentration and thus fulfills the invariant average
           criterion.)
 
-=item ComputeRPKM
+=item computeRPKM
 
 Title : computeRPKM
 
