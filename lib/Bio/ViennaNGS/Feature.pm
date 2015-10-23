@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-23 16:41:47 mtw>
+# Last changed Time-stamp: <2015-10-23 16:45:31 mtw>
 
 package Bio::ViennaNGS::Feature;
 
@@ -24,7 +24,6 @@ has 'score' => (
 		default => '0',
 		predicate => 'has_score',
 	       );
-}
 
 no Moose;
 
