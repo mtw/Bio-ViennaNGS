@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-23 12:51:06 mtw>
+# Last changed Time-stamp: <2015-10-23 15:44:38 mtw>
 
 package Bio::ViennaNGS::Peak;
 
@@ -9,7 +9,6 @@ use Carp;
 use Data::Dumper;
 use Path::Class;
 use List::Util qw(sum sum0 min max first);
-use Bio::ViennaNGS::Bed;
 use Bio::ViennaNGS::Util qw(sortbed);
 
 use namespace::autoclean;
@@ -488,8 +487,6 @@ Notes :
 =over
 
 =item L<Bio::ViennaNGS>
-
-=item L<Bio::ViennaNGS::Bed>
 
 =item L<Bio::ViennaNGS::Util>
 
