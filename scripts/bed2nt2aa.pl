@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-16 12:47:06 mtw>
+# Last changed Time-stamp: <2015-10-23 14:51:00 mtw>
 #
 # Provide nucleotide and amino acid sequences for BED files
 #
@@ -96,7 +96,7 @@ bed2nt2aa.pl - Get nucleotde and amino acid sequences from BED intervals
 
 =head1 SYNOPSIS
 
-bed2nt2ss.pl [--bed I<FILE>] [--fa I<FILE>] [--aa] [options]
+bed2nt2aa.pl [--bed I<FILE>] [--fa I<FILE>] [--aa] [options]
 
 =head1 DESCRIPTION
 
