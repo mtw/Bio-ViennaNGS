@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-16 16:28:29 mtw>
+# Last changed Time-stamp: <2015-10-23 12:36:14 mtw>
 #
 # Find peaks/enriched regions of certain size in RNA-seq data
 #
@@ -35,6 +35,7 @@ use Pod::Usage;
 use Data::Dumper;
 use Cwd;
 use Path::Class;
+use Bio::ViennaNGS::FeatureIO;
 use Bio::ViennaNGS::Peak;
 
 
@@ -88,13 +89,26 @@ unless (-d $dest){mkdir $dest;}
 $lf = file($dest,$logname);
 
 # parse input files
+my $io_pos = Bio::ViennaNGS::FeatureIO->new(file => "$infile1", # [+] strand
+					    filetype => "BedGraph",
+					    objecttype => "BedGraph",
+					   );
+
+my $io_neg = Bio::ViennaNGS::FeatureIO->new(file => "$infile2", # [-] strand
+					    filetype => "BedGraph",
+					    objecttype => "BedGraph",
+					   );
+
+# get an instance of Bio::ViennaNGS::Peak
 my $peaks = Bio::ViennaNGS::Peak->new(winsize    => $winsize,
 				      interval   => $wininterval,
 				      mincov     => $mincov,
 				      length     => $maxlen,
 				      threshold  => $threshold,
 				     );
-$peaks->parse_coverage_bedgraph($infile1,$infile2);
+
+# parse BedGraph coverage data from FeatureIO into the Peak object
+$peaks->populate_data($io_pos, $io_neg);
 
 # identify covered regions
 $peaks->raw_peaks($dest, "rnaseq_peakfinder", $lf);
@@ -172,6 +186,17 @@ Print short help
 Prints the manual page and exits
 
 =back
+
+=head1 NOTES
+
+The memory footprint of this tool is rather high (several GB for
+eucaryotic systems). This is due to the fact that the input BedGraph
+files are first parsed into an Array of
+L<Bio::ViennaNGS::BedGraphEntry> objects by
+L<Bio::ViennaNGS::FeatureIO>. In a second step, this array is parsed
+into a Hash of Arrays data structure within L<Bio::ViennaNGS::Peaks>
+to allow for efficient window sliding. This may be refactored in a
+future release.
 
 
 =head1 AUTHOR
