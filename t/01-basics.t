@@ -3,7 +3,7 @@
 
 #########################
 
-# change 'tests => 1' to 'tests => last_test_to_print';
+# change 'tests => 4' to 'tests => last_test_to_print';
 
 use strict;
 use warnings;
@@ -24,13 +24,16 @@ BEGIN { use_ok('Bio::ViennaNGS::Bam') };
 BEGIN { use_ok('Bio::ViennaNGS::BamStat') };
 BEGIN { use_ok('Bio::ViennaNGS::BamStatSummary') };
 BEGIN { use_ok('Bio::ViennaNGS::Bed') };
+BEGIN { use_ok('Bio::ViennaNGS::BedGraphEntry') };
 BEGIN { use_ok('Bio::ViennaNGS::Expression') };
 BEGIN { use_ok('Bio::ViennaNGS::ExtFeature') };
 BEGIN { use_ok('Bio::ViennaNGS::Fasta') };
 BEGIN { use_ok('Bio::ViennaNGS::Feature') };
 BEGIN { use_ok('Bio::ViennaNGS::FeatureChain') };
 BEGIN { use_ok('Bio::ViennaNGS::FeatureLine') };
+BEGIN { use_ok('Bio::ViennaNGS::FeatureInterval') };
 BEGIN { use_ok('Bio::ViennaNGS::MinimalFeature') };
+BEGIN { use_ok('Bio::ViennaNGS::Peak') };
 BEGIN { use_ok('Bio::ViennaNGS::SpliceJunc') };
 BEGIN { use_ok('Bio::ViennaNGS::Tutorial') };
 BEGIN { use_ok('Bio::ViennaNGS::UCSC') };
@@ -46,8 +49,38 @@ BEGIN { use_ok('Bio::ViennaNGS::Util') };
 #ok( defined(can_run('sortBed')), 'sortBed not found');
 #########################
 
+my $chr = "chr1";
+my $start = 100;
+my $end   = 200;
+my $strand = "-";
+my $value = 234433.434354;
+
 my $f = Bio::ViennaNGS::Fasta->new( fa => $data1_fa, );
 ok($f);
+
+my $featureinterval = Bio::ViennaNGS::FeatureInterval->new(
+   chromosome =>$chr,
+   start => $start,
+   end => $end,
+); 
+ok($featureinterval);
+
+my $mf = Bio::ViennaNGS::MinimalFeature->new(
+   chromosome => $chr,
+   start => $start,
+   end => $end,
+   strand => $strand,
+); 
+ok($mf);
+
+my $bge = Bio::ViennaNGS::BedGraphEntry->new(
+   chromosome => $chr,
+   start => $start,
+   end => $end,
+   dataValue => $value,
+);
+ok($bge);
+	
 
 
 #my @data1_ids = $f->fastaids;
