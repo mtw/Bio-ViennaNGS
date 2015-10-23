@@ -8,11 +8,14 @@ lib/Bio/ViennaNGS/Bam.pm
 lib/Bio/ViennaNGS/BamStat.pm
 lib/Bio/ViennaNGS/BamStatSummary.pm
 lib/Bio/ViennaNGS/Bed.pm
+lib/Bio/ViennaNGS/BedGraphEntry.pm
 lib/Bio/ViennaNGS/Expression.pm
 lib/Bio/ViennaNGS/ExtFeature.pm
 lib/Bio/ViennaNGS/Fasta.pm
 lib/Bio/ViennaNGS/Feature.pm
 lib/Bio/ViennaNGS/FeatureChain.pm
+lib/Bio/ViennaNGS/FeatureInterval.pm
+lib/Bio/ViennaNGS/FeatureIO.pm
 lib/Bio/ViennaNGS/FeatureLine.pm
 lib/Bio/ViennaNGS/MinimalFeature.pm
 lib/Bio/ViennaNGS/Peak.pm
