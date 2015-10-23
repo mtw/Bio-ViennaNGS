@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-16 15:52:02 mtw>
+# Last changed Time-stamp: <2015-10-23 12:15:01 mtw>
 
 package Bio::ViennaNGS::Peak;
 
@@ -8,11 +8,9 @@ use Moose;
 use Carp;
 use Data::Dumper;
 use Path::Class;
-use File::Slurp;
 use List::Util qw(sum sum0 min max first);
 use Bio::ViennaNGS::Bed;
 use Bio::ViennaNGS::Util qw(sortbed);
-use Data::Dumper;
 
 use namespace::autoclean;
 
@@ -73,40 +71,26 @@ has 'threshold' => (
 		 predicate => 'has_threshold',
 		);
 
-
-
-sub parse_coverage_bedgraph {
+sub populate_data {
   my ($self,$filep,$filen) = @_;
   my $this_function = (caller(0))[3];
-  my ($i, $bg_pos, $bg_neg, $chr, $start, $end, $val, $lastend, $line);
+  my ($i,$element,$chr,$start,$end,$val,$lastend);
   my $have_lastend = 0;
 
-  croak "ERROR [$this_function] bedGraph input file [+]  $filep not available\n"
-    unless (-e $filep);
-  croak "ERROR [$this_function] bedGraph input file [-]  $filen not available\n"
-    unless (-e $filen);
-
-  $bg_pos = read_file( $filep, array_ref => 1 ) ;
-  $bg_neg = read_file( $filen, array_ref => 1 ) ;
-
   # parse [+] strand
-  foreach $line (@$bg_pos) {
-    chomp($line);
-    croak "ERROR [$this_function] cannot parse bedGraph [+] input"
-      unless {$line =~ m/^([a-zA-Z0-9._]+)\t(\d+)\t(\d+)\t(\d+\.?\d*)$/};
-    $chr = $1; $start = $2; $end = $3, $val = $4;
-    unless (exists ${$self->region}{$chr}{pos}{start}){
-      ${$self->region}{$chr}{pos}{start} = $start;
+  foreach $element (@{$filep->data}){
+    unless (exists ${$self->region}{$element->chromosome}{pos}{start}){
+      ${$self->region}{$element->chromosome}{pos}{start} = $element->start;
     }
-    if($have_lastend == 1 && $start>$lastend){ # fill the gap with 0s
-      for($i=$lastend;$i<$start;$i++){
-	${$self->data}{$chr}{pos}[$i] = 0.;
+    if($have_lastend == 1 && $element->start>$lastend){ # fill the gap with 0s
+      for($i=$lastend;$i<$element->start;$i++){
+	${$self->data}{$element->chromosome}{pos}[$i] = 0.;
       }
     }
-    for ($i=$start;$i<$end;$i++){
-      ${$self->data}{$chr}{pos}[$i]=$val;
+    for ($i=$element->start;$i<$element->end;$i++){
+      ${$self->data}{$element->chromosome}{pos}[$i]=$element->dataValue;
     }
-    $lastend = $end;
+    $lastend = $element->end;
     $have_lastend = 1;
   }
 
@@ -114,28 +98,25 @@ sub parse_coverage_bedgraph {
   $have_lastend = 1; # needed to get the values parsed correctly below
 
   # parse [-] strand
-  foreach $line (@$bg_neg) {
-    chomp($line);
-    die "ERROR [$this_function] cannot parse bedGraph [-] input"
-      unless {$line =~ m/^([a-zA-Z0-9._]+)\t(\d+)\t(\d+)\t(-?\d+\.?\d*)$/};
-    $chr = $1; $start = $2; $end = $3, $val = $4;
-    if ($val <= 0){
-      $val *= -1;
+  foreach $element (@{$filen->data}){
+    if ($element->{dataValue} <= 0){
+      $element->{dataValue} *= -1;
     }
-    unless (exists ${$self->region}{$chr}{neg}{start}){
-      ${$self->region}{$chr}{neg}{start} = $start;
+    unless (exists ${$self->region}{$element->chromosome}{neg}{start}){
+      ${$self->region}{$element->chromosome}{neg}{start} = $element->start;
     }
-    if($have_lastend == 1 && $start>$lastend){ # fill the gap with 0s
-      for($i=$lastend;$i<$start;$i++){
-	${$self->data}{$chr}{neg}[$i] = 0.;
+    if($have_lastend == 1 && $element->start>$lastend){ # fill the gap with 0s
+      for($i=$lastend;$i<$element->start;$i++){
+	${$self->data}{$element->chromosome}{neg}[$i] = 0.;
       }
     }
-    for ($i=$start;$i<$end;$i++){
-      ${$self->data}{$chr}{neg}[$i]=$val;
+    for ($i=$element->start;$i<$element->end;$i++){
+      ${$self->data}{$element->chromosome}{neg}[$i]=$element->dataValue;
     }
-    $lastend = $end;
+    $lastend = $element->end;
     $have_lastend = 1;
   }
+  return;
 }
 
 sub raw_peaks {
@@ -375,48 +356,114 @@ __END__
 Bio::ViennaNGS::Peak - An object oriented interface for characterizing
 peaks in RNA-seq data
 
-
 =head1 SYNOPSIS
 
   use Bio::ViennaNGS::Peak;
 
+  # get an instance of Bio::ViennaNGS::peak
   my $peaks = Bio::ViennaNGS::Peak->new();
 
-  # parse coverage from a BedGraph file
-  $peaks->parse_coverage_bedgraph($filep,$filen);
+  # parse coverage for [+] and [-] strand from Bio::ViennaNGS::FeatureIO objects
+  $peaks->populate_data($filep,$filen);
 
   # identify regions covered by RNA-seq signal ('raw peaks')
-  $peaks->raw_peaks();
+  $peaks->raw_peaks($dest,$prefix,$log);
 
   # characterize final peaks
-  $peaks->final_peaks();
+  $peaks->final_peaks($dest,$prefix,$log);
 
 
 =head1 DESCRIPTION
 
 This module provides a L<Moose> interface for characterization of
-peaks in RNA-seq signal, provided via bedGraph input.
+peaks in RNA-seq coverage data.
 
 =head1 METHODS
 
 =over
 
-=item parse_coverage_bedgraph
+=item populate_data
 
-Title : parse_coverage_bedgraph
+Title : populate_data
 
-Usage : C<$obj-E<gt>parse_coverage_bedgraph($filep,$filen);>
+Usage : C<$obj-E<gt>populate_data($filep,$filen);>
 
-Function : Parses RNA-seq coverage from bedGraph input files for
-           positive ($filep) and negative ($filen) strand into a Hash
-           of Arrays data structure (C<@{$self-E<gt>data}>).
+Function : Parses RNA-seq coverage for positive and negative strand
+            into C<@{$self-E<gt>data}>, a Hash of Arrays data structure.
 
-Args : C<$file> is a bedGraph input file.
+Args : C<$filep> and C<$filen> are instances of L<Bio::ViennaNGS::FeatureIO>.
 
-Returns :
+Returns : None.
+
+Notes: The memory footprint of this method is rather high. It builds a
+       Hash of Arrays data structure from L<Bio::ViennaNGS::FeatureIO>
+       input objects of roughly the size of the underlying genome
+       (chromosomes are hash keys, and there is an array containing
+       coverage information for every genomic position referenced by
+       hash values).
+
+=item raw_peaks
+
+Title : raw_peaks
+
+Usage : C<$obj-E<gt>raw_peaks($dest,$prefix,$log);>
+
+Function : This method identifies genomic regions ('raw peaks')
+           covered by RNA-seq signal by means of a sliding window
+           approach. RNA-seq coverage is read from
+           C<@{$self-E<gt>data}> (which is populated by e.g. the
+           C<populate_data> method). The sliding window approach
+           processes [+] and [-] strand for all chromosomes in 5'
+           -E<gt> 3' direction, whereby the mean value of each window
+           is used as a representative for this window. Thereby both
+           start and end coordinates, as well as position of the
+           maximum elevation are identified. Here the end position of
+           a covered region is defined as the coordinate of the window
+           whose mean is less than a certain value
+           (i.e. C<$self-E<gt>threshold> * peak maximum).
+
+Raw peaks are stored in C<%{$self-E<gt>data}-E<gt>{peaks}>.
+
+Args : C<$dest> contains the output path for results, C<$prefix> the
+       prefix used for all output file names. C<$log> is the name of a
+       log file, or undef if no logging is reuqired.
+
+Returns : None. The output is a position-sorted BED6 file containing
+          all raw peaks.
+
+Notes : It is highly recommended to use I<normalized> input data in
+        order to allow for multiple calls of this method with the same
+        set of parameters on different samples.
+
+=item final_peaks
+
+Title : final_peaks
+
+Usage : C<$obj-E<gt>final_peaks($dest,$prefix,$log);>
+
+Function : This method characterizes final peaks from RNA-seq coverage
+           found in C<%{$self-E<gt>data}-E<gt>{peaks}>. The latter is
+           supposed to have been populated by C<$self-E<gt>raw_peaks>.
+
+The procedure for finding final peaks is as follows: For each raw peak
+found in C<%{$self-E<gt>data}-E<gt>{peaks}> the window of maximum
+coverage is retrieved and a (second) sliding window approach is then
+applied to regions both upstream and downstream of the maximum. Peak
+boundaries are set at the position where the mean coverage of the
+respective window is lower than C<$self-E<gt>threshold> * peak
+maximum).
+
+Peaks are reported if their total length (as determined by this
+routine) is not longer than C<$self-E<gt>length>.
+
+Args : C<$dest> contains the output path for results, C<$prefix> the
+       prefix used for all output file names. C<$log> is the name of a
+       log file, or undef if no logging is reuqired.
+
+Returns : None. The output is a position-sorted BED6 file containing
+          all candidate peaks.
 
 Notes :
-
 
 =back
 
@@ -430,8 +477,6 @@ Notes :
 
 =item L<Path::Class>
 
-=item L<File::Slurp>
-
 =item L<List::Util>
 
 =item L<namespace::autoclean>
@@ -441,3 +486,13 @@ Notes :
 =head1 SEE ALSO
 
 =over
+
+=item L<Bio::ViennaNGS>
+
+=item L<Bio::ViennaNGS::Bed>
+
+=item L<Bio::ViennaNGS::Util>
+
+=back
+
+
