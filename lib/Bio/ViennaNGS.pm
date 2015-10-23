@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-23 14:37:00 mtw>
+# Last changed Time-stamp: <2015-10-23 15:02:20 mtw>
 
 package Bio::ViennaNGS;
 
@@ -294,6 +294,8 @@ test Windows compatibility.
 
 =item L<Bio::ViennaNGS::Bed>
 
+=item L<Bio::ViennaNGS::BedGraphEntry>
+
 =item L<Bio::ViennaNGS::Expression>
 
 =item L<Bio::ViennaNGS::ExtFeature>
@@ -304,9 +306,15 @@ test Windows compatibility.
 
 =item L<Bio::ViennaNGS::FeatureChain>
 
+=item L<Bio::ViennaNGS::FeatureIO>
+
+=item L<Bio::ViennaNGS::FeatureInterval>
+
 =item L<Bio::ViennaNGS::FeatureLine>
 
 =item L<Bio::ViennaNGS::MinimalFeature>
+
+=item L<Bio::ViennaNGS::Peak>
 
 =item L<Bio::ViennaNGS::SpliceJunc>
 
@@ -315,8 +323,6 @@ test Windows compatibility.
 =item L<Bio::ViennaNGS::UCSC>
 
 =item L<Bio::ViennaNGS::Util>
-
-=item L<Bio::ViennaNGS::Peak>
 
 =back
 
