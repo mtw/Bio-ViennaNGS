@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-23 16:24:51 mtw>
+# Last changed Time-stamp: <2015-10-23 16:28:27 mtw>
 
 package Bio::ViennaNGS::MinimalFeature;
 
@@ -54,8 +54,7 @@ start position, end position and strand. As such, it can be regarded a
 simple wrapper for BED4 elements.
 
 This class inherits from L<Bio::ViennaNGS::FeatureInterval> and is the
-base classs for more advanced feature annotation classes such as
-L<Bio::ViennaNGS::FeatureChain>.
+base classs for L<Bio::ViennaNGS::Feature>.
 
 =head1 SEE ALSO
 
@@ -65,7 +64,7 @@ L<Bio::ViennaNGS::FeatureChain>.
 
 =item L<Bio::ViennaNGS::FeatureInterval>
 
-=item L<Bio::ViennaNGS::FeatureChain>
+=item L<Bio::ViennaNGS::Feature>
 
 =back
 
