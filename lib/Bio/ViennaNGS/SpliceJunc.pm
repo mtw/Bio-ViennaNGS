@@ -4,7 +4,7 @@
 package Bio::ViennaNGS::SpliceJunc;
 
 use Exporter;
-use version; our $VERSION = qv('0.15');
+use version; our $VERSION = qv('0.16_01');
 use strict;
 use warnings;
 use Data::Dumper;
@@ -205,9 +205,12 @@ sub intersect_sj{
   my @junctions = ();
   my @transcript_beds = ();
   my %asj = (); # annotated splice junctions hash
-  my $bedtools = can_run('bedtools') or croak "bedtools not found";
-  my $sortBed  = can_run('sortBed') or croak "sortBed not found";
   my $this_function = (caller(0))[3];
+
+  my $bedtools = can_run('bedtools') or
+    croak "ERROR [$this_function] bedtools not found";
+  my $sortBed  = can_run('sortBed') or
+    croak "ERROR [$this_function] sortBed not found";
 
   croak "ERROR [$this_function] $p_annot does not exist\n"
     unless (-d $p_annot);
