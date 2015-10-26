@@ -43,6 +43,7 @@ WriteMakefile(
 				    "Statistics::R"                => '0',
 				    "Test::Files"                  => '0',
 				    "Test::File::Contents"         => '0',
+				    "Test::Deep"                   => '0',
 				   },
 	      'MIN_PERL_VERSION'          => '5.010',
 	      'EXE_FILES'                 => [ map { "scripts/$_" } @scripts ],
