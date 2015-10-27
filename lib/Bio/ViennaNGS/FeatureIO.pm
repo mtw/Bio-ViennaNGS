@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-27 16:39:10 mtw>
+# Last changed Time-stamp: <2015-10-27 16:49:33 mtw>
 package Bio::ViennaNGS::FeatureIO;
 
 use Moose;
@@ -97,7 +97,7 @@ feature annotation classes
   use Bio::ViennaNGS::FeatureIO;
 
   # create a new object and parse the contents of a bedGraph file
-  my $obj = Bio::ViennaNGS::FeatureIO->new(file       => "file.bg,
+  my $obj = Bio::ViennaNGS::FeatureIO->new(file       => "file.bg",
                                            filetype   => "BedGraph",
                                            objecttype => "BedGraph",
                                           );
