@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-06-29 15:48:39 mtw>
+# Last changed Time-stamp: <2015-10-27 16:06:36 mtw>
 
 package Bio::ViennaNGS::AnnoC;
 
-use version; our $VERSION = qv('0.15');
+use version; our $VERSION = qv('0.16');
 use Bio::ViennaNGS::Util qw(sortbed);
 use Bio::Tools::GFF;
 use Path::Class;
@@ -276,11 +276,16 @@ scenarios, including spliced isoforms.
 =item parse_gff
 
 Title : parse_gff
+
 Usage : C<$obj-E<gt>parse_gff($gff3_file);>
+
 Function: Parses GFF3 annotation files of non-spliced genomes into
           C<$self-E<gt>features>
+
 Args : The full path to a GFF3 file
+
 Returns :
+
 Notes : The GFF3 specification is available at
         L<http://www.sequenceontology.org/resources/gff3.html>. This
         routine has been tested with NCBI bacteria GFF3 annotation.
@@ -288,18 +293,25 @@ Notes : The GFF3 specification is available at
 =item feature_summary
 
 Title : feature_summary
+
 Usage : C<$obj-E<gt>feature_summary($dest);>
+
 Function : Generate a summary file for all features present in
            C<$self-E<gt>features>
+
 Args : Full output path for summary.txt file
+
 Returns :
 
 =item features2bed
 
 Title : features2bed
+
 Usage : C<$obj-E<gt>features2bed($feature,$workdir,$bn,$log);>
+
 Function : Dumps genomic features from C<$self-E<gt>features> hash to a
            BED12 file.
+
 Args : C<$gbkey> can be either a string corresponding to a genbank
        key in C<$self-E<gt>featstat> or C<undef>. If defined, only
        features of the speficied key will be dumped to a single BED12
@@ -308,6 +320,7 @@ Args : C<$gbkey> can be either a string corresponding to a genbank
        output directory and C<$bn> the basename for all output
        files. C<$log> is either be the full path to a logfile or
        C<undef>.
+
 Returns  :
 
 =back
