@@ -237,6 +237,7 @@ shipped with the Perl core distribution:
 * Math::Round
 * XML::Simple
 * Template
+* Test::Deep
 * Test::Files
 * Test::File::Contents
 
