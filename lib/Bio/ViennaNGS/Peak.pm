@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-27 14:44:15 mtw>
+# Last changed Time-stamp: <2015-10-27 17:31:43 mtw>
 
 package Bio::ViennaNGS::Peak;
 
@@ -256,6 +256,7 @@ sub raw_peaks {
   } # end foreach
   close(RAWPEAKS);
   close(LOG);
+  sortbed($fn_u,$dest,$fn,1,$log);
 }
 
 sub final_peaks {
@@ -343,6 +344,7 @@ sub final_peaks {
     } # end foreach $peak
   } # end foreach $chr
   close(CANDIDATEPEAKS);
+  sortbed($fn_u,$dest,$fn,1,$log);
 }
 __PACKAGE__->meta->make_immutable;
 
