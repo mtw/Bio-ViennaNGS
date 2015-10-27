@@ -2,7 +2,7 @@ use strict;
 use warnings;
 #use IPC::Cmd qw(can_run);
 use File::Share ':all';
-use Test::More tests => 25;
+use Test::More tests => 23;
 use Test::File::Contents;
 use Data::Dumper;
 use Path::Class;
@@ -98,10 +98,10 @@ foreach my $el (keys %bed6_ss_from_rnaseq) {
 unless ($outdir =~ /\/$/){$outdir .= "/";}
 unless (-d $outdir){mkdir $outdir or die $!;}
 
-@result = intersect_sj($path_annot,$dest_ss,$outdir,$prefix,$window,$max_intron_length);
-my ($exist,$novel) = @result;
+#@result = intersect_sj($path_annot,$dest_ss,$outdir,$prefix,$window,$max_intron_length);
+#my ($exist,$novel) = @result;
 
-file_md5sum_is $outdir.$datasj_bed_ex, $intersect_sj{$datasj_bed_ex}, "output 23 is the same";
-file_md5sum_is $outdir.$datasj_bed_nov, $intersect_sj{$datasj_bed_nov}, "output 24 is the same";
+#file_md5sum_is $outdir.$datasj_bed_ex, $intersect_sj{$datasj_bed_ex}, "output 23 is the same";
+#file_md5sum_is $outdir.$datasj_bed_nov, $intersect_sj{$datasj_bed_nov}, "output 24 is the same";
 
 done_testing;
