@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-06-29 15:48:51 mtw>
+# Last changed Time-stamp: <2015-10-27 15:28:30 mtw>
 
 package Bio::ViennaNGS::Bam;
 
 use Exporter;
-use version; our $VERSION = qv('0.15');
+use version; our $VERSION = qv('0.16');
 use strict;
 use warnings;
 use Bio::Perl 1.00690001;
@@ -415,6 +415,8 @@ BAM files for unique and multi mappers, respectively.
 NOTE: Not all short read mappers use the I<NH:i:> SAM attribute to
 decorate unique and multi mappers. As such, this routine will not work
 unless your BAM file has these attributes.
+
+=back
 
 =head1 DEPENDENCIES
 
