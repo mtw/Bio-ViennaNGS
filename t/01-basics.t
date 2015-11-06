@@ -32,6 +32,7 @@ BEGIN { use_ok('Bio::ViennaNGS::Feature') };
 BEGIN { use_ok('Bio::ViennaNGS::FeatureChain') };
 BEGIN { use_ok('Bio::ViennaNGS::FeatureLine') };
 BEGIN { use_ok('Bio::ViennaNGS::FeatureInterval') };
+BEGIN { use_ok('Bio::ViennaNGS::FeatureIO') };
 BEGIN { use_ok('Bio::ViennaNGS::MinimalFeature') };
 BEGIN { use_ok('Bio::ViennaNGS::Peak') };
 BEGIN { use_ok('Bio::ViennaNGS::SpliceJunc') };

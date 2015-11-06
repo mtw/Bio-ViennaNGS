@@ -142,7 +142,7 @@ Revision history for Perl extension Bio::ViennaNGS.
 	- added tests for UCSC.pm
 	- added tests for SpliceJunc.pm
 
-0.16_01
+0.16 Tue Oct 27 2015
 	- added Bio::ViennaNGS::FeatureInterval
 	- added Bio::ViennaNGS::BedGraphLine
 	- added Bio::ViennaNGS::Peak

@@ -1,4 +1,4 @@
-# Bio::ViennaNGS 0.16_01
+# Bio::ViennaNGS 0.16
 
 Bio::ViennaNGS is a distribution of Perl modules and utilities for
 building efficient Next-Generation Sequencing (NGS) analysis
@@ -237,6 +237,7 @@ shipped with the Perl core distribution:
 * Math::Round
 * XML::Simple
 * Template
+* Test::Deep
 * Test::Files
 * Test::File::Contents
 

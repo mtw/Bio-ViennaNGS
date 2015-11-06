@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-06-29 15:52:40 mtw>
+# Last changed Time-stamp: <2015-10-27 15:29:45 mtw>
 
 package Bio::ViennaNGS::UCSC;
 
 use Exporter;
-use version; our $VERSION = qv('0.15');
+use version; our $VERSION = qv('0.16');
 use strict;
 use warnings;
 use Template;
@@ -684,7 +684,7 @@ This function takes 4 parameters:
 
 =item 4 path for the log file (/home/user/logs/assemblyhubconstructionlog)
 
-back
+=back
 
 =head3 make_track_hub()
 
