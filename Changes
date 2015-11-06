@@ -150,3 +150,6 @@ Revision history for Perl extension Bio::ViennaNGS.
 	- added scripts/rnaseq_peakfinder.pl
 	- added scripts/bed2nt2aa.pl
 	- updated POD and README
+
+0.17_01
+	- changed output format in scripts/bed2nt2aa.pl to csv
