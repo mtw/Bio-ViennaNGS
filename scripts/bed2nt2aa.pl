@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-23 14:51:00 mtw>
+# Last changed Time-stamp: <2015-11-06 13:21:30 mtw>
 #
 # Provide nucleotide and amino acid sequences for BED files
 #
@@ -74,14 +74,14 @@ foreach $line (@$bed){
   chomp $line;
   my ($chr,$chromStart,$chromEnd,$name,$score,$strand) = split("\t",$line);
   my $seq = $fastaO->stranded_subsequence($chr,$chromStart+1,$chromEnd,$strand);
-  print "$chr:$chromStart-$chromEnd $strand\n$seq\n";
+  print "$chr;$chromStart;$chromEnd;$strand;$seq;";
   if($translate == 1){
     my $seqobj = Bio::Seq->new (-seq => $seq,
 				-id  => 'foobar',
 				-accession_number => 'ABCD');
     my@prots = Bio::SeqUtils->translate_3frames($seqobj);
     foreach my $s (@prots){
-      print $s->seq."\n";
+      print $s->seq.";";
     }
     print "\n";
   }
