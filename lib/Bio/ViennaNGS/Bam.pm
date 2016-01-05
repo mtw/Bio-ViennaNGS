@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-27 15:28:30 mtw>
+# Last changed Time-stamp: <2016-01-05 13:58:12 mtw>
 
 package Bio::ViennaNGS::Bam;
 
 use Exporter;
-use version; our $VERSION = qv('0.16');
+use version; our $VERSION = qv('0.17_01');
 use strict;
 use warnings;
 use Bio::Perl 1.00690001;
@@ -32,7 +32,7 @@ sub split_bam {
   my ($bamfile,$reverse,$want_uniq,$want_bed,$dest_dir,$log) = @_;
   my ($bam,$sam,$bn,$path,$ext,$header,$flag,$NH,$eff_strand,$tmp);
   my ($bam_pos,$bam_neg,$tmp_bam_pos,$tmp_bam_neg,$bamname_pos,$bamname_neg);
-  my ($bed_pos,$bed_neg,$bedname_pos,$bedname_neg);
+  my ($bed_pos,$bed_neg,$bedname_pos,$bedname_neg,$nh_warning_issued);
   my ($seq_id,$start,$stop,$strand,$target_names,$id,$score);
   my $this_function = (caller(0))[3];
   my %count_entries = (
@@ -46,9 +46,12 @@ sub split_bam {
 		       se_alis   => 0,
 		       pe_alis   => 0,
 		       flag      => 0,
+		       unmapped  => 0,
 		      );
   $data{count} = \%count_entries;
   $data{flag} = ();
+  $data{nh_issues} = 0; # will be set to 1 if NH attribute is missing
+  $nh_warning_issued = 0;
 
   croak "ERROR [$this_function] $bamfile does not exist\n"
     unless (-e $bamfile);
@@ -88,27 +91,40 @@ sub split_bam {
   while (my $read= $bam->read1() ) {
     @NHval = ();
     $data{count}{total}++;
-    if($verbose == 1){print STDERR $read->query->name."\t";}
+
+    # collect statistics of SAM flags
+    $flag = $read->flag;
+    unless (exists $data{flag}{$flag}){
+      $data{flag}{$flag} = 0;
+    }
+    $data{flag}{$flag}++;
+
+    # skip unmapped reads
+    if ( $read->get_tag_values('UNMAPPED') ){
+      $data{count}{unmapped}++;
+      next;
+    }
 
     # check if NH (the SAM tag used to indicate multiple mappings) is set
     if ($read->has_tag("NH")) {
       @NHval = $read->get_tag_values("NH");
       $NH = $NHval[0];
-      if ($NH == 1) {
-	$data{count}{uniq}++;
-	if ($verbose == 1) {print STDERR "NH:i:1\t";}
-      }
+      if ($NH == 1) {$data{count}{uniq}++;}
       else {
 	$data{count}{mult}++;
-	if ($verbose == 1) {print STDERR "NH:i:".$NH."\t";}
 	if ($want_uniq == 1) { # skip processing this read if it is a mutli-mapper
 	  $data{count}{skip}++;
 	  next;
 	}
       }
-      $data{count}{cur}++;
     }
-    else{ carp "WARN [$this_function] Read ".$read->query->name." does not have NH attribute\n";}
+    else{ # no NH tag found
+      $data{nh_issues} = 1; # set this once and for all
+      unless ($nh_warning_issued == 1){
+	carp "WARN [$this_function] Read ".$read->query->name." does not have NH attribute\n";
+	$nh_warning_issued = 1;
+      }
+    }
 
   #  print Dumper ($read->query);
     $strand = $read->strand;
@@ -210,13 +226,9 @@ sub split_bam {
     }
     if($verbose == 1) {print STDERR "--> ".$eff_strand."\t";}
 
-    # collect statistics of SAM flags
-    $flag = $read->flag;
-    unless (exists $data{flag}{$flag}){
-      $data{flag}{$flag} = 0;
-    }
-    $data{flag}{$flag}++;
-    if ($verbose == 1) {print STDERR "\n";}
+    # count considered reads
+    $data{count}{cur}++;
+
   } # end while
 
   rename ($tmp_bam_pos, $bamname_pos);
@@ -229,7 +241,7 @@ sub split_bam {
 
   # error checks
   unless ($data{count}{pe_alis} + $data{count}{se_alis} == $data{count}{cur}) {
-    printf "ERROR:  paired-end + single-end alignments != total alignment count\n";
+    printf "ERROR:  paired-end + single-end != total alignments\n";
     print Dumper(\%data);
     croak $!;
   }
@@ -237,7 +249,8 @@ sub split_bam {
     printf STDERR "%20d fragments on [+] strand\n",$data{count}{pos};
     printf STDERR "%20d fragments on [-] strand\n",$data{count}{neg};
     printf STDERR "%20d sum\n",eval($data{count}{pos}+$data{count}{neg});
-    printf STDERR "%20d cur_count (should be)\n",$data{count}{cur};
+    printf STDERR "%20d unmapped reads\n",$data{count}{unmapped};
+    printf STDERR "%20d total alignment/read count\n",$data{count}{cur};
     printf STDERR "ERROR: pos alignments + neg alignments != total alignments\n";
     print Dumper(\%data);
     croak $!;
@@ -245,10 +258,11 @@ sub split_bam {
   foreach (keys %{$data{flag}}){
     $data{count}{flag} += $data{flag}{$_};
   }
-  unless ($data{count}{flag} == $data{count}{cur}){
+  unless ($data{count}{flag} == $data{count}{cur} + $data{count}{unmapped}){
     printf STDERR "%20d alignments considered\n",$data{count}{cur};
+    printf STDERR "%20d unmapped reads\n",$data{count}{unmapped};
     printf STDERR "%20d alignments found in flag statistics\n",$data{count}{flag};
-    printf STDERR "ERROR: #considered alignments != #alignments from flag stat\n";
+    printf STDERR "ERROR: alignments considered + unmapped reads != alignments from flag stat\n";
     print Dumper(\%data);
     croak $!;
   }
@@ -256,19 +270,30 @@ sub split_bam {
   # logging output
   printf LOG "# bam_split.pl log for file \'$bamfile\'\n";
   printf LOG "#-----------------------------------------------------------------\n";
-  printf LOG "%20d total alignments (unique & multi-mapper)\n",$data{count}{total};
-  printf LOG "%20d unique-mappers (%6.2f%% of total)\n",
-    $data{count}{uniq},eval(100*$data{count}{uniq}/$data{count}{total}) ;
-  printf LOG "%20d multi-mappers  (%6.2f%% of total)\n",
+  printf LOG "%20d total alignments (unique/multi/unmapped)\n",$data{count}{total};
+  printf LOG "%20d unique-mappers   (%7.2f%% of total) ",
+    $data{count}{uniq},eval(100*$data{count}{uniq}/$data{count}{total});
+  if ($data{nh_issues}){printf LOG " *** NH attribute issues ***";}
+  printf LOG "\n";
+  printf LOG "%20d multi-mappers    (%7.2f%% of total) ",
     $data{count}{mult},eval(100*$data{count}{mult}/$data{count}{total});
-  printf LOG "%20d multi-mappers skipped\n", $data{count}{skip};
+  if ($data{nh_issues}){printf LOG " *** NH attribute issues ***";}
+  printf LOG "\n";
+  printf LOG "%20d skipped\n", $data{count}{skip};
   printf LOG "%20d alignments considered\n", $data{count}{cur};
   printf LOG "%20d paired-end\n", $data{count}{pe_alis};
   printf LOG "%20s single-end\n", $data{count}{se_alis};
-  printf LOG "%20d fragments on [+] strand  (%6.2f%% of considered)\n",
-    $data{count}{pos},eval(100*$data{count}{pos}/$data{count}{cur});
-  printf LOG "%20d fragments on [-] strand  (%6.2f%% of considered)\n",
-    $data{count}{neg},eval(100*$data{count}{neg}/$data{count}{cur});
+  if($data{count}{cur}>0){
+    printf LOG "%20d fragments on [+] strand  (%7.2f%% of considered)\n",
+      $data{count}{pos},eval(100*$data{count}{pos}/$data{count}{cur});
+    printf LOG "%20d fragments on [-] strand  (%7.2f%% of considered)\n",
+      $data{count}{neg},eval(100*$data{count}{neg}/$data{count}{cur});
+  }
+  else{
+     printf LOG "%20d fragments on [+] strand\n",$data{count}{pos};
+     printf LOG "%20d fragments on [-] strand\n",$data{count}{neg};
+  }
+  printf LOG "%20d unmapped\n", $data{count}{unmapped};
   printf LOG "#-----------------------------------------------------------------\n";
   printf LOG "Dumper output:\n". Dumper(\%data);
   close(LOG);
@@ -390,7 +415,7 @@ This routine returns an array whose fist two elements are the file
 names of the newly generate BAM files with reads mapped to the
 positive, and negative strand, respectively. Elements three and four
 are the number of fragments mapped to the positive and negative
-strand. If the C<$want_bed> option was given elements fiveand six are
+strand. If the C<$want_bed> option was given elements five and six are
 the file names of the output BED files for positive and negative
 strand, respectively.
 
@@ -399,6 +424,12 @@ experiments; In paired-end experiments, read and mate are treated
 separately, thus allowing for scenarios where eg. one read is a
 multi-mapper, whereas its associate mate is a unique mapper, resulting
 in an ambiguous alignment of the entire fragment.
+
+As mentioned above, the NH:i: SAM attribute is used for discriminating
+unique and multi mappers, thus requiring this attribute to be present
+in every SAM record. If this attribute is not found in I<all> SAM
+entries, a warning will be issued and the log file will contain a note
+indicating that there were issues with the NH attribute.
 
 =item uniquify_bam($bam,$dest,$log)
 
@@ -446,7 +477,7 @@ unless your BAM file has these attributes.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2015 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2016 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.0 or,
