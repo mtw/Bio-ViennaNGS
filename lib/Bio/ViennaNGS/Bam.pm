@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-01-05 13:58:12 mtw>
+# Last changed Time-stamp: <2016-01-06 16:19:45 mtw>
 
 package Bio::ViennaNGS::Bam;
 
@@ -7,7 +7,7 @@ use Exporter;
 use version; our $VERSION = qv('0.17_01');
 use strict;
 use warnings;
-use Bio::Perl 1.00690001;
+#use Bio::Perl 1.00690001;
 use Bio::DB::Sam 1.37;
 use Data::Dumper;
 use File::Basename qw(fileparse);
@@ -28,11 +28,11 @@ sub split_bam {
   my %data = ();
   my @NHval = ();
   my @processed_files = ();
-  my $verbose = 0;
+  my ($verbose,$nh_warning_issued) = (0)x2;
   my ($bamfile,$reverse,$want_uniq,$want_bed,$dest_dir,$log) = @_;
   my ($bam,$sam,$bn,$path,$ext,$header,$flag,$NH,$eff_strand,$tmp);
   my ($bam_pos,$bam_neg,$tmp_bam_pos,$tmp_bam_neg,$bamname_pos,$bamname_neg);
-  my ($bed_pos,$bed_neg,$bedname_pos,$bedname_neg,$nh_warning_issued);
+  my ($bed_pos,$bed_neg,$bedname_pos,$bedname_neg);
   my ($seq_id,$start,$stop,$strand,$target_names,$id,$score);
   my $this_function = (caller(0))[3];
   my %count_entries = (
@@ -57,8 +57,6 @@ sub split_bam {
     unless (-e $bamfile);
   croak "ERROR [$this_function] $dest_dir does not exist\n"
     unless (-d $dest_dir);
-
-  open(LOG, ">", $log) or croak $!;
 
   (undef,$tmp_bam_pos) = tempfile('BAM_POS_XXXXXXX',UNLINK=>0);
   (undef,$tmp_bam_neg) = tempfile('BAM_NEG_XXXXXXX',UNLINK=>0);
@@ -268,6 +266,7 @@ sub split_bam {
   }
 
   # logging output
+  open(LOG, ">", $log) or croak $!;
   printf LOG "# bam_split.pl log for file \'$bamfile\'\n";
   printf LOG "#-----------------------------------------------------------------\n";
   printf LOG "%20d total alignments (unique/multi/unmapped)\n",$data{count}{total};
@@ -301,12 +300,23 @@ sub split_bam {
 }
 
 sub uniquify_bam {
+  my %data = ();
   my ($bamfile,$dest,$log) = @_;
   my ($bam, $bn,$path,$ext,$read,$header);
-  my ($tmp_uniq,$tmp_mult,$fn_uniq,$fn_mult,$bam_uniq,$bam_mult);
-  my ($count_all,$count_uniq,$count_mult) = (0)x3;
+  my ($tmp_uniq,$tmp_mult,$fn_uniq,$fn_mult,$bam_uniq,$bam_mult,$NH);
+  my ($count_all,$count_uniq,$count_mult,$unmapped,$nh_warning_issued) = (0)x5;
   my @processed_files = ();
+  my @NHval = ();
   my $this_function = (caller(0))[3];
+  my %count_entries = (
+		       total     => 0,
+		       uniq      => 0,
+		       mult      => 0,
+		       unmapped  => 0,
+		       nonhtag   => 0,
+		      );
+  $data{count} = \%count_entries;
+  $data{nh_issues} = 0; # will be set to 1 if NH attribute is missing
 
   croak "ERROR [$this_function] Cannot find $bamfile\n"
     unless (-e $bamfile);
@@ -331,19 +341,46 @@ sub uniquify_bam {
   $bam_mult->header_write($header);
 
   while ($read = $bam->read1() ) {
-    $count_all++;
-    if ($read->aux_get("NH") == 1){ # uniquely mapped reads
-      $bam_uniq->write1($read);
-      $count_uniq++;
+    $data{count}{total}++;
+
+    # skip unmapped reads
+    if ( $read->get_tag_values('UNMAPPED') ){
+      $data{count}{unmapped}++;
+      next;
     }
-    else { # multiply mapped reads
-      $bam_mult->write1($read);
-      $count_mult++;
+
+    # check if NH (the SAM tag used to indicate multiple mappings) is set
+    if ($read->has_tag("NH")) {
+      @NHval = $read->get_tag_values("NH");
+      $NH = $NHval[0];
+      if ($NH == 1) {
+	$bam_uniq->write1($read);
+	$data{count}{uniq}++;
+      }
+      else {
+	$bam_mult->write1($read);
+	$data{count}{mult}++;
+      }
+    }
+    else{ # no NH tag found
+      $data{nh_issues} = 1; # set this once and for all
+      unless ($nh_warning_issued == 1){
+	$data{count}{nonhtag}++;
+	carp "ERROR [$this_function] Read ".$read->query->name.
+	  " does not have NH attribute\nCannot continue ...";
+	$nh_warning_issued = 1;
+      }
     }
   }
 
-  croak "ERROR [$this_function] Read counts don't match\n"
-    unless ($count_uniq + $count_mult == $count_all);
+  unless ($data{count}{uniq} + $data{count}{mult} ==
+	  $data{count}{total} - $data{count}{unmapped} - $data{count}{nonhtag}){
+    printf STDERR "%20d unique alignments\n",$data{count}{uniq};
+    printf STDERR "%20d multiple alignments\n",$data{count}{mult};
+    printf STDERR "%20d total alignments\n",$data{count}{total};
+    printf STDERR "%20d unmapped reads\n",$data{count}{unmapped};
+    croak "ERROR [$this_function] Read counts don't match\n";
+  }
 
   rename ($tmp_uniq, $fn_uniq);
   rename ($tmp_mult, $fn_mult);
@@ -351,9 +388,9 @@ sub uniquify_bam {
 
   if (defined $log){
     my $lf = file($dest,$log);
-    open(LOG, ">>", $lf) or croak $!;
-    printf LOG "%15d reads total\n%15d unique reads\n%15d multiple reads\n",
-      $count_all,$count_uniq,$count_mult;
+    open(LOG, ">", $lf) or croak $!;
+    printf LOG "%15d reads total\n%15d unique alignments\n%15d multiple alignments\n%15d unmapped\n",
+      $data{count}{total},$data{count}{uniq},$data{count}{mult},$data{count}{unmapped};
     close(LOG);
   }
 }
