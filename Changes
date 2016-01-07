@@ -153,3 +153,4 @@ Revision history for Perl extension Bio::ViennaNGS.
 
 0.17_01
 	- changed output format in scripts/bed2nt2aa.pl to csv
+	- fixed output path creation in rnaseq_peakfinder.pl, splice_site_cummary.pl
