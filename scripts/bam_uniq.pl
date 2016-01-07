@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-13 23:44:07 mtw>
+# Last changed Time-stamp: <2016-01-07 14:56:33 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -29,14 +29,18 @@ use warnings;
 use Getopt::Long qw( :config posix_default bundling no_ignore_case );
 use Pod::Usage;
 use Path::Class;
+use File::Basename;
 use Bio::ViennaNGS::Bam qw(uniquify_bam);
+use Bio::ViennaNGS::Util  qw(mkdircheck);
+use Cwd;
+use Data::Dumper;
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-my $bam_in;
-my $logfile = "bam_uniq.log";
+my ($bam_in,$cwd,$lf,$basename,$bamdir,$bamext);
+my $logext = ".bam_uniq.log";
 my $outdir = "./";
 my @result = ();
 
@@ -45,25 +49,31 @@ my @result = ();
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
 Getopt::Long::config('no_ignore_case');
-pod2usage(-verbose => 1) unless GetOptions("bam=s"   => \$bam_in,
-					   "o=s"     => \$outdir,
-					   "man"     => sub{pod2usage(-verbose => 2)},
-					   "help|h"  => sub{pod2usage(1)}
+pod2usage(-verbose => 1) unless GetOptions("bam=s"     => \$bam_in,
+					   "o|out=s"   => \$outdir,
+					   "l|log=s"   => \$logext,
+					   "man"       => sub{pod2usage(-verbose => 2)},
+					   "help|h"    => sub{pod2usage(1)}
 					  );
 
-
-unless ($bam_in =~ /^\//) {$bam_in = "./".$bam_in;}
 unless (-f $bam_in){
   warn "Could not find input file $bam_in given via -bam option";
   pod2usage(-verbose => 0);
 }
+$cwd = getcwd();
+unless ($bam_in =~ /^\// || $bam_in =~ /\.\//) {$bam_in = file($cwd,$bam_in);}
+unless (-d $outdir){mkdircheck($outdir)};
 
-#TODO check if we are allowed to write to $outdir
-unless ($outdir =~ /\/$/){$outdir .= "/";}
-unless (-d $outdir){mkdir $outdir or die $!;}
+($basename,$bamdir,$bamext) = fileparse($bam_in,qr/\.bam/);
 
-# Make BED12 line from each splice junction
-@result = uniquify_bam($bam_in,$outdir,$logfile);
+
+$lf = file($outdir,$basename.$logext);
+
+print "\$basename: $basename\n";
+print "\$bamdir: $bamdir\n";
+print "\$bamext: $bamext\n";
+print ">>".$lf->stringify()."<<\n";
+@result = uniquify_bam($bam_in,$outdir,$lf);
 
 __END__
 
@@ -91,7 +101,7 @@ files for unique and multi mappers, respectively.
 
 BAM file to extract unique and multi mappers from
 
-=item B<-o>
+=item B<--out -o>
 
 Output path
 
