@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-01-06 16:19:45 mtw>
+# Last changed Time-stamp: <2016-01-08 12:42:36 mtw>
 
 package Bio::ViennaNGS::Bam;
 
@@ -7,7 +7,6 @@ use Exporter;
 use version; our $VERSION = qv('0.17_01');
 use strict;
 use warnings;
-#use Bio::Perl 1.00690001;
 use Bio::DB::Sam 1.37;
 use Data::Dumper;
 use File::Basename qw(fileparse);
@@ -489,8 +488,6 @@ unless your BAM file has these attributes.
 =head1 DEPENDENCIES
 
 =over
-
-=item  L<Bio::Perl> >= 1.00690001
 
 =item  L<BIO::DB::Sam> >= 1.37
 

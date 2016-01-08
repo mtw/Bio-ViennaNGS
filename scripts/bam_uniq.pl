@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-01-07 14:56:33 mtw>
+# Last changed Time-stamp: <2016-01-08 14:04:59 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -65,14 +65,8 @@ unless ($bam_in =~ /^\// || $bam_in =~ /\.\//) {$bam_in = file($cwd,$bam_in);}
 unless (-d $outdir){mkdircheck($outdir)};
 
 ($basename,$bamdir,$bamext) = fileparse($bam_in,qr/\.bam/);
-
-
 $lf = file($outdir,$basename.$logext);
 
-print "\$basename: $basename\n";
-print "\$bamdir: $bamdir\n";
-print "\$bamext: $bamext\n";
-print ">>".$lf->stringify()."<<\n";
 @result = uniquify_bam($bam_in,$outdir,$lf);
 
 __END__
