@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-03-06 10:23:17 mtw>
+# Last changed Time-stamp: <2016-01-19 12:02:19 mtw>
 #
 # Split BAM files according to their strands, optionally filter unique
 # mappers
@@ -45,7 +45,8 @@ my ($rev,$wantuniq,$wantbed,$wantnorm,$bw) = (0)x5;
 my $logext = ".bam_split.log";
 my $cs_in = "-";
 my $bam_in = "-";
-my $outdir = "./";
+my $outdir = ".";
+my $visdir = "vis";
 my $scale   = 1000000;
 my @result  = ();
 
@@ -57,6 +58,7 @@ Getopt::Long::config('no_ignore_case');
 pod2usage(-verbose => 1) unless GetOptions("bam=s"      => \$bam_in,
 					   "bed"        => sub{$wantbed = 1},
 					   "bw"         => sub{$bw = 1},
+					   "bwdir=s"    => \$visdir,
 					   "cs=s"       => \$cs_in,
 					   "norm"       => sub{$wantnorm = 1},
 					   "o|out=s"    => \$outdir,
@@ -98,8 +100,8 @@ $bed_p  = $result[4]; # BED file containing fragments of [+] strand
 $bed_n  = $result[5]; # BED file containing fragments of [-] strand
 
 if ($bw == 1) {
-  my $od = dir($outdir,"vis");
-  mkdircheck($od);
+  my $od = dir($outdir,$visdir);
+  mkdircheck($od->stringify());
   bed_or_bam2bw("bed",$bed_p,$cs_in,"+",$od,$wantnorm,$size_p,$scale,$lf);
   bed_or_bam2bw("bed",$bed_n,$cs_in,"-",$od,$wantnorm,$size_n,$scale,$lf);
 }
@@ -142,6 +144,11 @@ Create a BED6 file for each split BAM file
 
 Create BedGraph and bigWig coverage files for e.g. genome browser
 visualization.
+
+=item B<--bwdir>
+
+Directory name for resulting bigWig files. This directory is created
+as subdirectory of the output directory. Default is 'vis'.
 
 =item B<--cs>
 

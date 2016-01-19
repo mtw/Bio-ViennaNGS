@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-27 14:44:46 mtw>
+# Last changed Time-stamp: <2016-01-19 12:02:39 mtw>
 
 package Bio::ViennaNGS::Util;
 
 use Exporter;
-use version; our $VERSION = qv('0.16');
+use version; our $VERSION = qv('0.17_01');
 use strict;
 use warnings;
 use Data::Dumper;
