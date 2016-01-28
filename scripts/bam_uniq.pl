@@ -78,7 +78,7 @@ bam_uniq.pl - Deconvolute BAM files into unique and multi mappers
 
 =head1 SYNOPSIS
 
-bam_uniq.pl [-bam I<FILE>] [-o I<DIR>]
+bam_uniq.pl [--bam I<FILE>] [-o I<DIR>]
 [options]
 
 =head1 DESCRIPTION
