@@ -15,6 +15,7 @@ use File::Path qw(make_path remove_tree);
 use Math::Round;
 use Carp;
 use Bio::ViennaNGS::FeatureChain;
+use Env qw(HOME);
 
 our @ISA = qw(Exporter);
 our @EXPORT = ();
