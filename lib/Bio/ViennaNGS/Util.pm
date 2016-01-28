@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-01-19 12:02:39 mtw>
+# Last changed Time-stamp: <2016-01-28 15:58:17 mtw>
 
 package Bio::ViennaNGS::Util;
 
@@ -398,6 +398,10 @@ sub mkdircheck {
   }
   foreach (@dirstocreate){
     my @total = split(/[\/\\]/,$_);
+    if ($total[0] eq '~'){
+      $total[0]=$HOME;
+      carp "WARNING [$this_function] replacing \'~\' in path with \'$HOME\'";
+    }
     my $dir;
     while(@total){
       $dir = dir(shift(@total)) unless (defined $dir);
