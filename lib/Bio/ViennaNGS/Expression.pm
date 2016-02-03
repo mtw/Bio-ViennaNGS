@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-27 14:45:04 mtw>
+# Last changed Time-stamp: <2016-02-03 13:11:26 mtw>
 
 package Bio::ViennaNGS::Expression;
 
-use version; our $VERSION = qv('0.16');
+use version; our $VERSION = qv('0.17_01');
 use Moose;
 use Carp;
 use Data::Dumper;
@@ -85,7 +85,8 @@ sub parse_readcounts_bed12 {
 				 length    => $len,
 				 count     => $mcData[eval(12+$i)],
 				};
-      # print Dumper(${$self->data}[$i]);
+     # print "sample $i:\n";
+     # print Dumper(${$self->data}[$i]);
     }
   }
   $self->nr_features($n);
@@ -176,8 +177,8 @@ sub computeTPM {
 
   $meanTPM = $totalTPM/$self->nr_features;
 
- # print Dumper(${$self->data}[$sample]);
- # print "totalTPM=$totalTPM | meanTPM=$meanTPM\n";
+  #print Dumper(${$self->data}[$sample]);
+  #print "totalTPM=$totalTPM | meanTPM=$meanTPM\n";
 
   return $meanTPM;
 }
