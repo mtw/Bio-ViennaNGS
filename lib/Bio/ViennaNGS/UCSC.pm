@@ -1,15 +1,16 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-27 15:29:45 mtw>
+# Last changed Time-stamp: <2016-02-04 14:15:42 mtw>
 
 package Bio::ViennaNGS::UCSC;
 
 use Exporter;
-use version; our $VERSION = qv('0.16');
+use version; our $VERSION = qv('0.17_01');
 use strict;
 use warnings;
 use Template;
 use Cwd;
 use File::Basename;
+use File::Find;
 use IPC::Cmd qw(can_run run);
 use File::Share ':all';
 use Path::Class;
@@ -44,10 +45,6 @@ sub make_assembly_hub{
   croak ("ERROR [$this_function]: no URL (network location for upload to UCSC) provided") 
     unless(defined $baseURL);
 
-  if (defined $log){
-    open(LOG, ">>", $log) or croak "$!";
-  }
-
   unless ($baseURL =~ /\/$/) { $baseURL .= "/"; }
 
   my $tmp_path = dist_file('Bio-ViennaNGS', "hub.txt" );
@@ -72,9 +69,12 @@ sub make_assembly_hub{
   my $genome_assembly_directory = dir($assembly_hub_directory,$genome_assembly_name);
   mkdir $assembly_hub_directory;
   mkdir $genome_assembly_directory;
+
   if (defined $log){
+    open(LOG, ">>", $log) or croak "$!";
     print LOG "LOG Base directory:          $assembly_hub_directory\n";
     print LOG "LOG Assembly Hub directory:  $genome_assembly_directory\n";
+    close(LOG);
   }
 
   #2-bit fasta file conversion
@@ -82,7 +82,12 @@ sub make_assembly_hub{
   modify_fasta_header($fasta_path,$fa_modified,$accession);
   my $twoBit = file($genome_assembly_directory, $accession.".2bit");
   my $fastaToTwobit_cmd = "$faToTwoBit $fa_modified $twoBit";
-  if (defined $log){  print LOG "LOG [$this_function] $fastaToTwobit_cmd\n";}
+
+  if (defined $log){
+    open(LOG, ">>", $log) or croak "$!";
+    print LOG "LOG [$this_function] $fastaToTwobit_cmd\n";
+    close(LOG);
+  }
 
   my( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) =
     run( command => $fastaToTwobit_cmd, verbose => 0 );
@@ -180,13 +185,13 @@ sub make_assembly_hub{
     write_chromosome_size_file($chromosome_size_filepath,$accession,$chromosome_size);
     convert_tracks($filesdir, $genome_assembly_directory, $chromosome_size_filepath, $log);
     my @trackfiles = retrieve_tracks($genome_assembly_directory, $baseURL, $assembly_hub_name, $accession);
-    
+
     foreach my $track (@trackfiles){
       my $trackString = make_track(@$track);
       $tracksList .= $trackString;
     }
   }
-  
+
   #big wigs
   my $bigwig_tracks_string = "";
   unless($big_wig_ids=~/^-$/){
@@ -204,6 +209,7 @@ sub make_assembly_hub{
     croak "Template process failed: ", $template->error(), "\n";
 
   if (defined $log){
+    open(LOG, ">>", $log) or croak "$!";
     print LOG "LOG Assembly Hub created\n";
     close(LOG);
   }
@@ -320,16 +326,26 @@ sub make_track_hub{
 
 sub convert_tracks{
   my ($filesdir,$genome_assembly_directory,$chromosome_size_filepath,$log) = @_;
-  my $currentDirectory = getcwd;
-  chdir $filesdir or croak $!;
-  my @bedfiles = <*.bed>;
-  foreach my $bedfile (@bedfiles){
-    my $bed_file_path = file($filesdir,$bedfile);
-    my $filename = $bedfile;
-    $filename =~ s/.bed$//;
-    bed2bigBed($bed_file_path,$chromosome_size_filepath,$genome_assembly_directory,$log);
+  my $this_function = (caller(0))[3];
+  my @bedfiles = ();
+
+  find( sub {
+	  return unless -f;
+	  return unless /\.bed$/;
+	  push @bedfiles, $File::Find::name;
+	} , $filesdir);
+
+  if (defined $log){
+    open(LOG, ">>", $log) or croak $!;
+    foreach my $bedfile (@bedfiles){
+      print LOG "LOG [$this_function] found file $bedfile\n";
+    }
+    close(LOG);
   }
-  chdir $currentDirectory or croak $!;
+
+  foreach my $bedfile (@bedfiles){
+    bed2bigBed($bedfile,$chromosome_size_filepath,$genome_assembly_directory,$log);
+  }
   return 1;
 }
 
@@ -671,8 +687,8 @@ Variables:
 
 =head3 make_assembly_hub()
 
-Build assembly hubs for the UCSC genome browser.
-This function takes 4 parameters:
+Build an UCSC Genome Browser Assembly Hub. This function takes 4
+parameters:
 
 =over
 
@@ -680,7 +696,10 @@ This function takes 4 parameters:
 
 =item 2 path to the ouput directory (e.g. /home/user/assemblyhubs/)
 
-=item 3 base URL where the output folder will be placed for upload to the UCSC genome browser (e.g. http://www.foo.com/folder/)
+=item 3 base URL under which the new Assembly Hub will be available on
+the Internet, e.g. http://www.foo.com/folder/. The generated Assembly
+Hub files must be copied to the corresponding file system location on
+the Web Server and the URL readable for the UCSC Genome Browser server.
 
 =item 4 path for the log file (/home/user/logs/assemblyhubconstructionlog)
 
@@ -723,7 +742,7 @@ This function takes 4 parameters:
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2015 Michael T. Wolfinger, E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2016 Michael T. Wolfinger, E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.0 or,

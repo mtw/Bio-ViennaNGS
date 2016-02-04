@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2014-12-19 23:14:44 mtw>
+# Last changed Time-stamp: <2016-02-04 12:48:53 mtw>
 #
 # Construct UCSC genome browser Assembly Hub and display various
 # genomic sequence annotation data within the Hub
@@ -79,7 +79,7 @@ unless (-d $dest){
 }
 $lf = file($dest,$logname);
 
-$assembly_hub_return_value = make_assembly_hub($fasta_in,$folder_in,$dest,$base_URL,$big_wig_urls,$lf);
+$assembly_hub_return_value = make_assembly_hub($fasta_in,$folder_in,$dest,$base_URL,$big_wig_urls,"$lf");
 
 
 __END__
