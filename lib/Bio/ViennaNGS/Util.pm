@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-01-28 15:58:17 mtw>
+# Last changed Time-stamp: <2016-02-12 23:01:56 mtw>
 
 package Bio::ViennaNGS::Util;
 
@@ -14,6 +14,7 @@ use Path::Class qw(dir file);
 use File::Path qw(make_path remove_tree);
 use Math::Round;
 use Carp;
+use Bio::ViennaNGS::Feature;
 use Bio::ViennaNGS::FeatureChain;
 use Env qw(HOME);
 

@@ -161,4 +161,5 @@ Revision history for Perl extension Bio::ViennaNGS.
 	- fixed output path creation in rnaseq_peakfinder.pl,
 	  splice_site_summary.pl
 	- refactored scripts/bam_uniq.pl
+	- refactored scripts/bed2nt2aa.pl
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-11-06 13:21:30 mtw>
+# Last changed Time-stamp: <2016-02-12 23:47:48 mtw>
 #
 # Provide nucleotide and amino acid sequences for BED files
 #
@@ -33,15 +33,19 @@ use Pod::Usage;
 use Data::Dumper;
 use Cwd;
 use Path::Class;
-use File::Slurp;
 use Bio::ViennaNGS::Fasta;
+use Bio::ViennaNGS::FeatureChain;
+use Bio::ViennaNGS::Util qw(parse_bed6);
+
 use Bio::SeqUtils;
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-my ($fastaO,$bed,$line);
+my ($fastaO,$bed,$line,$cwd,$featurechain,$f,$seq,$theid);
+my @featurelist = ();
+my @fids = ();
 my $bed_in = undef;
 my $fa_in  = undef;
 my $translate = 0;  # translate nucleotide sequence
@@ -62,29 +66,38 @@ unless(-f $fa_in){
   warn "Could not find input FASTA input file provided via ---fa option";
   pod2usage(-verbose => 0);
 }
-my $cwd = getcwd();
+$cwd = getcwd();
 unless ($bed_in =~ /^\// || $bed_in =~ /^\.\//){$bed_in = file($cwd,$bed_in);}
 unless ($fa_in =~ /^\// || $fa_in =~ /^\.\//){$fa_in = file($cwd,$fa_in);}
 
 $fastaO = Bio::ViennaNGS::Fasta->new(fa=>"$fa_in");
-
-# parse BED6 file
-$bed = read_file( $bed_in, array_ref => 1);
-foreach $line (@$bed){
-  chomp $line;
-  my ($chr,$chromStart,$chromEnd,$name,$score,$strand) = split("\t",$line);
-  my $seq = $fastaO->stranded_subsequence($chr,$chromStart+1,$chromEnd,$strand);
-  print "$chr;$chromStart;$chromEnd;$strand;$seq;";
+@fids = $fastaO->fastaids; # get all FASTA IDs
+$theid = $fids[0][0];
+@featurelist  = @{parse_bed6($bed_in)};
+$featurechain = Bio::ViennaNGS::FeatureChain->new('type'=>'original','chain'=>\@featurelist);
+foreach  $f ($featurechain->chain){
+  $seq = $fastaO->stranded_subsequence($f->chromosome,
+				       $f->start+1,
+				       $f->end,
+				       $f->strand);
+  my $fn = $f->chromosome.".".$f->name.".".eval($f->start+1)."-".$f->end.".fa";
+  my $newid = $theid."|".$f->name."|".eval($f->start+1)."-".$f->end."|";
+  open (FH, ">", $fn);
+  print FH ">$newid\n";
+  print FH join "\n", (unpack "(a70)*",$seq);
   if($translate == 1){
     my $seqobj = Bio::Seq->new (-seq => $seq,
 				-id  => 'foobar',
 				-accession_number => 'ABCD');
-    my@prots = Bio::SeqUtils->translate_3frames($seqobj);
+    my @prots = Bio::SeqUtils->translate_3frames($seqobj);
+    my $i=1;
     foreach my $s (@prots){
-      print $s->seq.";";
+      print FH "\n";
+      print FH ">$newid|AA frame $i|\n"; $i++;
+      print FH join "\n", (unpack "(a70)*",$s->seq);
     }
-    print "\n";
   }
+  close FH;
 }
 
 __END__
@@ -100,7 +113,7 @@ bed2nt2aa.pl [--bed I<FILE>] [--fa I<FILE>] [--aa] [options]
 
 =head1 DESCRIPTION
 
-Provide sequence information for BED intervals/files, optionally
+Generate sequence information for BED6 intervals as Fasta files, optionally
 translate nucleotide into amino acid sequences.
 
 =head1 OPTIONS
