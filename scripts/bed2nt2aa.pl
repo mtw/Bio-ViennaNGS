@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-02-12 23:47:48 mtw>
+# Last changed Time-stamp: <2016-02-18 00:53:10 mtw>
 #
 # Provide nucleotide and amino acid sequences for BED files
 #
@@ -85,6 +85,7 @@ foreach  $f ($featurechain->chain){
   open (FH, ">", $fn);
   print FH ">$newid\n";
   print FH join "\n", (unpack "(a70)*",$seq);
+  print FH "\n";
   if($translate == 1){
     my $seqobj = Bio::Seq->new (-seq => $seq,
 				-id  => 'foobar',
@@ -95,6 +96,7 @@ foreach  $f ($featurechain->chain){
       print FH "\n";
       print FH ">$newid|AA frame $i|\n"; $i++;
       print FH join "\n", (unpack "(a70)*",$s->seq);
+      print FH "\n";
     }
   }
   close FH;
