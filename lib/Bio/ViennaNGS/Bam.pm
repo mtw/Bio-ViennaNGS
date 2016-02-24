@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-02-23 18:36:17 mtw>
+# Last changed Time-stamp: <2016-02-24 14:19:45 mtw>
 
 package Bio::ViennaNGS::Bam;
 
@@ -17,7 +17,7 @@ use Carp;
 our @ISA = qw(Exporter);
 our @EXPORT = ();
 
-our @EXPORT_OK = qw ( split_bam uniquify_bam );
+our @EXPORT_OK = qw ( split_bam uniquify_bam uniquify_bam2 );
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
@@ -408,8 +408,11 @@ sub uniquify_bam2 {
   my ($bam, $bn,$path,$ext,$read,$header);
   my ($tmp_uniq,$tmp_mult,$fn_uniq,$fn_mult,$bam_uniq,$bam_mult,$NH);
   my ($count_all,$count_uniq,$count_mult,$unmapped,$nh_warning_issued) = (0)x5;
+  my $pos = 0;
   my @processed_files = ();
   my @NHval = ();
+  my $lastqname = undef;
+  my @band = ();
   my $this_function = (caller(0))[3];
   my %count_entries = (
 		       total     => 0,
@@ -445,7 +448,18 @@ sub uniquify_bam2 {
 
   while ($read = $bam->read1() ) {
     $data{count}{total}++;
+    $pos = $bam->tell();
 
+    my $qname = $read->qname;
+    $qname =~ s/\/[12]$//;
+
+    if (!defined($lastqname) || $qname eq $lastqname ){
+      print "pushing to array ";
+    }
+    else {
+      print "-----\n";
+    }
+    print "at pos $pos $qname\n";
     # skip unmapped reads
     if ( $read->get_tag_values('UNMAPPED') ){
       $data{count}{unmapped}++;
@@ -453,37 +467,38 @@ sub uniquify_bam2 {
     }
 
     # check if NH (the SAM tag used to indicate multiple mappings) is set
-    if ($read->has_tag("NH")) {
-      @NHval = $read->get_tag_values("NH");
-      $NH = $NHval[0];
-      if ($NH == 1) {
-	$bam_uniq->write1($read);
-	$data{count}{uniq}++;
-      }
-      else {
-	$bam_mult->write1($read);
-	$data{count}{mult}++;
-      }
-    }
-    else{ # no NH tag found
-      $data{nh_issues} = 1; # set this once and for all
-      unless ($nh_warning_issued == 1){
-	$data{count}{nonhtag}++;
-	carp "ERROR [$this_function] Read ".$read->query->name.
-	  " does not have NH attribute\nCannot continue ...";
-	$nh_warning_issued = 1;
-      }
-    }
+    #if ($read->has_tag("NH")) {
+    #  @NHval = $read->get_tag_values("NH");
+    #  $NH = $NHval[0];
+    #  if ($NH == 1) {
+    #	$bam_uniq->write1($read);
+    #	$data{count}{uniq}++;
+    #  }
+    #  else {
+    #	$bam_mult->write1($read);
+    #	$data{count}{mult}++;
+    #  }
+    #}
+    #else{ # no NH tag found
+    #  $data{nh_issues} = 1; # set this once and for all
+    #  unless ($nh_warning_issued == 1){
+    #	$data{count}{nonhtag}++;
+    #	carp "ERROR [$this_function] Read ".$read->query->name.
+    #	  " does not have NH attribute\nCannot continue ...";
+    #	$nh_warning_issued = 1;
+    #  }
+    #}
+    $lastqname = $qname;
   }
 
-  unless ($data{count}{uniq} + $data{count}{mult} ==
-	  $data{count}{total} - $data{count}{unmapped} - $data{count}{nonhtag}){
-    printf STDERR "%20d unique alignments\n",$data{count}{uniq};
-    printf STDERR "%20d multiple alignments\n",$data{count}{mult};
-    printf STDERR "%20d total alignments\n",$data{count}{total};
-    printf STDERR "%20d unmapped reads\n",$data{count}{unmapped};
-    croak "ERROR [$this_function] Read counts don't match\n";
-  }
+  #unless ($data{count}{uniq} + $data{count}{mult} ==
+  #	  $data{count}{total} - $data{count}{unmapped} - $data{count}{nonhtag}){
+  #  printf STDERR "%20d unique alignments\n",$data{count}{uniq};
+  #  printf STDERR "%20d multiple alignments\n",$data{count}{mult};
+  #  printf STDERR "%20d total alignments\n",$data{count}{total};
+  #  printf STDERR "%20d unmapped reads\n",$data{count}{unmapped};
+  #  croak "ERROR [$this_function] Read counts don't match\n";
+  #}
 
   rename ($tmp_uniq, $fn_uniq);
   rename ($tmp_mult, $fn_mult);
