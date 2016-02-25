@@ -154,6 +154,7 @@ Revision history for Perl extension Bio::ViennaNGS.
 
 0.17_01
 	- changed output format in scripts/bed2nt2aa.pl to csv
+	- added uniquify_bam2() in Bio::ViennaNGS::Bam
 	- implemented correct handling of unmapped reads in
 	  Bio::ViennaNGS::Bam
 	- replace '~' with $HOME in mkdircheck() within

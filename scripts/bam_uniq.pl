@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-02-24 12:18:03 mtw>
+# Last changed Time-stamp: <2016-02-25 17:57:46 mtw>
 #
 # ***********************************************************************
 # *  Copyright notice
@@ -41,7 +41,7 @@ use Data::Dumper;
 
 my ($bam_in,$cwd,$lf,$basename,$bamdir,$bamext);
 my $logext = ".bam_uniq.log";
-my $outdir = "./";
+my $outdir = getcwd();
 my @result = ();
 my $band = 0;
 
