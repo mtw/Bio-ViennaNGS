@@ -153,6 +153,7 @@ Revision history for Perl extension Bio::ViennaNGS.
 	- updated POD and README
 
 0.17_01
+	- minimum required Perl version is now 5.8
 	- changed output format in scripts/bed2nt2aa.pl to csv
 	- implemented correct handling of unmapped reads in
 	  Bio::ViennaNGS::Bam
@@ -162,4 +163,5 @@ Revision history for Perl extension Bio::ViennaNGS.
 	  splice_site_summary.pl
 	- refactored scripts/bam_uniq.pl
 	- refactored scripts/bed2nt2aa.pl
+	- added scripts/fasub.pl
 
