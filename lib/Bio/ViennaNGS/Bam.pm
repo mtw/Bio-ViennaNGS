@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-01-08 12:42:36 mtw>
+# Last changed Time-stamp: <2016-02-25 18:05:19 mtw>
 
 package Bio::ViennaNGS::Bam;
 
@@ -17,7 +17,7 @@ use Carp;
 our @ISA = qw(Exporter);
 our @EXPORT = ();
 
-our @EXPORT_OK = qw ( split_bam uniquify_bam );
+our @EXPORT_OK = qw ( split_bam uniquify_bam uniquify_bam2 );
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
@@ -394,6 +394,139 @@ sub uniquify_bam {
   }
 }
 
+sub uniquify_bam2 {
+  my %data = ();
+  my ($bamfile,$dest,$log) = @_;
+  my ($bam, $bn,$path,$ext,$read,$header,$ali);
+  my ($tmp_uniq,$tmp_mult,$fn_uniq,$fn_mult,$bam_uniq,$bam_mult,$NH);
+  my ($count_all,$count_uniq,$count_mult,$unmapped,$nh_warning_issued) = (0)x5;
+  my $pushme = 0;
+  my $allgomulti = 0;
+  my @processed_files = ();
+  my @NHval = ();
+  my $lastqname = undef;
+  my @band = ();
+  my $this_function = (caller(0))[3];
+  my %count_entries = (
+		       total     => 0,
+		       uniq      => 0,
+		       mult      => 0,
+		       unmapped  => 0,
+		       nonhtag   => 0,
+		      );
+  $data{count} = \%count_entries;
+  $data{nh_issues} = 0; # will be set to 1 if NH attribute is missing
+
+  croak "ERROR [$this_function] Cannot find $bamfile\n"
+    unless (-e $bamfile);
+  croak "ERROR [$this_function] $dest does not exist\n"
+    unless (-d $dest);
+
+  ($bn,$path,$ext) = fileparse($bamfile, qr /\..*/);
+
+  (undef,$tmp_uniq) = tempfile('BAM_UNIQ_XXXXXXX',UNLINK=>0);
+  (undef,$tmp_mult) = tempfile('BAM_MULT_XXXXXXX',UNLINK=>0);
+
+  $bam     = Bio::DB::Bam->open($bamfile, "r");
+  $fn_uniq = file($dest,$bn.".uniq.band.".$ext);
+  $fn_mult = file($dest,$bn.".mult.band.".$ext);
+  $header  = $bam->header; # TODO: modify header, leave traces ...
+
+  $bam_uniq = Bio::DB::Bam->open($tmp_uniq,'w')
+    or croak "ERROR [$this_function] Cannot open temp file for writing: $!";
+  $bam_mult = Bio::DB::Bam->open($tmp_mult,'w')
+    or croak "ERROR [$this_function] Cannot open temp file for writing: $!";
+  $bam_uniq->header_write($header);
+  $bam_mult->header_write($header);
+
+  while ($read = $bam->read1() ) {
+    $data{count}{total}++;
+
+    # skip unmapped reads
+    if ( $read->get_tag_values('UNMAPPED') ){
+      $data{count}{unmapped}++;
+      next;
+    }
+
+    my $qname = $read->qname;
+    $qname =~ s/\/[12]$//;
+
+    if (!defined($lastqname) || $qname eq $lastqname ){
+      #print "$qname\n";
+      push @band, $read;
+    }
+    else {
+      # band is now completely read, processing it ...
+      foreach $ali (@band){
+	# check if NH (the SAM attribute used to indicate multiple mappings) is set
+	if ($ali->has_tag("NH")) {
+	  @NHval = $ali->get_tag_values("NH");
+	  $NH = $NHval[0];
+	  if ($NH > 1) {
+	    $allgomulti = 1;
+	    $data{count}{mult}++;
+	  }
+	  else {
+	    $data{count}{uniq}++;
+	  }
+	}
+	else{ # no NH tag found
+	  $data{nh_issues} = 1; # set this once and for all
+	  unless ($nh_warning_issued == 1){
+	    $data{count}{nonhtag}++;
+	    carp "ERROR [$this_function] Read ".$read->qname.
+	      " does not have NH attribute\nCannot continue ...";
+	    $nh_warning_issued = 1;
+	  }
+	}
+      } # end foreach
+
+      if ($allgomulti == 1){ # write entire band to multi mapper file
+	foreach $ali (@band){$bam_mult->write1($ali)}
+	#print " -> mult\n";
+      }
+      else{ # write entire band to uniq mapper file
+	foreach $ali (@band){$bam_uniq->write1($ali)}
+	#print " -> uniq\n";
+      }
+
+      #print "-----\n";
+      @band = ();
+      $pushme = 1;
+      $allgomulti = 0;
+    } # end else
+
+    if ($pushme == 1){
+      #print "$qname\n";
+      push @band, $read;
+      $pushme = 0;
+    }
+
+    $lastqname = $qname;
+  }
+
+  unless ($data{count}{uniq} + $data{count}{mult} ==
+  	  $data{count}{total} - $data{count}{unmapped} - $data{count}{nonhtag}){
+    printf STDERR "%20d unique alignments\n",$data{count}{uniq};
+    printf STDERR "%20d multiple alignments\n",$data{count}{mult};
+    printf STDERR "%20d total alignments\n",$data{count}{total};
+    printf STDERR "%20d unmapped reads\n",$data{count}{unmapped};
+    croak "ERROR [$this_function] Read counts don't match\n";
+  }
+
+  rename ($tmp_uniq, $fn_uniq);
+  rename ($tmp_mult, $fn_mult);
+  push (@processed_files, ($fn_uniq,$fn_mult));
+
+  if (defined $log){
+    my $lf = file($dest,$log);
+    open(LOG, ">", $lf) or croak $!;
+    printf LOG "%15d reads total\n%15d unique alignments\n%15d multiple alignments\n%15d unmapped\n",
+      $data{count}{total},$data{count}{uniq},$data{count}{mult},$data{count}{unmapped};
+    close(LOG);
+  }
+}
+
 
 1;
 __END__
@@ -475,6 +608,23 @@ unique and multi mappers are created in the output folder C<$dest>,
 which are named B<basename.uniq.bam> and B<basename.mult.bam>,
 respectively. If defined, a logfile named C<$log> is created in the
 output folder.
+
+This routine returns an array holding file names of the newly created
+BAM files for unique and multi mappers, respectively.
+
+NOTE: Not all short read mappers use the I<NH:i:> SAM attribute to
+decorate unique and multi mappers. As such, this routine will not work
+unless your BAM file has these attributes.
+
+=item uniquify_bam2($bam,$dest,$log)
+
+Extract I<uniquely> and I<multiply> aligned reads from BAM file
+C<$bam> by means of the I<NH:i:> SAM attribute, like the original
+C<uniquify_bam> routine. Contrary to that, this one expects a
+I<name-sorted BAM file> and reads in bands of (supposedly paired-end)
+reads sharing the same id/query name. If all reads in a band are unique
+mappers, they go to the B<basename.uniq.band.bam> file, else all
+reads go the B<basename.mult.band.bam> file.
 
 This routine returns an array holding file names of the newly created
 BAM files for unique and multi mappers, respectively.
