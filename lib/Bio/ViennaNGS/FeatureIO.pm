@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-27 16:49:33 mtw>
+# Last changed Time-stamp: <2016-09-28 16:51:07 mtw>
 package Bio::ViennaNGS::FeatureIO;
 
 use Moose;
@@ -24,10 +24,12 @@ has 'filetype' => ( # BED6, BED12, GFF, GTF
 		  );
 
 has 'objecttype' => (
-		 is => 'rw',
-		 isa => 'Str', # BedGraph, ContainerFeature
-		 predicate => 'has_objecttype',
-		 required => 1,
+		     is => 'rw',
+		     isa => 'Str', # BedGraph, ContainerFeature
+		     predicate => 'has_objecttype',
+		     required => 1,
+		     writer => '_set_objecttype',
+		     
 		);
 
 has 'data' => (
@@ -50,9 +52,15 @@ sub BUILD { # call a parser method, depending on $self->objecttype
   confess "ERROR [$this_function] \$self->objecttype not available"
     unless ($self->has_objecttype);
 
-  if ($self->objecttype eq "BedGraph"){
+  if ($self->filetype eq "BedGraph"){
     #carp "INFO  [$this_function] \$self->objecttype is BedGraph\n";
     $self->parse_bedgraph_file($self->file);
+    return $self->data;
+  }
+  elsif ($self->filetype =~ m/bed6/){
+    # $self->objecttype = "Bio::ViennaNGS::Feature";
+    #carp "INFO  [$this_function] \$self->objecttype is Bed6\n";
+    $self->parse_bed6_file($self->file);
     return $self->data;
   }
   else{
@@ -60,24 +68,46 @@ sub BUILD { # call a parser method, depending on $self->objecttype
   }
 }
 
-sub parse_bedgraph_file{
-  my ($self,$file) = @_;
-  my $this_function = (caller(0))[3];
-  my ($bg,$line,$entry,$chr,$start,$end,$val);
+sub set_objecttype {
+  my $self = shift;
+  my @args = @_;
+  print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+  print Dumper (@args);
+}
 
-  $bg =  read_file( $file, array_ref => 1 ) ;
-  foreach $line (@$bg){
-    chomp($line);
-    croak "ERROR [$this_function] cannot parse bedGraph input from $file"
+sub parse_bedgraph_file{
+  my ($self,$filename) = @_;
+  my $this_function = (caller(0))[3];
+  my ($file,$line,$entry,$chr,$start,$end,$val);
+
+  $file =  read_file( $filename, array_ref => 1, chomp =>1 ) ;
+  foreach $line (@$file){
+    croak "ERROR [$this_function] cannot parse bedGraph input from $filename"
       unless {$line =~ m/^([a-zA-Z0-9._]+)\t(\d+)\t(\d+)\t(-?\d+\.?\d*)$/};
     $chr = $1; $start = $2; $end = $3, $val = $4;
     #print "++ \$chr $chr ++ \$start $start ++ \$end $end ++ \$val $val\n";
     $entry = Bio::ViennaNGS::BedGraphEntry->new(chromosome => $chr,
 						start => $start,
 						end => $end,
-						dataValue => $val,
-					       );
+						dataValue => $val);
     push @{$self->data}, $entry;
+  }
+}
+
+sub parse_bed6_file{
+  my ($self,$file) = @_;
+  my $this_function = (caller(0))[3];
+  my $line;
+  $file = read_file( $file, array_ref => 1, chomp =>1 );
+  foreach $line (@$file){
+    my @feat = split /\t/,$line;
+    my $feat = Bio::ViennaNGS::Feature->new(chromosome=>$feat[0],
+					    start=>$feat[1],
+					    end=>$feat[2],
+					    name=>$feat[3],
+					    score=>$feat[4],
+					    strand=>$feat[5]);
+    push @{$self->data}, $feat;
   }
 }
 
