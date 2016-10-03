@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-09-28 16:51:07 mtw>
+# Last changed Time-stamp: <2016-10-03 17:36:35 mtw>
 package Bio::ViennaNGS::FeatureIO;
 
 use Moose;
@@ -8,6 +8,7 @@ use File::Slurp;
 use Bio::ViennaNGS::Bed;
 use Bio::ViennaNGS::Feature;
 use Bio::ViennaNGS::BedGraphEntry;
+use Data::Dumper;
 
 has 'file' => ( # file path
 	       is => 'ro',
@@ -23,56 +24,58 @@ has 'filetype' => ( # BED6, BED12, GFF, GTF
 		   required => 1,
 		  );
 
-has 'objecttype' => (
+has 'instanceOf' => (
 		     is => 'rw',
 		     isa => 'Str', # BedGraph, ContainerFeature
-		     predicate => 'has_objecttype',
+		     predicate => 'has_instanceOf',
 		     required => 1,
-		     writer => '_set_objecttype',
-		     
-		);
+		     writer => 'set_instanceOf',
+		    );
 
 has 'data' => (
 	       is => 'rw',
 	       isa => 'ArrayRef',
 	       default => sub { [] },
+	       traits => ['Array'],
 	       predicate => 'has_data',
+	       handles => {
+			   all    => 'elements',
+			   count  => 'count',
+			   add    => 'push',
+			   pop    => 'pop',
+			  },
 	      );
 
-sub BUILD { # call a parser method, depending on $self->objecttype
+sub BUILD { # call a parser method, depending on $self->instanceOf
   my $self = shift;
   my $this_function = (caller(0))[3];
-
+  my $type = # 0/1/2
   #carp "INFO [$this_function]  now in BUILD";
 
   confess "ERROR [$this_function] \$self->file not available"
     unless ($self->has_file);
   confess "ERROR [$this_function] \$self->filetype not available"
     unless ($self->has_filetype);
-  confess "ERROR [$this_function] \$self->objecttype not available"
-    unless ($self->has_objecttype);
+  confess "ERROR [$this_function] \$self->instanceOf not available"
+    unless ($self->has_instanceOf);
 
   if ($self->filetype eq "BedGraph"){
-    #carp "INFO  [$this_function] \$self->objecttype is BedGraph\n";
+    #carp "INFO  [$this_function] \$self->instanceOf is BedGraph\n";
     $self->parse_bedgraph_file($self->file);
     return $self->data;
   }
-  elsif ($self->filetype =~ m/bed6/){
-    # $self->objecttype = "Bio::ViennaNGS::Feature";
-    #carp "INFO  [$this_function] \$self->objecttype is Bed6\n";
-    $self->parse_bed6_file($self->file);
+  elsif ($self->filetype =~ m/[Bb]ed6/){
+    if($self->instanceOf eq "Bio::ViennaNGS::Feature"){
+      carp "INFO  [$this_function] \$self->instanceOf is Bio::ViennaNGS::Feature\n";
+#      $type=0/1/2 je nachdem ob wir eine arrayref auf features, featurechain oder featurechain von geblockten features haben wollen
+    }
+    
+    $self->parse_bed6_file($self->file,$type);
     return $self->data;
   }
   else{
-    croak "ERROR [$this_function] Invalid type for \$self->objecttyp";
+    croak "ERROR [$this_function] Invalid type for \$self->filetyp: $self->filetype";
   }
-}
-
-sub set_objecttype {
-  my $self = shift;
-  my @args = @_;
-  print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-  print Dumper (@args);
 }
 
 sub parse_bedgraph_file{
