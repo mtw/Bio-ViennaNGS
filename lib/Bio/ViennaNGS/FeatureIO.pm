@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-10-04 08:51:31 mtw>
+# Last changed Time-stamp: <2016-10-04 16:17:20 mtw>
 package Bio::ViennaNGS::FeatureIO;
 
 use Moose;
@@ -7,7 +7,7 @@ use Carp;
 use File::Slurp;
 use Bio::ViennaNGS::Bed;
 use Bio::ViennaNGS::Feature;
-use bio::ViennaNGS::FeatureChain;
+use Bio::ViennaNGS::FeatureChain;
 use Bio::ViennaNGS::BedGraphEntry;
 use Data::Dumper;
 
@@ -115,8 +115,9 @@ sub parse_bed6_file{
 
   if ($typ == 2){ # initialize an empty FeatureChain object
     $fc = Bio::ViennaNGS::FeatureChain->new(type => "feature");
-  }
+   }
 
+  print "********** in parse_bed6: typ= $typ ************\n";
   foreach $line (@$file){
     my @feat = split /\t/,$line;
     $feat = Bio::ViennaNGS::Feature->new(chromosome=>$feat[0],
@@ -131,18 +132,19 @@ sub parse_bed6_file{
     elsif ($typ == 1) { # ArrayRef of FeatureChain objects, one per Feature object
       $fc = Bio::ViennaNGS::FeatureChain->new(type => "feature",
 					      chain => [$feat]);
-      $fc->_count_entries();
+      #      $fc->count_entries();
       push @{$self->data}, $fc;
     }
     elsif($typ == 2){
       $fc->add($feat);
-      $fc->_count_entries();
+      $fc->count_entries();
     }
     else{
       croak "ERROR [$this_function] don't know how to handle typ $typ";
     }
   } #end foreach
   if ($typ == 2) { push @{$self->data}, $fc; }
+ # print Dumper($self);
 }
 
 no Moose;
