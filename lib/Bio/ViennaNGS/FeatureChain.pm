@@ -1,9 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-27 14:43:29 mtw>
+# Last changed Time-stamp: <2016-10-03 16:41:12 mtw>
 
 package Bio::ViennaNGS::FeatureChain;
 
-use version; our $VERSION = qv('0.16');
+use version; our $VERSION = qv('0.17_01');
+use Carp;
 use Moose;
 with 'MooseX::Clone';
 use MooseX::InstanceTracking;
@@ -17,22 +18,35 @@ has 'chain' => (
 		is => 'rw',
 		traits => ['Array', 'Clone' => {to=>'ArrayRef'}],
 		isa => 'ArrayRef[Bio::ViennaNGS::Feature]',
-		required => '1',
-		builder => 'build_chain',
-		auto_deref => 1
-		);
+		default => sub { [] },
+		predicate => 'has_chain',
+		auto_deref => 1,
+		handles => {
+			    all    => 'elements',
+			    count  => 'count',
+			    add    => 'push',
+			    pop    => 'pop',
+			   },
+	       );
 
-sub build_chain {
+has '_entries' => (
+		   is => 'rw',
+		   isa => 'Int',
+		   predicate => 'nr_entries',
+		   init_arg => undef, # make this unsettable via constructor
+		  );
+
+sub BUILD {
   my $self = shift;
-  my $featurelist = shift; ## We expect features to be pre-sorted, So
-                           ## I simply read in an arrayref of Feature
-                           ## Objects
-  return ($featurelist);
+  my $this_function = (caller(0))[3];
+  confess "ERROR [$this_function] \$self->chain not available"
+    unless ($self->has_chain);
+  $self->_entries( scalar @{$self->chain});
 }
 
 sub print_chain{
   my $self = shift;
-  return 0 if (!$self->chain);
+  return 0 unless ($self->has_chain);
   my $out;
   foreach my $feature (@{$self->chain}){
     $out .= join("\t",
@@ -46,13 +60,17 @@ sub print_chain{
   }
   return $out;
 }
-
-#sub clone {
-#  my ( $self, %params ) = @_;
-#  $self->meta->clone_object($self, %params);
-#  return $self;
-#}
-
+  
+  sub as_bed12_line{
+    return;
+  }
+  
+  #sub clone {
+  #  my ( $self, %params ) = @_;
+  #  $self->meta->clone_object($self, %params);
+  #  return $self;
+  #}
+  
 no Moose;
 
 1;
