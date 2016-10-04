@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-10-03 16:41:12 mtw>
+# Last changed Time-stamp: <2016-10-04 08:55:25 mtw>
 
 package Bio::ViennaNGS::FeatureChain;
 
@@ -34,6 +34,7 @@ has '_entries' => (
 		   isa => 'Int',
 		   predicate => 'nr_entries',
 		   init_arg => undef, # make this unsettable via constructor
+		   builder => '_count_entries',
 		  );
 
 sub BUILD {
@@ -42,6 +43,13 @@ sub BUILD {
   confess "ERROR [$this_function] \$self->chain not available"
     unless ($self->has_chain);
   $self->_entries( scalar @{$self->chain});
+}
+
+sub _count_entries {
+  my $self = shift;
+  my $this_function = (caller(0))[3];
+  carp "INFO  [$this_function]";
+  return (scalar @{$self->chain});
 }
 
 sub print_chain{
