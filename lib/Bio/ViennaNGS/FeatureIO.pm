@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-10-04 00:39:38 mtw>
+# Last changed Time-stamp: <2016-10-04 08:51:31 mtw>
 package Bio::ViennaNGS::FeatureIO;
 
 use Moose;
@@ -131,10 +131,12 @@ sub parse_bed6_file{
     elsif ($typ == 1) { # ArrayRef of FeatureChain objects, one per Feature object
       $fc = Bio::ViennaNGS::FeatureChain->new(type => "feature",
 					      chain => [$feat]);
+      $fc->_count_entries();
       push @{$self->data}, $fc;
     }
     elsif($typ == 2){
       $fc->add($feat);
+      $fc->_count_entries();
     }
     else{
       croak "ERROR [$this_function] don't know how to handle typ $typ";
