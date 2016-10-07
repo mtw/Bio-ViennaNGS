@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-10-04 16:24:33 mtw>
+# Last changed Time-stamp: <2016-10-06 16:18:02 mtw>
 
 package Bio::ViennaNGS::FeatureChain;
 
@@ -36,7 +36,7 @@ has 'start' => (
 		is => 'ro',
 		isa => 'Int',
 		predicate => 'has_start',
-		builder => '_get_start',
+#		builder => '_get_start',
 ##		lazy => 1,
 		);
 
@@ -70,27 +70,27 @@ sub count_entries {
   $self->_entries($cnt);
 }
 
-#before '_get_start' => sub {
-#  my $self = shift;
-#  my $this_function = (caller(0))[3];
-#  carp "INFO [$this_function] in 'before ";
-#  $self->sip( sub { $_[0]->start cmp $_[1]->start} )
-#};
-
-sub _get_start {
+before 'as_bed12_line' => sub {
   my $self = shift;
-  print ">>>>>>>>>>>>>>>>>>>>>\n";
   my $this_function = (caller(0))[3];
-  carp "INFO [$this_function] in _get_start ";
-  print Dumper($self->chain);
+#  carp "INFO [$this_function] in 'before ";
+  $self->sip( sub { $_[0]->start <=> $_[1]->start} )
+};
+
+#sub _get_start {
+#  my $self = shift;
+#  print ">>>>>>>>>>>>>>>>>>>>>\n";
+#  my $this_function = (caller(0))[3];
+#  carp "INFO [$this_function] in _get_start ";
+#  print Dumper($self->chain);
 #  my $element = {$self->chain}->[0];
 #  confess "ERROR [$this_function] element is undef" unless (defined $element);
   #  print Dumper($element);
-  print "-----------------------\n";
-  return -99;
+#  print "-----------------------\n";
+#  return -99;
 ##  print Dumper($element);
 ##  $self->start($element->start);
-}
+#}
 
 sub print_chain{
   my $self = shift;
@@ -110,7 +110,35 @@ sub print_chain{
 }
   
   sub as_bed12_line{
-    return;
+    my ($self,$name,$score,$strand) = @_;
+    my ($i,$chr,$start,$end,$feat,$bed12,$bsizes,$bstarts);
+    my $count=0;
+    my @blockSizes = ();
+    my @blockStarts = ();
+    # TODO check whether all features have the same chromosome id
+    $chr   = @{$self->chain}[0]->chromosome;
+    $start = @{$self->chain}[0]->start;
+    $end   = @{$self->chain}[$#{$self->chain}]->end;
+    unless (defined $name){$name=@{$self->chain}[0]->name;}
+    unless (defined $score){$score=@{$self->chain}[0]->score;}
+    unless (defined $strand){$strand=@{$self->chain}[0]->strand;}
+
+#    print "start $start -- end $end\n";
+
+    # TODO populate blockSizes and blockStarts
+    for ($i=0;$i<=$#{$self->chain};$i++){
+      $count++;
+      $feat = @{$self->chain}[$i];
+#      print ">>>feature $i is a ".ref($feat)."\n";
+      push @blockSizes, eval($feat->end - $feat->start);
+      push @blockStarts, ($feat->start - $start);;
+    }
+    $bsizes = join (",",@blockSizes);
+    $bstarts = join (",", @blockStarts);
+    $bed12 = join ("\t",$chr,$start,$end,$name,$score,$strand,$start,$end,"0",$count,$bsizes,$bstarts);
+
+    
+    return $bed12;
   }
   
   #sub clone {
