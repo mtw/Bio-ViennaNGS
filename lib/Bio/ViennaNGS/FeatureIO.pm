@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-10-04 16:17:20 mtw>
+# Last changed Time-stamp: <2016-10-11 01:06:30 mtw>
 package Bio::ViennaNGS::FeatureIO;
 
 use Moose;
@@ -66,21 +66,29 @@ sub BUILD { # call a parser method, depending on $self->instanceOf
   }
   elsif ($self->filetype =~ m/[Bb]ed6/){
     if($self->instanceOf eq "Feature"){
-      carp "INFO  [$this_function] \$self->instanceOf is Feature\n";
+      #carp "INFO  [$this_function] \$self->instanceOf is Feature\n";
       $type=0; # ArrayRef of individual Feature objects
     }
     elsif ($self->instanceOf eq "FeatureChain"){
-      carp "INFO  [$this_function] \$self->instanceOf is FeatureChain\n";
+      #carp "INFO  [$this_function] \$self->instanceOf is FeatureChain\n";
       $type=1; # ArrayRef of FeatureChain objects, one per Feature object
     }
     elsif ($self->instanceOf eq "FeatureChainBlock"){
-      carp "INFO  [$this_function] \$self->instanceOf is FeatureChainBlock\n";
+      #carp "INFO  [$this_function] \$self->instanceOf is FeatureChainBlock\n";
       $type=2; # ArrayRef of the entire block of Features (aka Bed12 from Bed6 block)
     }
     else{
       croak "ERROR [$this_function] Invalid type for \$self->instanceOf: $self->instanceOf";
     }
     $self->parse_bed6_file($self->file,$type);
+    return $self->data;
+  }
+  elsif ($self->filetype =~ m/[Bb]ed12/){
+    if($self->instanceOf eq "Bed"){
+      #carp "INFO  [$this_function] \$self->instanceOf is Bed\n";
+      $type=0; # ArrayRef of individual Bed objects
+    }
+    $self->parse_bed12_file($self->file,$type);
     return $self->data;
   }
   else{
@@ -145,6 +153,33 @@ sub parse_bed6_file{
   } #end foreach
   if ($typ == 2) { push @{$self->data}, $fc; }
  # print Dumper($self);
+}
+
+sub parse_bed12_file{
+  my ($self,$file,$typ) = @_;
+  my $this_function = (caller(0))[3];
+  my ($line,$feat,$fc);
+  $file = read_file( $file, array_ref => 1, chomp =>1 );
+  foreach $line (@$file){
+    my @mcData = split /\t/,$line;
+    if ($typ == 0){ # ArrayRef of Bio::ViennaNGS::Bed objects
+      my $bo = Bio::ViennaNGS::Bed->new(chromosome   => $mcData[0],
+					start        => $mcData[1],
+					end          => $mcData[2],
+					name         => $mcData[3],
+					score        => $mcData[4],
+					strand       => $mcData[5],
+					thickStart   => $mcData[6],
+					thickEnd     => $mcData[7],
+					itemRgb      => $mcData[8],
+					blockCount   => $mcData[9],
+					blockSizes   => $mcData[10],
+					blockStarts  => $mcData[11],
+				       );
+      push @{$self->data}, $bo;
+    }
+  }
+
 }
 
 no Moose;
