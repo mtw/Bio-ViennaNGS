@@ -69,3 +69,4 @@ t/02-thirdparty.t
 t/04-UCSC-TrackHub.t
 t/05-UCSC-AssemblyHub.t
 t/06-SpliceJunc.t
+t/07-FeatureIO.t
