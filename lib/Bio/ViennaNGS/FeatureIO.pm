@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-10-11 01:06:30 mtw>
+# Last changed Time-stamp: <2016-11-02 19:10:59 mtw>
 package Bio::ViennaNGS::FeatureIO;
 
 use Moose;
@@ -88,6 +88,7 @@ sub BUILD { # call a parser method, depending on $self->instanceOf
       #carp "INFO  [$this_function] \$self->instanceOf is Bed\n";
       $type=0; # ArrayRef of individual Bed objects
     }
+    else {croak "ERROR [$this_function] currently only 'Bed' is a valid option for \$self->instance";}
     $self->parse_bed12_file($self->file,$type);
     return $self->data;
   }
@@ -125,7 +126,7 @@ sub parse_bed6_file{
     $fc = Bio::ViennaNGS::FeatureChain->new(type => "feature");
    }
 
-  print "********** in parse_bed6: typ= $typ ************\n";
+  #  print "********** in parse_bed6: typ= $typ ************\n";
   foreach $line (@$file){
     my @feat = split /\t/,$line;
     $feat = Bio::ViennaNGS::Feature->new(chromosome=>$feat[0],
@@ -197,12 +198,25 @@ feature annotation classes
 
   use Bio::ViennaNGS::FeatureIO;
 
-  # create a new object and parse the contents of a bedGraph file
+  # initialize a FeatureIO object from a Bed6 file
+  my $data_bed = Bio::ViennaNGS::FeatureIO->new(
+					       file => "file.bed6",
+					       filetype => 'Bed6',
+					       instanceOf => 'Feature',
+					      );
+
+  # initialize a FeatureIO object from a Bed12 file
+  my $data_bed = Bio::ViennaNGS::FeatureIO->new(
+					       file => "file.bed12",
+					       filetype => 'Bed12',
+					       instanceOf => 'Bed',
+					      );
+
+  # initialize a FeatureIO object from a bedGraph file
   my $obj = Bio::ViennaNGS::FeatureIO->new(file       => "file.bg",
                                            filetype   => "BedGraph",
-                                           objecttype => "BedGraph",
+                                           instanceOf => "BedGraph",
                                           );
-
 
 
 =head1 DESCRIPTION
@@ -210,11 +224,34 @@ feature annotation classes
 This module provides an object-oriented interface for easy
 input/output operations on common feature annotation file formats. It
 is - by design - a very generic module that stores all annotation data
-within the C<$self-E<gt>data> ArrayRef. C<$self-E<gt>objecttype>
-determines the type of elements in C<$self-E<gt>data>.
+within the C<$self-E<gt>data> ArrayRef. C<$self-E<gt>filetype>
+specifies the file type to be processed. Currently parsing of I<Bed6>,
+I<Bed12> and I<bedGraph> files is supported. C<$self-E<gt>instanceOf>
+determines the object type of elements held in the C<$self-E<gt>data>
+ArrayRef(s).
 
-Currently parsing of bedGraph files into an array of
-L<Bio::ViennaNGS::BedGraphEntry> objects is supported.
+In case of parsing Bed6 data, C<$self-E<gt>instanceOf> can either be
+C<Feature>, C<FeatureChain> or C<FeatureChainBlock>. While the first
+causes C<$self-E<gt>data> to hold an ArrayRef to individual
+L<Bio::ViennaNGS::Feature> objects, the second triggers creation of
+individual L<Bio::ViennaNGS::FeatureChain> objects (each containing
+exactly one feature interval, corresponding to individual Bed6
+entries). A C<FeatureChainBlock> value to the C<$self-E<gt>instanceOf>
+causes C<$self-E<gt>data> to hold an ArrayRef to a combined
+L<Bio::ViennaNGS::FeatureChain> containing an entire block of
+features. In the context of Bed annotation this corresponds to a
+single Bed12 line (e.g. gene/transcript) that contains all individual
+Bed6 features (e.g. exons). Evidently, this only makes sense if all
+Bed6 features originate from the same chromosome and strand.
+
+In case of parsing Bed12 data, currently only C<Bed> is supported for
+C<$self-E<gt>instanceOf>, causing C<$self-E<gt>data> to hold an
+ArrayRef to L<Bio::ViennaNGS::Bed> (aka Bed12) features. This will be
+adjusted to L<Bio::ViennaNGS::FeatureChain> in the future.
+
+In case of pasring bedGraph data, C<$self-E<gt>instanceOf> is ignored
+and C<$self-E<gt>data> holds an ArrayRef to individual
+L<Bio::ViennaNGS::BedGraph> objects.
 
 =head1 METHODS
 
@@ -222,18 +259,12 @@ L<Bio::ViennaNGS::BedGraphEntry> objects is supported.
 
 =item parse_bedgraph_file
 
-Title : parse_gff
+=item parse_bed6_file.
 
-Usage : C<$obj-E<gt>parse_bedgraph_file($bedgraph_file);>
+=item parse_bed12_file
 
-Function: Parses bedGraph coverage data into C<$self-E<gt>data>.
-
-Args : The full path to a bedGraph file
-
-Returns : Nothing.
-
-Notes : The bedGraph specification is available at
-        L<http://genome.ucsc.edu/goldenpath/help/bedgraph.html>.
+These methods are used for object construction and should not be
+called directly.
 
 =back
 
@@ -244,6 +275,8 @@ Notes : The bedGraph specification is available at
 =item L<Bio::ViennaNGS::Bed>
 
 =item L<Bio::ViennaNGS::Feature>
+
+=item L<Bio::ViennaNGS::FeatureChain>
 
 =item L<Bio::ViennaNGS::BedGraphEntry>
 
@@ -259,7 +292,7 @@ Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014-2015 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2014-2016 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.0 or,
