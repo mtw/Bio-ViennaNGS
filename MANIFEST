@@ -5,8 +5,6 @@ inc/File/ShareDir/Install.pm
 lib/Bio/ViennaNGS.pm
 lib/Bio/ViennaNGS/AnnoC.pm
 lib/Bio/ViennaNGS/Bam.pm
-lib/Bio/ViennaNGS/BamStat.pm
-lib/Bio/ViennaNGS/BamStatSummary.pm
 lib/Bio/ViennaNGS/Bed.pm
 lib/Bio/ViennaNGS/BedGraphEntry.pm
 lib/Bio/ViennaNGS/Expression.pm
@@ -27,13 +25,11 @@ Makefile.PL
 MANIFEST			This list of files
 README
 scripts/assembly_hub_constructor.pl
-scripts/bam_quality_stat.pl
 scripts/bam_split.pl
 scripts/bam_to_bigwig.pl
 scripts/bam_uniq.pl
 scripts/bed2bedGraph.pl
 scripts/bed2nt2aa.pl
-scripts/extend_bed.pl
 scripts/gff2bed.pl
 scripts/kmer_analysis.pl
 scripts/MEME_xml_motif_extractor.pl
@@ -44,9 +40,6 @@ scripts/sj_visualizer.pl
 scripts/splice_site_summary.pl
 scripts/track_hub_constructor.pl
 scripts/trim_fastq.pl
-scripts/Tutorial_pipeline00.pl
-scripts/Tutorial_pipeline01.pl
-scripts/Tutorial_pipeline02.pl
 scripts/Tutorial_pipeline03.pl
 share/data1/NC_000913.3.30k.fa
 share/data1/NC_000913.3.30k.gff
