@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-27 14:44:03 mtw>
+# Last changed Time-stamp: <2016-11-02 16:07:51 mtw>
 
 package Bio::ViennaNGS::MinimalFeature;
 
@@ -41,11 +41,11 @@ intervals.
 
   use Bio::ViennaNGS::MinimalFeature;
 
-  my $expression = Bio::ViennaNGS::MinimalFeature->new(chromosome => "chr1",
-                                                       start => "1200",
-                                                       end => "4300",
-                                                       strand => "+",
-                                                      );
+  my $feat = Bio::ViennaNGS::MinimalFeature->new(chromosome => "chr1",
+                                                 start => "1200",
+                                                 end => "4300",
+                                                 strand => "+",
+                                                );
 =head1 DESCRIPTION
 
 This module provides an object-oriented interface for storing
