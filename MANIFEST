@@ -30,6 +30,7 @@ scripts/bam_to_bigwig.pl
 scripts/bam_uniq.pl
 scripts/bed2bedGraph.pl
 scripts/bed2nt2aa.pl
+scripts/bed6_to_bed12.pl
 scripts/gff2bed.pl
 scripts/kmer_analysis.pl
 scripts/MEME_xml_motif_extractor.pl
