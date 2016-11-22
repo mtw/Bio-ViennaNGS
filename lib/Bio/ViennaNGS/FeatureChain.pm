@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-10-06 16:18:02 mtw>
+# Last changed Time-stamp: <2016-11-21 08:31:32 mtw>
 
 package Bio::ViennaNGS::FeatureChain;
 
@@ -36,8 +36,6 @@ has 'start' => (
 		is => 'ro',
 		isa => 'Int',
 		predicate => 'has_start',
-#		builder => '_get_start',
-##		lazy => 1,
 		);
 
 has '_entries' => (
@@ -49,11 +47,11 @@ has '_entries' => (
 		   lazy => 1,
 		  );
 
-has 'foo' => (
-	      is => 'ro',
-	      isa => 'Str',
-	      default => "AAA",
-	     );
+#has 'foo' => (
+#	      is => 'ro',
+#	      isa => 'Str',
+#	      default => "AAA",
+#	     );
 
 sub BUILD {
   my $self = shift;
@@ -123,22 +121,34 @@ sub print_chain{
     unless (defined $score){$score=@{$self->chain}[0]->score;}
     unless (defined $strand){$strand=@{$self->chain}[0]->strand;}
 
-#    print "start $start -- end $end\n";
-
     # TODO populate blockSizes and blockStarts
     for ($i=0;$i<=$#{$self->chain};$i++){
       $count++;
       $feat = @{$self->chain}[$i];
-#      print ">>>feature $i is a ".ref($feat)."\n";
       push @blockSizes, eval($feat->end - $feat->start);
       push @blockStarts, ($feat->start - $start);;
     }
     $bsizes = join (",",@blockSizes);
     $bstarts = join (",", @blockStarts);
     $bed12 = join ("\t",$chr,$start,$end,$name,$score,$strand,$start,$end,"0",$count,$bsizes,$bstarts);
-
-    
     return $bed12;
+  }
+
+  sub as_bed6_array{
+    my $self = shift;
+    $self->count_entries();
+    my @bed6array=();
+    return 0 unless ($self->has_chain);
+    for (my $i=0;$i<$self->_entries;$i++){
+      push @bed6array, join ("\t", 
+			     @{$self->chain}[$i]->chromosome,
+			     @{$self->chain}[$i]->start,
+			     @{$self->chain}[$i]->end,
+			     @{$self->chain}[$i]->name,
+			     @{$self->chain}[$i]->score,
+			     @{$self->chain}[$i]->strand);
+    }
+    return \@bed6array;
   }
   
   #sub clone {
