@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-11-02 19:10:59 mtw>
+# Last changed Time-stamp: <2016-12-01 23:41:16 mtw>
 package Bio::ViennaNGS::FeatureIO;
 
 use Moose;
@@ -47,6 +47,15 @@ has 'data' => (
 			  },
 	      );
 
+has '_entries' => ( # of elements in $self->data
+		   is => 'rw',
+		   isa => 'Int',
+		   predicate => 'nr_entries',
+		   init_arg => undef, # make this unsettable via constructor
+		   builder => 'count_entries',
+		   lazy => 1,
+		  );
+
 sub BUILD { # call a parser method, depending on $self->instanceOf
   my $self = shift;
   my $this_function = (caller(0))[3];
@@ -86,7 +95,7 @@ sub BUILD { # call a parser method, depending on $self->instanceOf
   elsif ($self->filetype =~ m/[Bb]ed12/){
     if($self->instanceOf eq "Bed"){
       #carp "INFO  [$this_function] \$self->instanceOf is Bed\n";
-      $type=0; # ArrayRef of individual Bed objects
+      $type=0; # ArrayRef of individual Bio::ViennaNGS::Bed objects
     }
     else {croak "ERROR [$this_function] currently only 'Bed' is a valid option for \$self->instance";}
     $self->parse_bed12_file($self->file,$type);
@@ -95,6 +104,14 @@ sub BUILD { # call a parser method, depending on $self->instanceOf
   else{
     croak "ERROR [$this_function] Invalid type for \$self->filetyp: $self->filetype";
   }
+  $self->count_entries();
+  print Dumper($self->_entries);
+}
+
+sub count_entries {
+  my $self = shift;
+  my $cnt = scalar @{$self->data};
+  $self->_entries($cnt);
 }
 
 sub parse_bedgraph_file{
