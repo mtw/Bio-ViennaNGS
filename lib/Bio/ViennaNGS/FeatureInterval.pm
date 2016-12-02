@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-27 14:45:34 mtw>
+# Last changed Time-stamp: <2016-12-02 11:22:16 mtw>
 
 package Bio::ViennaNGS::FeatureInterval;
 
-use version; our $VERSION = qv('0.16');
+use version; our $VERSION = qv('0.17_02');
 use namespace::autoclean;
 
 use Moose;
@@ -74,7 +74,7 @@ Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014-2015 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2014-2017 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.0 or,

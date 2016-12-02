@@ -152,7 +152,7 @@ Revision history for Perl extension Bio::ViennaNGS.
 	- added scripts/bed2nt2aa.pl
 	- updated POD and README
 
-0.17_01
+0.17_02
 	- minimum required Perl version is now 5.8
 	- added Bio::ViennaNGS::FeatureIO
 	- changed output format in scripts/bed2nt2aa.pl to csv
@@ -171,4 +171,5 @@ Revision history for Perl extension Bio::ViennaNGS.
 	- added scripts/fasub.pl
 	- updated POD
 	- removed Tutorial_pipeline0{1,2}
+	- added unit tests
 

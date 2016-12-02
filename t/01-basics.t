@@ -21,8 +21,6 @@ print Dumper($data1_gff);
 BEGIN { use_ok('Bio::ViennaNGS') };
 BEGIN { use_ok('Bio::ViennaNGS::AnnoC') };
 BEGIN { use_ok('Bio::ViennaNGS::Bam') };
-BEGIN { use_ok('Bio::ViennaNGS::BamStat') };
-BEGIN { use_ok('Bio::ViennaNGS::BamStatSummary') };
 BEGIN { use_ok('Bio::ViennaNGS::Bed') };
 BEGIN { use_ok('Bio::ViennaNGS::BedGraphEntry') };
 BEGIN { use_ok('Bio::ViennaNGS::Expression') };
