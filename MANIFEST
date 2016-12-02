@@ -46,6 +46,7 @@ share/data1/NC_000913.3.30k.fa
 share/data1/NC_000913.3.30k.gff
 share/data1/NC_000913.3.chrom.sizes
 share/data1/NC_000913.CDS.bed
+share/data1/NC_000913.CDS.bed6
 share/data1/SRR794848.8k.bam
 share/data2/MIOS.bed12
 share/data2/MIOS_sj.bed
