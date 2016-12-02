@@ -6,7 +6,7 @@ use Path::Class;
 use File::Share ':all';
 use Data::Dumper;
 use FindBin qw($Bin);
-use constant TEST_COUNT => 13;
+use constant TEST_COUNT => 17;
 
 use lib "$Bin/../lib", "$Bin/../blib/lib", "$Bin/../blib/arch";
 
@@ -37,6 +37,10 @@ use Bio::ViennaNGS::FeatureChain;
   my $Feature2 = new_ok('Bio::ViennaNGS::Feature'=> \@arg2);
   my $Feature3 = new_ok('Bio::ViennaNGS::Feature'=> \@arg3);
   my $Feature4 = new_ok('Bio::ViennaNGS::Feature'=> \@arg4);
+  ok($Feature1->_length == 246, 'length of Feature1');
+  ok($Feature2->_length == 199, 'length of Feature2');
+  ok($Feature3->_length == 89, 'length of Feature3');
+  ok($Feature4->_length == 1352, 'length of Feature4');
 
   my @arg_fc = (type => "test", chain => [$Feature1,$Feature2]);
   my $FC1 = new_ok("Bio::ViennaNGS::FeatureChain" => \@arg_fc);
@@ -67,5 +71,4 @@ use Bio::ViennaNGS::FeatureChain;
   isa_ok( $ft, 'Bio::ViennaNGS::Feature');
   $FC1->count_entries();
   ok($FC1->_entries == 3, "elements in FeatureChain->chain ArrayRef");
-  print Dumper($FC1);
 }

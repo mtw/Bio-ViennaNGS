@@ -6,7 +6,7 @@ use Path::Class;
 use File::Share ':all';
 use Data::Dumper;
 use FindBin qw($Bin);
-use constant TEST_COUNT => 1;
+use constant TEST_COUNT => 2;
 
 use lib "$Bin/../lib", "$Bin/../blib/lib", "$Bin/../blib/arch";
 
@@ -28,6 +28,6 @@ use Bio::ViennaNGS::FeatureInterval;
   my $end = 123456;
   my @arg = (chromosome => $chr, start => $start, end => $end);
   my $FI = new_ok('Bio::ViennaNGS::FeatureInterval'=> \@arg);
-
+  ok($FI->_length == 23457, 'length of Featureinterval');
 }
 

@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-12-01 23:41:16 mtw>
+# Last changed Time-stamp: <2016-12-02 16:41:32 mtw>
 package Bio::ViennaNGS::FeatureIO;
 
 use Moose;
@@ -105,7 +105,6 @@ sub BUILD { # call a parser method, depending on $self->instanceOf
     croak "ERROR [$this_function] Invalid type for \$self->filetyp: $self->filetype";
   }
   $self->count_entries();
-  print Dumper($self->_entries);
 }
 
 sub count_entries {

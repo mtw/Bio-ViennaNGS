@@ -1,33 +1,50 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-12-02 11:22:16 mtw>
+# Last changed Time-stamp: <2016-12-02 16:58:22 mtw>
 
 package Bio::ViennaNGS::FeatureInterval;
 
 use version; our $VERSION = qv('0.17_02');
 use namespace::autoclean;
-
+use Carp;
 use Moose;
 
 has 'chromosome' => (
-		     is  => 'rw',
+		     is  => 'ro',
 		     isa => 'Str',
 		     required => 1,
 		     predicate => 'has_chromosome',
 	     );
 
 has 'start' => (
-		is      => 'rw',
+		is      => 'ro',
 		isa     => 'Int',
 		required => 1,
 		predicate => 'has_start',
 	       );
 
 has 'end' => (
-	      is      => 'rw',
+	      is      => 'ro',
 	      isa     => 'Int',
 	      required => 1,
 	      predicate => 'has_end',
 	     );
+
+has '_length' => ( # length of interval
+		   is => 'rw',
+		   isa => 'Int',
+		   predicate => 'length',
+		   init_arg => undef, # make this unsettable via constructor
+		 );
+
+sub BUILD { # call a parser method, depending on $self->instanceOf
+  my $self = shift;
+  my $this_function = (caller(0))[3];
+
+  confess "ERROR [$this_function] \$self->end must be >= than \$self->start"
+    unless ($self->end >= $self->start);
+  my $len = $self->end-$self->start;
+  $self->_length($len);
+}
 
 no Moose;
 
@@ -48,6 +65,8 @@ genomic intervals.
                                                  start => "1200",
                                                  end => "4300",
                                                 );
+
+  my $len = $obj->_length();
 
 =head1 DESCRIPTION
 
