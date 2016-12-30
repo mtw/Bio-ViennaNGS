@@ -12,6 +12,8 @@ use File::Share ':all';
 use Test::More tests => 12;
 use Data::Dumper;
 
+my $log = "TrackHub.log";
+
 # Check if Bio::ViennaNGS::UCSC is successfully loaded.
 require_ok ( 'Bio::ViennaNGS::UCSC');
 
@@ -275,7 +277,7 @@ is ( retrieve_bigbed_url_tracks (@arguments), $expected, 'retrieve bigbed url tr
 };
 
 # Make track hub
-make_track_hub ( "hg19", ".", "http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_trackHub/", "http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.pos.bb#http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.neg.bb", "http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.pos.bw,http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.neg.bw", "log.txt" );
+make_track_hub ( "hg19", ".", "http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_trackHub/", "http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.pos.bb#http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.neg.bb", "http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.pos.bw,http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.neg.bw", $log );
 
 # Check files
 # genome.txt

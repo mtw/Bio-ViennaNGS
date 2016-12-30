@@ -15,13 +15,6 @@ Bio::ViennaNGS is shipped with a complementary set of modules/classes:
 - Bio::ViennaNGS::Bam
   Routines for high-level manipulation of BAM files.
 
-- Bio::ViennaNGS::BamStat
-  A Moose-based class for collecting mapping statistics.
-
-- Bio::ViennaNGS::BamStatSummary
-  A Moose interface for processing Bio::ViennaNGS::BamStat objects on
-  a set of BAM files.
-
 - Bio::ViennaNGS::Bed 
   A Moose interface for manipulation of genomic interval data in BED
   format.
@@ -51,6 +44,10 @@ Bio::ViennaNGS is shipped with a complementary set of modules/classes:
   A Moose interface for handling elementary genomic intervals,
   corresponding to BED3.
 
+- Bio::ViennaNGS::FeatureIO
+  A Moose interface for easy input/output operations on common feature
+  annotation file formats.
+
 - Bio::ViennaNGS::FeatureLine
   An abstract Moose class for combining several
   Bio::ViennaNGS::FeatureChain objects.
@@ -60,8 +57,8 @@ Bio::ViennaNGS is shipped with a complementary set of modules/classes:
   to BED4.
 
 - Bio::ViennaNGS::Peak
-  A Moose interface for identification and characterization of peaks in
-  RNA-seq data.
+  A Moose interface for identification and characterization of (coverage /
+  expression) peaks in RNA-seq data.
 
 - Bio::ViennaNGS::SpliceJunc
   A collection of routines for alternative splicing analysis.  
@@ -92,10 +89,6 @@ organism (including organisms that are not included in the standard
 UCSC browser bundle) through hso called 'Assembly Hubs'. This script
 constructs Assembly Hubs from genomic sequence and annotation data.
 
-bam_quality_stat.pl:
-Compute sophisticated quality/mapping statistics for a set of BAM
-alignment files and produce publication-ready graphics.
-
 bam_split.pl: 
 Split (paired-end and single-end) BAM alignment files by strand and compute
 statistics. Optionally create BED output, as well as normalized bedGraph
@@ -119,10 +112,6 @@ easily be converted to big-type files for easy UCSC visualization.
 
 bed2nt2aa.pl:
 Provide nucleotide and amino acid sequences for BED6 intervals.
-
-extend_bed.pl:
-Extend genomic features in BED files by a certain number of nucleotides,
-either on both sides or specifically at the 5' or 3' end, respectively.
 
 gff2bed.pl:
 Convert RefSeq GFF3 annotation files to BED12 format. Individual BED12

@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-01-07 14:17:51 mtw>
+# Last changed Time-stamp: <2016-10-11 15:55:03 mtw>
 #
 # Find peaks/enriched regions of certain size in RNA-seq data
 #
@@ -91,12 +91,12 @@ $lf = file($dest,$logname);
 # parse input files
 my $io_pos = Bio::ViennaNGS::FeatureIO->new(file => "$infile1", # [+] strand
 					    filetype => "BedGraph",
-					    objecttype => "BedGraph",
+					    instanceOf => "BedGraphEntry",
 					   );
 
 my $io_neg = Bio::ViennaNGS::FeatureIO->new(file => "$infile2", # [-] strand
 					    filetype => "BedGraph",
-					    objecttype => "BedGraph",
+					    instanceOf => "BedGraphEntry",
 					   );
 
 # get an instance of Bio::ViennaNGS::Peak

@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-01-05 17:04:32 mtw>
+# Last changed Time-stamp: <2016-01-13 11:43:05 mtw>
 package Bio::ViennaNGS::BamIO;
 
 use Carp;
@@ -12,7 +12,7 @@ subtype 'FileHandleFromStr', as 'FileHandle';
 
 coerce 'FileHandleFromStr', from 'Str', via { IO::File->new("samtools view -h $_ |") };
 
-coerce 'StrToFileHandle', from 'Str', via { IO::File->new("samtools view -h -b - > $_") };
+#coerce 'StrToFileHandle', from 'Str', via { IO::File->new("| samtools view -h -b - >> $_") };
 
 has 'input' => (
 	       is => 'ro',

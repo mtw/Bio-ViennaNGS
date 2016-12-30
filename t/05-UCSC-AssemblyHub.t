@@ -25,6 +25,7 @@ my $infile_fasta  = dist_file('Bio-ViennaNGS','data1/NC_000913.3.30k.fa');
 my $bed_path = dir($infile_path,"data1");
 my $bed_file = file($bed_path,"NC_000913.CDS.bed");
 my $infile_bed = "$bed_file";
+my $log = "AssemblyHub.log";
 #print Dumper($infile_path);
 #print Dumper($infile_bed);
 
@@ -34,7 +35,7 @@ make_assembly_hub ( $infile_fasta,
                     ".",
                     "http://tbi.univie.ac.at/~egg/assemblyHub_test",
                     "-",
-                    "log_asemblyHub.txt" );
+                    $log );
 
 
 # Check if functions work correctly
@@ -88,10 +89,10 @@ subtest 'write_chromosome_size_file' => sub {
 
 subtest 'convert_tracks' => sub {
   plan tests => 1;
-  my @arguments = ( ".",
+  my @arguments = ( $bed_path,
                     "assemblyHub/NC_000913.3",
                     "assemblyHub/NC_000913.3/NC_000913.3.chrom.sizes",
-                    "log.txt" );
+                    $log );
   my $expected = "1";
   is ( convert_tracks (@arguments), $expected, 'convert tracks');
 };

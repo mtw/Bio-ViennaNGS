@@ -1,13 +1,13 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-02-18 00:53:10 mtw>
+# Last changed Time-stamp: <2016-11-02 19:36:08 mtw>
 #
 # Provide nucleotide and amino acid sequences for BED files
 #
 # ***********************************************************************
 # *  Copyright notice
 # *
-# *  Copyright 2015 Michael T. Wolfinger <michael@wolfinger.eu>
+# *  Copyright 2016 Michael T. Wolfinger <michael@wolfinger.eu>
 # *  All rights reserved
 # *
 # *  This program is free software: you can redistribute it and/or modify
@@ -34,8 +34,7 @@ use Data::Dumper;
 use Cwd;
 use Path::Class;
 use Bio::ViennaNGS::Fasta;
-use Bio::ViennaNGS::FeatureChain;
-use Bio::ViennaNGS::Util qw(parse_bed6);
+use Bio::ViennaNGS::FeatureIO;
 
 use Bio::SeqUtils;
 
@@ -43,8 +42,7 @@ use Bio::SeqUtils;
 #^^^^^^^^^^ Variables ^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-my ($fastaO,$bed,$line,$cwd,$featurechain,$f,$seq,$theid);
-my @featurelist = ();
+my ($fastaO,$bed,$line,$cwd,$f,$seq,$theid, $intervals);
 my @fids = ();
 my $bed_in = undef;
 my $fa_in  = undef;
@@ -73,9 +71,12 @@ unless ($fa_in =~ /^\// || $fa_in =~ /^\.\//){$fa_in = file($cwd,$fa_in);}
 $fastaO = Bio::ViennaNGS::Fasta->new(fa=>"$fa_in");
 @fids = $fastaO->fastaids; # get all FASTA IDs
 $theid = $fids[0][0];
-@featurelist  = @{parse_bed6($bed_in)};
-$featurechain = Bio::ViennaNGS::FeatureChain->new('type'=>'original','chain'=>\@featurelist);
-foreach  $f ($featurechain->chain){
+$intervals = Bio::ViennaNGS::FeatureIO->new(
+					    file => "$bed_in",
+					    filetype => 'Bed6',
+					    instanceOf => 'Feature',
+					   );
+foreach  $f (@{$intervals->data}){
   $seq = $fastaO->stranded_subsequence($f->chromosome,
 				       $f->start+1,
 				       $f->end,
