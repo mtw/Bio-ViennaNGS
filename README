@@ -1,4 +1,4 @@
-# Bio::ViennaNGS 0.17_01
+# Bio::ViennaNGS 0.17_02
 
 Bio::ViennaNGS is a distribution of Perl modules and utilities for
 building efficient Next-Generation Sequencing (NGS) analysis
@@ -117,6 +117,9 @@ gff2bed.pl:
 Convert RefSeq GFF3 annotation files to BED12 format. Individual BED12
 files are created for each feature type (CDS/tRNA/rRNA/etc.). Tested with
 RefSeq bacterial GFF3 annotation.  
+
+fasta_splitter.pl:
+Extract subsequences from Fasta files.
 
 kmer_analysis.pl:
 Count k-mers of predefined length in FastQ and Fasta files
