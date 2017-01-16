@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-10-06 16:12:42 mtw>
+# Last changed Time-stamp: <2017-01-16 15:34:31 mtw>
 #
 # Converts bed6 to bed12
 #
@@ -88,54 +88,25 @@ __END__
 
 =head1 NAME
 
-motiffinda.pl - Find sequence motifs in annotated features.
+bed6_to_bed12.pl - Convert BED6 to BED12.
 
 =head1 SYNOPSIS
 
-motiffinda.pl [--motif I<REGEX>] [--gff I<FILE>] [--fa I<FILE>]
-[options]
+bed6_to_bed12.pl [--input|-i I<FILE>] [options]
 
 =head1 DESCRIPTION
 
-This script extracts sequence motifs from gene annotation data. The
-motif can be provided as regualr expression. Optionally, only motifs
-I<in frame> with the annoation are reported.
-
-The tool returns B<all motifs> matching the search criteria as a
-(mutli-)Fasta file to STDOUT. This means if teh motif is found more
-than once within an annotated feature, all matches will be reported.
+This script is a simple converter for BED6 to BED12. All it does is
+compute values for the additional 6 fields according to the L<BED12
+specification|https://genome.ucsc.edu/FAQ/FAQformat#format1>.
 
 =head1 OPTIONS
 
 =over
 
-=item B<motif|m>
+=item B<input|i>
 
-The motif to search for as regular expression. For technical reasons,
-the regular expression must be enclosed in brackets ().
-
-=item B<gff|g>
-
-Genome annotation in GFF3 format
-
-=item B<fa|f>
-
-Reference genome in Fasta format
-
-=item B<gbkey>
-
-Motifs are only searched for in this feature type, aka Genbank key
-(e.g. CDS or gene). Currently only one Genbank key provided via this
-option will be procesed.
-
-=item B<offset|o>
-
-Offset for determination of frame
-
-=item <inframe|i>
-
-Only report motifs in current ORF
-
+A BED6 file
 
 =back
 
