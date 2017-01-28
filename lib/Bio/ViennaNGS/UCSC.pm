@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-01-28 17:29:02 mtw>
+# Last changed Time-stamp: <2017-01-28 17:34:04 mtw>
 
 package Bio::ViennaNGS::UCSC;
 
@@ -566,7 +566,7 @@ sub valid_ncbi_accession{
 
 sub parse_fasta_header{
   my $filepath = shift;
-  my $this_function = shift;
+  my $this_function = (caller(0))[3];
   open my $file, '<', "$filepath" or die $!;
   my $fastaheader = <$file>;
   chomp $fastaheader;
