@@ -170,6 +170,7 @@ Revision history for Perl extension Bio::ViennaNGS.
 	- refactored scripts/bed2nt2aa.pl
 	- added scripts/fasub.pl
 	- added scripts/fasta_splitter.pl
+	- added scripts/grep_multifa.pl
 	- updated POD
 	- removed Tutorial_pipeline0{1,2}
 	- added unit tests
