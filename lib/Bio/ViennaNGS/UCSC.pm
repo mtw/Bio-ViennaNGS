@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-02-04 14:15:42 mtw>
+# Last changed Time-stamp: <2017-01-28 17:34:04 mtw>
 
 package Bio::ViennaNGS::UCSC;
 
@@ -566,30 +566,27 @@ sub valid_ncbi_accession{
 
 sub parse_fasta_header{
   my $filepath = shift;
-  my $this_function = shift;
-  open my $file, '<', "$filepath";
+  my $this_function = (caller(0))[3];
+  open my $file, '<', "$filepath" or die $!;
   my $fastaheader = <$file>;
   chomp $fastaheader;
   close $file;
+  my @ids = ();
   #>gi|556503834|ref|NC_000913.3| Escherichia coli str. K-12 substr. MG1655
   if($fastaheader=~/^>gi/){
     my @headerfields = split(/\|/, $fastaheader);
     my $accession = $headerfields[3];
     my $scientificName = $headerfields[4];
-    my @ids;
     push(@ids,$accession);
     push(@ids,$scientificName);
     return \@ids;
   }else{
     $fastaheader=~s/^>//;
-    if(valid_ncbi_accession($fastaheader)){
-      my @ids;
-      push(@ids,$fastaheader);
-      push(@ids,"scientific name not set");
-      return \@ids;
-    }else{
-      croak ("ERROR [$this_function] \$fasta_path does not contain a valid accession/ ncbi header\n");
-    }
+    carp "INFO [$this_function] It looks like your input Fasta header does not contain a valid NCBI accession number. Continuing with:\n $fastaheader\n"
+      unless ( valid_ncbi_accession($fastaheader) );
+    push(@ids,$fastaheader);
+    push(@ids,"scientific name not set");
+    return \@ids;
   }
 }
 
@@ -598,7 +595,7 @@ sub write_chromosome_size_file{
   my $chromosome_name = shift;
   my $chromosome_size = shift;
   my $entry = $chromosome_name . "\t" . $chromosome_size . "\n";
-  open CHROMFILE, '>', "$filepath";
+  open CHROMFILE, '>', "$filepath" or die $!;
   print CHROMFILE $entry;
   close CHROMFILE;
   return 1;
@@ -608,7 +605,7 @@ sub write_chromosome_sizes_file{
   my $filepath = shift;
   my $chromosome_sizes_reference = shift;
   my %chromosome_sizes = %{$chromosome_sizes_reference};
-  open CHROMFILE, '>', "$filepath";
+  open CHROMFILE, '>', "$filepath" or die $!;
   foreach my $chromosome_name ( keys %chromosome_sizes){
     my $chromosome_size = $chromosome_sizes{$chromosome_name};
     my $entry = $chromosome_name . "\t" . $chromosome_size . "\n";
