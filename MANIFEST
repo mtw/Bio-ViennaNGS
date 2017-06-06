@@ -18,6 +18,7 @@ lib/Bio/ViennaNGS/FeatureLine.pm
 lib/Bio/ViennaNGS/MinimalFeature.pm
 lib/Bio/ViennaNGS/Peak.pm
 lib/Bio/ViennaNGS/SpliceJunc.pm
+lib/Bio/ViennaNGS/Subtypes.pm
 lib/Bio/ViennaNGS/Tutorial.pm
 lib/Bio/ViennaNGS/UCSC.pm
 lib/Bio/ViennaNGS/Util.pm
@@ -51,6 +52,7 @@ share/data1/NC_000913.CDS.bed6
 share/data1/SRR794848.8k.bam
 share/data2/MIOS.bed12
 share/data2/MIOS_sj.bed
+share/data3/all_DENVG_5UTR.fa
 share/template-AssemblyHub/description.html
 share/template-AssemblyHub/genome.txt
 share/template-AssemblyHub/groups.txt

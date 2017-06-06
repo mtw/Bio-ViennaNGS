@@ -1,6 +1,7 @@
+#-*-CPerl-*-
+use 5.010;
 use strict;
 use warnings;
-#use IPC::Cmd qw(can_run);
 use File::Share ':all';
 use Test::More tests => 23;
 use Test::File::Contents;
@@ -70,7 +71,7 @@ my $file = 0;
 
 #########################
 
-my $fastaO = Bio::ViennaNGS::Fasta->new(fa=>$datasj_fasta_in);
+my $fastaO = Bio::ViennaNGS::Fasta->new(fasta=>$datasj_fasta_in);
 
 unless ($path_annot =~ /\/$/){$path_annot .= "/";}
 unless (-d $path_annot){mkdir $path_annot or die $!;}
