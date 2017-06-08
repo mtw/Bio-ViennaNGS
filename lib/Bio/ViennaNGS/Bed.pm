@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-02-03 13:11:14 mtw>
+# Last changed Time-stamp: <2017-06-08 19:19:22 michl>
 
 package Bio::ViennaNGS::Bed;
 
-use version; our $VERSION = qv('0.17_01');
+use version; our $VERSION = qv('0.17');
 use Carp;
 use Moose;
 use namespace::autoclean;
@@ -192,7 +192,7 @@ Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2015 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2015-2017 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.0 or,

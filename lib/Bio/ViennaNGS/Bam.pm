@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-02-25 18:05:19 mtw>
+# Last changed Time-stamp: <2017-06-08 19:19:51 michl>
 
 package Bio::ViennaNGS::Bam;
 
 use Exporter;
-use version; our $VERSION = qv('0.17_01');
+use version; our $VERSION = qv('0.17');
 use strict;
 use warnings;
 use Bio::DB::Sam 1.37;
@@ -661,7 +661,7 @@ unless your BAM file has these attributes.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2016 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2013-2017 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.0 or,

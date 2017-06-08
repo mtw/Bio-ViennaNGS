@@ -152,8 +152,7 @@ Revision history for Perl extension Bio::ViennaNGS.
 	- added scripts/bed2nt2aa.pl
 	- updated POD and README
 
-0.17_03
-	- minimum required Perl version is now 5.8
+0.17 Thu Jun 08 2017
 	- added Bio::ViennaNGS::FeatureIO
 	- added Bio::ViennaNGS::Subtypes
 	- refactored Bio::ViennaNGS::Fasta to transparently coerce input
@@ -175,7 +174,9 @@ Revision history for Perl extension Bio::ViennaNGS.
 	- refactored scripts/bed2nt2aa.pl
 	- added scripts/fasta_subgrep.pl
 	- added scripts/fasta_multigrep.pl
+	- migrated scripts/MEME_xml_motif_extractor.pl to
+	  Bio-ViennaNGS-scripts-extra package on github
 	- updated POD
-	- removed Tutorial_pipeline0{1,2}
+	- removed Tutorial_pipeline{0,1,2}
 	- added unit tests
 

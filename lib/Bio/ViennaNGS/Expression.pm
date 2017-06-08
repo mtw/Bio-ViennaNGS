@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-02-03 13:11:26 mtw>
+# Last changed Time-stamp: <2017-06-08 19:17:58 michl>
 
 package Bio::ViennaNGS::Expression;
 
-use version; our $VERSION = qv('0.17_01');
+use version; our $VERSION = qv('0.17');
 use Moose;
 use Carp;
 use Data::Dumper;
@@ -395,7 +395,7 @@ Michael T. Wolfinger, E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2015 by Michael T. Wolfinger
+Copyright (C) 2015-2017 by Michael T. Wolfinger
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.0 or,

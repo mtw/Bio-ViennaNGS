@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-27 16:06:36 mtw>
+# Last changed Time-stamp: <2017-06-08 19:14:21 michl>
 
 package Bio::ViennaNGS::AnnoC;
 
-use version; our $VERSION = qv('0.16');
+use version; our $VERSION = qv('0.17');
 use Bio::ViennaNGS::Util qw(sortbed);
 use Bio::Tools::GFF;
 use Path::Class;
@@ -345,7 +345,7 @@ Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014-2015 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2014-2017 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.0 or,

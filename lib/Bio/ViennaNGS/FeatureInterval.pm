@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-12-02 16:58:22 mtw>
+# Last changed Time-stamp: <2017-06-08 19:15:52 michl>
 
 package Bio::ViennaNGS::FeatureInterval;
 
-use version; our $VERSION = qv('0.17_02');
+use version; our $VERSION = qv('0.17');
 use namespace::autoclean;
 use Carp;
 use Moose;

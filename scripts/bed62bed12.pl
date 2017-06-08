@@ -1,15 +1,15 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-01-16 15:34:31 mtw>
+# Last changed Time-stamp: <2017-06-08 18:07:36 michl>
 #
 # Converts bed6 to bed12
 #
-# usage: bed6_to_bed12.pl -i <STRING>
+# usage: bed62bed12.pl -i <STRING>
 #
 # ***********************************************************************
 # *  Copyright notice
 # *
-# *  Copyright 2016 Michael T. Wolfinger <michael@wolfinger.eu>
+# *  Copyright 2017 Michael T. Wolfinger <michael@wolfinger.eu>
 # *  All rights reserved
 # *
 # *  This program is free software: you can redistribute it and/or modify
@@ -77,22 +77,16 @@ foreach my $d (@{$fio->data}){
   print $d->as_bed12_line(undef,undef,undef) ."\n";
 }
 
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
-#^^^^^^^^^^^ Subroutines ^^^^^^^^^^#
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
-
-
-
 
 __END__
 
 =head1 NAME
 
-bed6_to_bed12.pl - Convert BED6 to BED12.
+bed62bed12.pl - Convert BED6 to BED12.
 
 =head1 SYNOPSIS
 
-bed6_to_bed12.pl [--input|-i I<FILE>] [options]
+bed62bed12.pl [--input|-i I<FILE>] [options]
 
 =head1 DESCRIPTION
 

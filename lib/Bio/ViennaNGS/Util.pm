@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-11-02 19:42:03 mtw>
+# Last changed Time-stamp: <2017-06-08 19:18:24 michl>
 
 package Bio::ViennaNGS::Util;
 
 use Exporter;
-use version; our $VERSION = qv('0.17_01');
+use version; our $VERSION = qv('0.17');
 use strict;
 use warnings;
 use Data::Dumper;
@@ -489,7 +489,7 @@ Examples for using most of the provided methods can be found at L<ViennaNGS::Tut
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2015 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2015-2017 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.0 or,

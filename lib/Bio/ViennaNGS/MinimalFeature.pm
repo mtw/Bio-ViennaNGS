@@ -1,26 +1,18 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-12-02 11:21:39 mtw>
+# Last changed Time-stamp: <2017-06-08 18:44:01 michl>
 
 package Bio::ViennaNGS::MinimalFeature;
 
-use version; our $VERSION = qv('0.17_02');
+use version; our $VERSION = qv('0.17');
 use namespace::autoclean;
 
-use Moose::Util::TypeConstraints;
-subtype 'PlusOrMinus',
-  as 'Str',
-  where { /[\+\-\.]/ },
-  message { "$_ is neither +/- nor ."};
-no Moose::Util::TypeConstraints;
-
 use Moose;
-with 'MooseX::Clone';
-
+use Bio::ViennaNGS::Subtypes;
 extends 'Bio::ViennaNGS::FeatureInterval';
 
 has 'strand' => (
 		 is      => 'rw',
-		 isa     => 'PlusOrMinus',
+		 isa     => 'Bio::ViennaNGS::PlusOrMinus',
 		 default => '.',
 		 predicate => 'has_strand',
 		);

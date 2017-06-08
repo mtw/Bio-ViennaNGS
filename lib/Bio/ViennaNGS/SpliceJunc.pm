@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-27 14:44:54 mtw>
+# Last changed Time-stamp: <2017-06-08 19:12:01 michl>
 
 package Bio::ViennaNGS::SpliceJunc;
 
 use Exporter;
-use version; our $VERSION = qv('0.16');
+use version; our $VERSION = qv('0.17');
 use strict;
 use warnings;
 use Data::Dumper;
@@ -558,7 +558,7 @@ Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2015 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2015-2017 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.0 or,

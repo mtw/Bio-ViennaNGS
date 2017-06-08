@@ -1,4 +1,4 @@
-# Bio::ViennaNGS 0.17_03
+# Bio::ViennaNGS 0.17
 
 Bio::ViennaNGS is a distribution of Perl modules and utilities for
 building efficient Next-Generation Sequencing (NGS) analysis
@@ -118,16 +118,19 @@ bed2nt2aa.pl:
 Extract sequence intervals from Fasta files, provided as BED6
 records. Optionally translate nucleotide into amino acid sequences.
 
-gff2bed.pl:
-Convert RefSeq GFF3 annotation files to BED12 format. Individual BED12
-files are created for each feature type (CDS/tRNA/rRNA/etc.). Tested with
-RefSeq bacterial GFF3 annotation.  
+bed62bed12.pl:
+A simple BED6 -> BED12 converter
+
+fasta_multigrep.pl
+Extract individual (whole) sequences from a multi Fasta file
 
 fasta_subgrep.pl:
 Extract subsequences from (multi) Fasta files.
 
-fasta_multigrep.pl
-Extract full individual sequences from a multi Fasta file
+gff2bed.pl:
+Convert RefSeq GFF3 annotation files to BED12 format. Individual BED12
+files are created for each feature type (CDS/tRNA/rRNA/etc.). Tested with
+RefSeq bacterial GFF3 annotation.  
 
 kmer_analysis.pl:
 Count k-mers of predefined length in FastQ and Fasta files
@@ -220,22 +223,23 @@ shipped with the Perl core distribution:
 * Bio::DB::Sam >= 1.37
 * Bio::DB::Fasta
 * Bio::Tools::GFF
-* File::Share
-* File::Slurp	
+* File::Basename
 * File::Path
+* File::Share
+* File::Slurp
+* File::Temp
+* IPC::Cmd
 * List::Util
 * Template
 * Moose
 * Moose::Util::TypeConstraints
 * MooseX::Clone
-* MooseX::InstanceTracking
 * Path::Class
+* Params::Coerce
 * namespace::autoclean
 * Tie::Hash::Indexed
-* Statistics::R
 * PerlIO::gzip
 * Math::Round
-* XML::Simple
 * Template
 * Test::Deep
 * Test::Files

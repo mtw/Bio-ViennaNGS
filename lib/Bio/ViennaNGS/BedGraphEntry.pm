@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2015-10-27 14:45:14 mtw>
+# Last changed Time-stamp: <2017-06-08 19:12:22 michl>
 
 package Bio::ViennaNGS::BedGraphEntry;
 
-use version; our $VERSION = qv('0.16');
+use version; our $VERSION = qv('0.17');
 
 use Moose;
 

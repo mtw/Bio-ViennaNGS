@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-01-28 17:34:04 mtw>
+# Last changed Time-stamp: <2017-06-08 19:15:27 michl>
 
 package Bio::ViennaNGS::UCSC;
 
 use Exporter;
-use version; our $VERSION = qv('0.17_01');
+use version; our $VERSION = qv('0.17');
 use strict;
 use warnings;
 use Template;
@@ -739,7 +739,7 @@ This function takes 4 parameters:
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2016 Michael T. Wolfinger, E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2014-2017 Michael T. Wolfinger, E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.0 or,
