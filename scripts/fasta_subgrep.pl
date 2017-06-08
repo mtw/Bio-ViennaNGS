@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-08 12:38:25 michl>
+# Last changed Time-stamp: <2017-06-08 16:48:13 michl>
 #
 # Extract subsequences from a (multi) Fasta file
 #
@@ -45,11 +45,13 @@ my $id = undef;
 my $strand = "+";
 
 Getopt::Long::config('no_ignore_case');
-pod2usage(-verbose => 1) unless GetOptions('f|fa=s'     => \$fa_in,
-					   's|start=s'  => \$start,
-					   'e|end=s'    => \$end,
-					   'id=s'       => \$id,
-					   'strand=s'   => \$strand);
+pod2usage(-verbose => 1) unless GetOptions('f|fa=s'    => \$fa_in,
+					   's|start=s' => \$start,
+					   'e|end=s'   => \$end,
+					   'id=s'      => \$id,
+					   'strand=s'  => \$strand,
+					   "man"       => sub{pod2usage(-verbose => 2)},
+					   "h|help"    => sub{pod2usage(1)}
 
 unless (-f $fa_in){
   warn "Could not find input FASTA input file provided via -f|--fa option";
