@@ -3,7 +3,7 @@
 
 #########################
 
-# change 'tests => 4' to 'tests => last_test_to_print';
+# change 'tests => 3' to 'tests => last_test_to_print';
 
 use strict;
 use warnings;
@@ -54,8 +54,8 @@ my $end   = 200;
 my $strand = "-";
 my $value = 234433.434354;
 
-my $f = Bio::ViennaNGS::Fasta->new( fa => $data1_fa, );
-ok($f);
+#my $f = Bio::ViennaNGS::Fasta->new( fa => $data1_fa, );
+#ok($f);
 
 my $featureinterval = Bio::ViennaNGS::FeatureInterval->new(
    chromosome =>$chr,

@@ -1,11 +1,11 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-01-07 14:12:42 mtw>
+# Last changed Time-stamp: <2017-06-08 17:24:10 michl>
 #
 # ***********************************************************************
 # *  Copyright notice
 # *
-# *  Copyright 2014 Michael T. Wolfinger <michael@wolfinger.eu>
+# *  Copyright 2017 Michael T. Wolfinger <michael@wolfinger.eu>
 # *  All rights reserved
 # *
 # *  This program is free software: you can redistribute it and/or modify
@@ -111,7 +111,7 @@ unless (-d $path_annot){mkdircheck($path_annot);}
 unless (-d $path_ss){mkdircheck($path_ss);}
 
 if($want_canonical){
-  $fastaO = Bio::ViennaNGS::Fasta->new(fa=>$fa_in);
+  $fastaO = Bio::ViennaNGS::Fasta->new(fasta=>$fa_in);
 }
 
 # Extract annotated splice sites from a BED12 file

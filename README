@@ -1,4 +1,4 @@
-# Bio::ViennaNGS 0.17_02
+# Bio::ViennaNGS 0.17_03
 
 Bio::ViennaNGS is a distribution of Perl modules and utilities for
 building efficient Next-Generation Sequencing (NGS) analysis
@@ -6,7 +6,8 @@ pipelines. It covers various aspects of NGS data analysis, including
 (but not limited to) conversion of sequence annotation, evaluation of
 mapped data, expression quantification and visualization.
 
-Bio::ViennaNGS is shipped with a complementary set of modules/classes:
+Bio::ViennaNGS is shipped with a complementary set of modules, classes and
+roles:
 
 - Bio::ViennaNGS::AnnoC
   A Moose interface for storage and conversion of sequence annotation
@@ -61,7 +62,10 @@ Bio::ViennaNGS is shipped with a complementary set of modules/classes:
   expression) peaks in RNA-seq data.
 
 - Bio::ViennaNGS::SpliceJunc
-  A collection of routines for alternative splicing analysis.  
+  A collection of routines for alternative splicing analysis.
+
+- Bio::ViennaNGS::Subtypes
+  Moose subtypes for internal usage.
 
 - Bio::ViennaNGS::Tutorial
   A comprehensive tutorial of the Bio::ViennaNGS core routines with
@@ -111,15 +115,19 @@ additional annotation and automatic generation of bedGraph files which can
 easily be converted to big-type files for easy UCSC visualization.
 
 bed2nt2aa.pl:
-Provide nucleotide and amino acid sequences for BED6 intervals.
+Extract sequence intervals from Fasta files, provided as BED6
+records. Optionally translate nucleotide into amino acid sequences.
 
 gff2bed.pl:
 Convert RefSeq GFF3 annotation files to BED12 format. Individual BED12
 files are created for each feature type (CDS/tRNA/rRNA/etc.). Tested with
 RefSeq bacterial GFF3 annotation.  
 
-fasta_splitter.pl:
-Extract subsequences from Fasta files.
+fasta_subgrep.pl:
+Extract subsequences from (multi) Fasta files.
+
+fasta_multigrep.pl
+Extract full individual sequences from a multi Fasta file
 
 kmer_analysis.pl:
 Count k-mers of predefined length in FastQ and Fasta files
