@@ -19,15 +19,15 @@ BEGIN {
     use Test::More tests => TEST_COUNT;
 }
 
-use Bio::ViennaNGS::MinimalFeature;
+use Bio::ViennaNGS::BedGraphEntry;
 
 {
   my $chr = "chrX";
   my $start = 99999;
   my $end = 123456;
-  my $strand = "+";
-  my @arg = (chromosome => $chr, start => $start, end => $end, strand => $strand);
-  my $MF = new_ok('Bio::ViennaNGS::MinimalFeature'=> \@arg);
-  ok($MF->_length == 23457, 'length of Featureinterval');
+  my $value = 234433.434354;
+  my @arg = (chromosome => $chr, start => $start, end => $end, dataValue => $value);
+  my $BGE = new_ok('Bio::ViennaNGS::BedGraphEntry'=> \@arg);
+  ok($BGE->_length == 23457, 'length of underlying Featureinterval');
 }
 

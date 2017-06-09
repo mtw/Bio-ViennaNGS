@@ -62,7 +62,8 @@ share/template-TrackHub/description.html
 share/template-TrackHub/genome.txt
 share/template-TrackHub/hub.txt
 share/template-TrackHub/trackDb.txt
-t/01-basics.t
+t/00-prereq.t
+t/01-load.t
 t/02-thirdparty.t
 t/04-UCSC-TrackHub.t
 t/05-UCSC-AssemblyHub.t
@@ -71,3 +72,4 @@ t/07-FeatureIO.t
 t/08-FeatureInterval.t
 t/09-MinimalFeature.t
 t/10-Features.t
+t/11-BedGraphEntry.t

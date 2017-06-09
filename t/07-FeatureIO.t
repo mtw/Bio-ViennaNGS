@@ -17,7 +17,6 @@ BEGIN {
       use lib 't';
     }
     use Test::More tests => TEST_COUNT;
-    print Dumper($Bin);
 }
 
 use Bio::ViennaNGS::FeatureIO;
