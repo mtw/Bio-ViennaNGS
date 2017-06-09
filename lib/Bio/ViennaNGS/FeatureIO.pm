@@ -1,7 +1,8 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2016-12-02 16:41:32 mtw>
+# Last changed Time-stamp: <2017-06-09 12:21:47 michl>
 package Bio::ViennaNGS::FeatureIO;
 
+use version; our $VERSION = qv('0.17');
 use Moose;
 use Carp;
 use File::Slurp;
