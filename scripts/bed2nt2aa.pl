@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-07 13:43:06 michl>
+# Last changed Time-stamp: <2017-06-09 11:18:37 michl>
 #
 # Extract nucleotide and amino acid sequence data from Fasta file,
 # provided by a BED file
@@ -37,8 +37,6 @@ use Carp;
 use Path::Class;
 use Bio::ViennaNGS::Fasta;
 use Bio::ViennaNGS::FeatureIO;
-use diagnostics;
-
 use Bio::SeqUtils;
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#

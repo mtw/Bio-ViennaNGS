@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-08 19:27:33 michl>
+# Last changed Time-stamp: <2017-06-09 11:12:51 michl>
 
 package Bio::ViennaNGS;
 
@@ -175,71 +175,12 @@ Fastq file by user defined length.
 =head1 DEPENDENCIES
 
 The L<Bio::ViennaNGS> modules and classes depend on a set of Perl
-modules, some of which are part of the Perl core distribution:
+modules, some of which are part of the Perl core distribution, most
+notably L<Bio::Perl> >= 1.00690001 and L<Bio::DB::Sam> >= 1.37.
 
-=over
-
-=item L<Bio::Perl> >= 1.00690001
-
-=item L<Bio::DB::Sam> >= 1.37
-
-=item L<Bio::DB::Fasta>
-
-=item L<Bio::Tools::GFF>
-
-=item L<Carp>
-
-=item L<File::Basename>
-
-=item L<File::Share>
-
-=item L<File::Slurp>
-
-=item L<File::Temp>
-
-=item L<IPC::Cmd>
-
-=item L<List::Util>
-
-=item L<Moose>
-
-=item L<Moose::Util::TypeConstraints>
-
-=item L<namespace::autoclean>
-
-=item L<MooseX::Clone>
-
-=item L<Path::Class>
-
-=item L<Parama::Coerce>
-
-=item L<Template>
-
-=item L<Test::Files>
-
-=item L<Test::File::Contents>
-
-=item L<Tie::Hash::Indexed>
-
-=back
-
-In addition the following modules are required by the L<Bio::ViennaNGS> utilities:
-
-=over
-
-=item L<PerlIO::gzip>
-
-=item L<Math::Round>
-
-=item L<XML::Simple>
-
-=item L<Statistics::R>
-
-=back
-
-L<Bio::ViennaNGS> depends on a set of third-party tools and libraries which
-are required for specific filtering and file format conversion tasks as
-well as for building internally used Perl modules:
+In addition, L<Bio::ViennaNGS> depends on third-party tools and
+libraries which are required for specific filtering and file format
+conversion tasks as well as for building internally used Perl modules:
 
 =over
 
