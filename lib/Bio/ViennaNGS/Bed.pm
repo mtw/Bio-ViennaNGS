@@ -1,13 +1,14 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-08 19:19:22 michl>
+# Last changed Time-stamp: <2017-06-10 18:20:26 michl>
 
 package Bio::ViennaNGS::Bed;
 
-use version; our $VERSION = qv('0.17');
+use Bio::ViennaNGS;
 use Carp;
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
+use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
 
 extends 'Bio::ViennaNGS::Feature';
 

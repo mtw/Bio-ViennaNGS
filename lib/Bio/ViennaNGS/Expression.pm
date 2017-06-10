@@ -1,18 +1,17 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-08 19:17:58 michl>
+# Last changed Time-stamp: <2017-06-10 18:59:03 michl>
 
 package Bio::ViennaNGS::Expression;
 
-use version; our $VERSION = qv('0.17');
+use Bio::ViennaNGS;
 use Moose;
 use Carp;
 use Data::Dumper;
 use Path::Class;
 use Bio::ViennaNGS::Bed;
 use Bio::ViennaNGS::Util qw(sortbed);
-
 use namespace::autoclean;
-
+use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
 
 has 'readcountfile' => (
 			is => 'rw',

@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-08 19:18:24 michl>
+# Last changed Time-stamp: <2017-06-10 19:12:00 michl>
 
 package Bio::ViennaNGS::Util;
 
+use Bio::ViennaNGS;
 use Exporter;
-use version; our $VERSION = qv('0.17');
 use strict;
 use warnings;
 use Data::Dumper;
@@ -15,6 +15,7 @@ use File::Path qw(make_path remove_tree);
 use Math::Round;
 use Carp;
 use Env qw(HOME);
+use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
 
 our @ISA = qw(Exporter);
 our @EXPORT = ();

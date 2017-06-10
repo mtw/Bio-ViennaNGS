@@ -1,13 +1,14 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-08 18:44:01 michl>
+# Last changed Time-stamp: <2017-06-10 19:07:52 michl>
 
 package Bio::ViennaNGS::MinimalFeature;
 
-use version; our $VERSION = qv('0.17');
+use Bio::ViennaNGS;
 use namespace::autoclean;
-
 use Moose;
 use Bio::ViennaNGS::Subtypes;
+use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
+
 extends 'Bio::ViennaNGS::FeatureInterval';
 
 has 'strand' => (

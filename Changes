@@ -180,3 +180,7 @@ Revision history for Perl extension Bio::ViennaNGS.
 	- removed Tutorial_pipeline{0,1,2}
 	- added unit tests
 
+0.17.1 Sat Jun 10 2017
+	- version is now declared at a unique location within ViennaNGS.pm
+	- updated README
+	- updated POD

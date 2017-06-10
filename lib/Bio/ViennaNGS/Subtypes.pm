@@ -1,12 +1,13 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-08 19:16:16 michl>
+# Last changed Time-stamp: <2017-06-10 19:13:43 michl>
 
 package Bio::ViennaNGS::Subtypes;
 
-use version; our $VERSION = qv('0.17');
+use Bio::ViennaNGS;
 use Moose::Util::TypeConstraints;
 use Bio::DB::Fasta;
 use Params::Coerce ();
+use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
 
 subtype 'Bio::ViennaNGS::MyFasta' => as class_type('Bio::DB::Fasta');
 

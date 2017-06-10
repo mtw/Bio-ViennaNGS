@@ -1,8 +1,8 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-09 12:21:47 michl>
+# Last changed Time-stamp: <2017-06-10 19:07:22 michl>
 package Bio::ViennaNGS::FeatureIO;
 
-use version; our $VERSION = qv('0.17');
+use Bio::ViennaNGS;
 use Moose;
 use Carp;
 use File::Slurp;
@@ -11,6 +11,7 @@ use Bio::ViennaNGS::Feature;
 use Bio::ViennaNGS::FeatureChain;
 use Bio::ViennaNGS::BedGraphEntry;
 use Data::Dumper;
+use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
 
 has 'file' => ( # file path
 	       is => 'ro',

@@ -1,12 +1,14 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-08 18:50:38 michl>
+# Last changed Time-stamp: <2017-06-10 19:00:46 michl>
 
 package Bio::ViennaNGS::ExtFeature;
 
-use version; our $VERSION = qv('0.17');
-
+use Bio::ViennaNGS;
 use Moose;
+use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
+
 extends 'Bio::ViennaNGS::Feature';
+
 
 has 'extension' => (
 		    is      => 'rw',

@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-08 19:18:41 michl>
+# Last changed Time-stamp: <2017-06-10 19:01:14 michl>
 
 =head1 NAME
 
@@ -56,13 +56,14 @@ Fasta IDs found in the input file
 
 package Bio::ViennaNGS::Fasta;
 
-use version; our $VERSION = qv('0.17');
+use Bio::ViennaNGS;
 use Moose;
 use Bio::ViennaNGS::Subtypes;
 use Bio::Perl;
 use Carp;
 use Data::Dumper;
 use namespace::autoclean;
+use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
 
 has 'fasta' => (
 		is => 'ro',

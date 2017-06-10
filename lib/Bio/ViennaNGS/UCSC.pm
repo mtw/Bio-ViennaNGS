@@ -1,10 +1,10 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-08 19:15:27 michl>
+# Last changed Time-stamp: <2017-06-10 19:11:36 michl>
 
 package Bio::ViennaNGS::UCSC;
 
+use Bio::ViennaNGS;
 use Exporter;
-use version; our $VERSION = qv('0.17');
 use strict;
 use warnings;
 use Template;
@@ -17,6 +17,7 @@ use Path::Class;
 use Data::Dumper;
 use Carp;
 use Bio::ViennaNGS::Util qw(fetch_chrom_sizes bed2bigBed);
+use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
 
 our @ISA = qw(Exporter);
 

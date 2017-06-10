@@ -1,12 +1,13 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-08 19:15:52 michl>
+# Last changed Time-stamp: <2017-06-10 19:04:16 michl>
 
 package Bio::ViennaNGS::FeatureInterval;
 
-use version; our $VERSION = qv('0.17');
+use Bio::ViennaNGS;
 use namespace::autoclean;
 use Carp;
 use Moose;
+use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
 
 has 'chromosome' => (
 		     is  => 'ro',

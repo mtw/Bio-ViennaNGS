@@ -1,19 +1,19 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-08 19:12:01 michl>
+# Last changed Time-stamp: <2017-06-10 19:08:57 michl>
 
 package Bio::ViennaNGS::SpliceJunc;
 
+use Bio::ViennaNGS;
 use Exporter;
-use version; our $VERSION = qv('0.17');
 use strict;
 use warnings;
 use Data::Dumper;
-use Bio::ViennaNGS;
 use Bio::ViennaNGS::Fasta;
 use IPC::Cmd qw(can_run run);
 use File::Basename;
 use Path::Class;
 use Carp;
+use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
 
 our @ISA = qw(Exporter);
 our @EXPORT = ();

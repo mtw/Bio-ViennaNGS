@@ -1,13 +1,15 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-08 18:48:15 michl>
+# Last changed Time-stamp: <2017-06-10 19:02:34 michl>
 
 package Bio::ViennaNGS::FeatureChain;
 
-use version; our $VERSION = qv('0.17');
+use Bio::ViennaNGS;
 use Carp;
 use Moose;
-with 'MooseX::Clone';
 use Data::Dumper;
+use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
+
+with 'MooseX::Clone';
 
 has 'type' => (
 	       is => 'rw',

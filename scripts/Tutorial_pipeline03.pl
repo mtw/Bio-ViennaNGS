@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Last changed Time-stamp: <2015-02-24 17:06:35 fall>
+# Last changed Time-stamp: <2017-06-09 15:08:11 michl>
 # AUTHOR: Florian Eggenhofer <florian.eggenhofer@univie.ac.at>
 
 ###############
@@ -57,7 +57,7 @@ $lf = file($dest,$logname);
 
 =head1 NAME
 
-Tutorial_Pipeline03.pl - Construct a UCSC genome browser trackhub
+Tutorial_Pipeline03.pl - Construct a UCSC genome browser TrackHub
 
 =head1 SYNOPSIS
 
@@ -65,28 +65,30 @@ Tutorial_Pipeline03.pl - Construct a UCSC genome browser trackhub
 
 =head1 DESCRIPTION
 
-This script demonstrates UCSC genome browser trackhub construction with <Bio::ViennaNGS>.
+This script demonstrates the semi-automated construction of UCSC
+genome browser TrackHubs with L<Bio::ViennaNGS>.
 
-The results of Tutalorial02_pipeline.pl are vizualized in UCSC,
-showing genomic region, annotation and expression level, which can be
-interpreted in conjunction to each other.
-
-The result of this tutorial can be viewed by navigating your browser to 
+The result of this tutorial can be viewed by navigating your browser
 L<here|http://genome-euro.ucsc.edu/cgi-bin/hgTracks?hubUrl=http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_trackHub/trackHub/hub.txt&position=chr15>
 
-This tutorial is based on the track_hub_constructor.pl script and the output from Tutorial02_pipeline.pl.
-While the option descriptions here are specific for the results from Tutorial02 the trackhub_hub_constructor.pl
-can be applied in the same manner to other datasets. The example call uses the bigwig and bedfiles available from our server.
-Example call: 
+This tutorial is based on the track_hub_constructor.pl script and the
+output from Tutorial02_pipeline.pl.  While the option descriptions
+here are specific for the results from Tutorial02 the
+trackhub_hub_constructor.pl can be applied in the same manner to other
+datasets. The example call uses the bigwig and bedfiles available from
+our server.  Example call:
 
-  Tutorial_pipeline03.pl -o /home/user/public_html/hg19_trackHub -u http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_trackHub -b http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.pos.bb#http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.neg.bb -w http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.pos.bw,http://nibiru.tbi.univie.ac.at/ViennaNGS/tutorial03/hg19_highlyexpressed.neg.bw
+  Tutorial_pipeline03.pl -o /home/user/public_html/hg19_trackHub -u
+http://www.mydomain.com/ucsc/hg19_trackHub -b
+http://www.mydomain.com/ucsc/data/hg19_highlyexpressed.pos.bb#http://www.mydomain.com/ucsc/data/hg19_highlyexpressed.neg.bb
+                                                             #-w
+                                                             #http://www.mydomain.com/ucsc/data/hg19_highlyexpressed.pos.bw,http://www.mydomain.com/ucsc/data/hg19_highlyexpressed.neg.bw
 
 =head2 PREREQUITES
 
-For running this tutorial on your machine you will need a full
-installation of the L<Bio::ViennaNGS> distribution, and result files
-obtained from tutorial02.pl, which can alternatively be downloaded
-from L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>):
+To run this tutorial on your machine you will need a full installation
+of the L<Bio::ViennaNGS> distribution. Input files can be downloaded
+L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>):
 
 =over
 
@@ -100,15 +102,16 @@ from L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>):
 
 =back
 
-For the UCSC genome browser to be able to
-visualize our trackhub it needs to be accessible via URL. This is the base
-URL you need to provide as commandline argument. 
+For the UCSC genome browser to be able to visualize our trackhub it
+needs to be accessible via URL. This is the base URL you need to
+provide as commandline argument.
 
 =head2 DISCLAIMER
 
-The resulting trackhub can only be read by the UCSC genome browser if it is accessible via URL.
-If you have no webspace for testing available you can use example output available from
-our webserver L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>.
+The resulting trackhub can only be read by the UCSC genome browser if
+it is accessible via URL.  If you have no webspace for testing
+available you can use example output available from our webserver
+L<here|http://nibiru.tbi.univie.ac.at/ViennaNGS>.
 
 
 =head1 PIPELINE

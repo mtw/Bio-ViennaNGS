@@ -1,18 +1,19 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-08 19:19:51 michl>
+# Last changed Time-stamp: <2017-06-10 18:20:31 michl>
 
 package Bio::ViennaNGS::Bam;
 
-use Exporter;
-use version; our $VERSION = qv('0.17');
 use strict;
 use warnings;
+use Exporter;
+use Bio::ViennaNGS;
 use Bio::DB::Sam 1.37;
 use Data::Dumper;
 use File::Basename qw(fileparse);
 use File::Temp qw(tempfile);
 use Path::Class;
 use Carp;
+use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
 
 our @ISA = qw(Exporter);
 our @EXPORT = ();

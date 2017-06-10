@@ -1,11 +1,11 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-08 18:34:09 michl>
+# Last changed Time-stamp: <2017-06-10 19:01:37 michl>
 
 package Bio::ViennaNGS::Feature;
 
-use version; our $VERSION = qv('0.17');
-
+use Bio::ViennaNGS;
 use Moose;
+use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
 
 extends 'Bio::ViennaNGS::MinimalFeature';
 

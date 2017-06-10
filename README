@@ -1,4 +1,4 @@
-# Bio::ViennaNGS 0.17
+# Bio::ViennaNGS 0.17.1
 
 Bio::ViennaNGS is a distribution of Perl modules and utilities for
 building efficient Next-Generation Sequencing (NGS) analysis
@@ -135,11 +135,6 @@ RefSeq bacterial GFF3 annotation.
 kmer_analysis.pl:
 Count k-mers of predefined length in FastQ and Fasta files
 
-MEME_xml_motif_extractor.pl:
-Compute simple statistics from MEME XML output and return a list of found
-motifs with the number of sequences containing those motifs as well as nice
-ggplot graphs.
-
 newUCSCdb.pl:
 Create a new genome database to a locally installed instance of the UCSC
 genome browser in order to add a novel organism for visualization.
@@ -200,6 +195,28 @@ with all Perl dependencies and install the suite automatically (provided
 you have samtools <= 0.1.19 installed, see the HOWTO link above).
 
 
+## SUPPORT AND DOCUMENTATION
+
+After installing, you can find documentation for this module with the
+perldoc command.
+
+    perldoc Bio::ViennaNGS
+
+You can also look for information at:
+
+    RT, CPAN's request tracker (report bugs here)
+        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Bio-ViennaNGS
+
+    AnnoCPAN, Annotated CPAN documentation
+        http://annocpan.org/dist/Bio-ViennaNGS
+
+    CPAN Ratings
+        http://cpanratings.perl.org/d/Bio-ViennaNGS
+
+    Search CPAN
+        http://search.cpan.org/dist/Bio-ViennaNGS
+
+
 ## DEPENDENCIES
 
 Bio::ViennaNGS depends on a set of third-party tools and libraries which
@@ -216,34 +233,9 @@ well as for building internally used Perl modules:
 Please ensure that all third-party utilities are available on your system
 and accessible to the Perl interpreter.
 
-Moreover, Bio::ViennaNGS requires the following Perl packages that are not
-shipped with the Perl core distribution:
-
-* Bio::Perl >= 1.00690001
-* Bio::DB::Sam >= 1.37
-* Bio::DB::Fasta
-* Bio::Tools::GFF
-* File::Basename
-* File::Path
-* File::Share
-* File::Slurp
-* File::Temp
-* IPC::Cmd
-* List::Util
-* Template
-* Moose
-* Moose::Util::TypeConstraints
-* MooseX::Clone
-* Path::Class
-* Params::Coerce
-* namespace::autoclean
-* Tie::Hash::Indexed
-* PerlIO::gzip
-* Math::Round
-* Template
-* Test::Deep
-* Test::Files
-* Test::File::Contents
+Moreover, Bio::ViennaNGS depends on a ste of Perl packages that are not
+shipped with the Perl core distribution, most notably Bio::Perl >=
+1.00690001 and Bio::DB::Sam >= 1.37.
 
 
 ## SOURCE AVAILABILITY
@@ -252,10 +244,10 @@ This source is available on Github:
               https://github.com/mtw/Bio-ViennaNGS
 
 
-## ViennaNGS PAPER
+## VIENNANGS PAPER
 
 If the Bio::ViennaNGS suite is useful for your work or if you use any
-component of ViennaNGS in a custom pipeline, please cite the following
+component of Bio::ViennaNGS in a custom pipeline, please cite the following
 publication:
 
 "ViennaNGS - A toolbox for building efficient next-generation sequencing
@@ -271,8 +263,7 @@ The Bio::ViennaNGS suite is actively developed and tested on different
 flavours of Linux and Mac OS X. We have taken care of writing
 platform-independent code that should run out of the box on most UNIX-based
 systems, however we do not have access to machines running Microsoft
-Windows. As such, we have not tested and will not test Windows
-compatibility.
+Windows. As such Microsoft Windows compatibility is not tested.
 
 
 ## BUGS
@@ -291,7 +282,7 @@ Fabian Amman <fabian@tbi.univie.ac.at>
 
 ## COPYRIGHT AND LICENCE
 
-Copyright (C) 2014-2016 Michael T. Wolfinger <michael@wolfinger.eu>
+Copyright (C) 2014-2017 Michael T. Wolfinger <michael@wolfinger.eu>
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself, either Perl version 5.10.0 or, at your
@@ -301,4 +292,3 @@ This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 more details.
-

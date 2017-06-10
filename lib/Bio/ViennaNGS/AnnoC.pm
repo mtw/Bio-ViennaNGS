@@ -1,15 +1,17 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-08 19:14:21 michl>
+# Last changed Time-stamp: <2017-06-10 18:18:45 michl>
 
 package Bio::ViennaNGS::AnnoC;
-
-use version; our $VERSION = qv('0.17');
+use Bio::ViennaNGS;
 use Bio::ViennaNGS::Util qw(sortbed);
 use Bio::Tools::GFF;
 use Path::Class;
 use Carp;
 use Moose;
 use namespace::autoclean;
+use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
+
+#my $VERSION = $Bio::ViennaNGS::VER;
 
 has 'accession' => (
 		    is => 'rw',
