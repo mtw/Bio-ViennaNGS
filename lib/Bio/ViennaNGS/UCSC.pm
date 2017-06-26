@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-10 19:11:36 michl>
+# Last changed Time-stamp: <2017-06-26 17:28:26 mtw>
 
 package Bio::ViennaNGS::UCSC;
 
@@ -554,10 +554,10 @@ sub valid_ncbi_accession{
   # receives a NCBI accession ID, with or without version number
   # checks for validity and returns the accession number as is
   my $acc = shift;
-  if ($acc =~ /^(N[CST]\_\d{6})\.\d+?$/){
+  if ($acc =~ /^(N[CSTZ]\_[A-Z]*\d{6})\.\d+?$/){
     return $acc;
   }
-  elsif ($acc =~ /^(N[CST]\_\d{6})$/){
+  elsif ($acc =~ /^(N[CSTZ]\_[A-Z]*\d{6})$/){
     return $1;
   }
   else {

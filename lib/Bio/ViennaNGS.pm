@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-10 18:19:30 michl>
+# Last changed Time-stamp: <2017-06-26 17:29:06 mtw>
 
 package Bio::ViennaNGS;
 use Exporter;
-use version; our $VERSION = version->declare("v0.17.1");
+use version; our $VERSION = version->declare("v0.17.2");
 our @ISA = qw(Exporter);
 our @EXPORT = ($VERSION);
 1;
