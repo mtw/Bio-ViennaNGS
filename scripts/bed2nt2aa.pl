@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-09 11:18:37 michl>
+# Last changed Time-stamp: <2017-07-18 09:22:28 mtw>
 #
 # Extract nucleotide and amino acid sequence data from Fasta file,
 # provided by a BED file
@@ -76,7 +76,12 @@ $intervals = Bio::ViennaNGS::FeatureIO->new(
 					    filetype => 'Bed6',
 					    instanceOf => 'Feature',
 					   );
+
+my $fn = "sequence.fa";
+$stdout == 0 ? open($out, ">", $fn) : open($out, ">&STDOUT");
+
 foreach  $f (@{$intervals->data}){
+ # print Dumper($f);
   confess "ERROR: ID ".$f->chromosome." not found in Fasta file $fa_in"
     unless ($fastaO->has_sequid($f->chromosome));
   $seq = $fastaO->stranded_subsequence($f->chromosome,
@@ -84,9 +89,10 @@ foreach  $f (@{$intervals->data}){
 				       $f->end,
 				       $f->strand);
   #my $fn = $f->chromosome.".".$f->name.".".eval($f->start+1)."-".$f->end.".fa";
-  my $fn = "sequence.fa";
+
   my $newid = $f->chromosome."|".$f->name."|".eval($f->start+1)."-".$f->end."|";
-  $stdout == 0 ? open($out, ">", $fn) : open($out, ">&STDOUT");
+  print "++ $newid\n";
+
   print $out ">$newid\n";
   print $out join "\n", (unpack "(a70)*",$seq);
   print $out "\n";
@@ -102,8 +108,8 @@ foreach  $f (@{$intervals->data}){
       print $out "\n";
     }
   }
-  close $out;
 }
+close $out;
 
 __END__
 
