@@ -1,4 +1,4 @@
-# Bio::ViennaNGS 0.17.4
+# Bio::ViennaNGS 0.17.5
 
 Bio::ViennaNGS is a distribution of Perl modules and utilities for
 building efficient Next-Generation Sequencing (NGS) analysis
@@ -57,7 +57,7 @@ roles:
   A Moose interface for handling elementary gene annotation, corresponding
   to BED4.
 
-- Bio::ViennaNGS::Peak
+- Bio::ViennaNGS::Peak 
   A Moose interface for identification and characterization of (coverage /
   expression) peaks in RNA-seq data.
 
@@ -121,11 +121,15 @@ records. Optionally translate nucleotide into amino acid sequences.
 bed62bed12.pl:
 A simple BED6 -> BED12 converter
 
-fasta_multigrep.pl
+fasta_multigrep.pl:
 Extract individual (whole) sequences from a multi Fasta file
 
 fasta_subgrep.pl:
 Extract subsequences from (multi) Fasta files.
+
+fasta_regex.pl:
+Extract sequence motifs from (multi) Fasta files provided as regular
+expression.
 
 gff2bed.pl:
 Convert RefSeq GFF3 annotation files to BED12 format. Individual BED12
