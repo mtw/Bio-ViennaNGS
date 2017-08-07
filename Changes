@@ -191,5 +191,8 @@ Revision history for Perl extension Bio::ViennaNGS.
 0.17.3 Sun Jul 2 2017
 	- fixed missing parentheses in fasta_subgrep.pl
 
-0.17.4 Weg Jul 19 2017
+0.17.4 Wed Jul 19 2017
 	- fixed handling of multi-Fasta files in bed2nt2aa.pl
+
+0.17.5 Mon Aug 07 2017
+	- added scripts/fasta_regex.pl

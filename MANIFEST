@@ -35,6 +35,7 @@ scripts/bed62bed12.pl
 scripts/gff2bed.pl
 scripts/fasta_subgrep.pl
 scripts/fasta_multigrep.pl
+scripts/fasta_regex.pl
 scripts/kmer_analysis.pl
 scripts/newUCSCdb.pl
 scripts/normalize_multicov.pl
