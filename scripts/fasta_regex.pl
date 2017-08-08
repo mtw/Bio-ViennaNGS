@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-08-07 09:04:15 mtw>
+# Last changed Time-stamp: <2017-08-08 14:21:14 mtw>
 #
 # Find sequence motifs in (multi)-Fasta files
 #
@@ -50,6 +50,7 @@ my $wantbed = 0;
 my $name   = "pattern";
 my @fids = ();
 
+
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^ Main ^^^^^^^^^^^^^#
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
@@ -82,18 +83,22 @@ foreach my $id (keys %$ps){
   my $cnt = 0;
   my $start = $$ps{$id}->{start};
   my $end = $$ps{$id}->{stop};
-  print ">FASTA Id $id ($start-$end)\n";
+ # print ">FASTA Id $id ($start-$end)\n";
   my $seq = $fastaO->stranded_subsequence($id,$start, $end,$strand);
-  print "$seq\n";
+ # print "$seq\n";
   while ($seq =~ m/($motif)/g){ # we need those parentheses here !!!
-    my $p = pos($seq)-length($1)+1;
+    my $p = pos($seq)-length($1);
+    my $q = $p+length($1);
+    my $n = $name."_$p-$q";
     if ($wantbed == 1){
-      print join "\t", ($id,$p, $p+length($1),$name,"0",$strand);
+      print join "\t", ($id,$p,$q,$n,"0",$strand);
       print "\n";
     }
     $cnt++;
-  } 
+  }
+  print "$cnt motifs found\n";
 }
+
 
 #print Dumper($ps);
 
