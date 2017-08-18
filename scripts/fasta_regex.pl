@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-08-08 14:21:14 mtw>
+# Last changed Time-stamp: <2017-08-17 18:11:05 mtw>
 #
 # Find sequence motifs in (multi)-Fasta files
 #
@@ -96,7 +96,7 @@ foreach my $id (keys %$ps){
     }
     $cnt++;
   }
-  print "$cnt motifs found\n";
+  #print "$cnt motifs found\n";
 }
 
 
