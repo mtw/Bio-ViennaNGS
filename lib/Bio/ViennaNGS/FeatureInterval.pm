@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-10 19:04:16 michl>
+# Last changed Time-stamp: <2018-01-09 17:54:25 mtw>
 
 package Bio::ViennaNGS::FeatureInterval;
 
@@ -47,6 +47,15 @@ sub BUILD { # call a parser method, depending on $self->instanceOf
   $self->_length($len);
 }
 
+sub dump {
+  my $self = shift;
+  print join "\t",
+    $self->chromosome,
+    $self->start,
+    $self->end,
+    "\n";
+}
+
 no Moose;
 
 1;
@@ -66,8 +75,8 @@ genomic intervals.
                                                  start => "1200",
                                                  end => "4300",
                                                 );
-
   my $len = $obj->_length();
+  $obj->dump();
 
 =head1 DESCRIPTION
 
@@ -77,6 +86,21 @@ start and end position. As such, it can be regarded a simple wrapper
 for BED3 elements.
 
 This is the base class for L<Bio::ViennaNGS::MinimalFeature>.
+
+=head1 METHODS
+
+=over
+
+=item dump()
+
+Title   : dump
+
+Usage   : C<$obj-E<gt>dump;>
+
+Function: Print a tab-separated representation of C<$obj> (a BED3
+          line).
+
+=back
 
 =head1 SEE ALSO
 
@@ -94,7 +118,7 @@ Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014-2017 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2014-2018 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.0 or,

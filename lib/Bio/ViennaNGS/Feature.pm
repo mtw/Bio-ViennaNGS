@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-10 19:01:37 michl>
+# Last changed Time-stamp: <2018-01-09 17:57:47 mtw>
 
 package Bio::ViennaNGS::Feature;
 
@@ -23,6 +23,18 @@ has 'score' => (
 		predicate => 'has_score',
 	       );
 
+override 'dump' => sub {
+    my $self = shift;
+  print join "\t",
+    $self->chromosome,
+    $self->start,
+    $self->end,
+    $self->name,
+    $self->score,
+    $self->strand,
+    "\n";
+};
+
 no Moose;
 
 1;
@@ -38,13 +50,14 @@ Bio::ViennaNGS::Feature - A Moose wrapper for BED6-type genomic intervals.
 
   use Bio::ViennaNGS::Feature;
 
-  my $expression = Bio::ViennaNGS::Feature->new(chromosome => "chr1",
-                                                start => "1200",
-                                                end => "4300",
-                                                strand => "+",
-                                                name => "foobar",
-                                                score => "100",
-                                               );
+  my $feat = Bio::ViennaNGS::Feature->new(chromosome => "chr1",
+                                          start => "1200",
+                                          end => "4300",
+                                          strand => "+",
+                                          name => "foobar",
+                                          score => "100",
+                                          );
+  $feat->dump();
 
 =head1 DESCRIPTION
 
@@ -55,6 +68,21 @@ for BED6 elements.
 
 This class inherits from L<Bio::ViennaNGS::MinimalFeature> and is the
 base classs for L<Bio::ViennaNGS::FeatureChain>.
+
+=head1 METHODS
+
+=over
+
+=item dump()
+
+Title   : dump
+
+Usage   : C<$obj-E<gt>dump;>
+
+Function: Print a tab-separated representation of C<$obj> (a BED6
+          line).
+
+=back
 
 =head1 SEE ALSO
 
@@ -74,7 +102,7 @@ Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014-2017 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2014-2018 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.0 or,

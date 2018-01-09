@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-10 19:07:52 michl>
+# Last changed Time-stamp: <2018-01-09 17:55:29 mtw>
 
 package Bio::ViennaNGS::MinimalFeature;
 
@@ -17,6 +17,16 @@ has 'strand' => (
 		 default => '.',
 		 predicate => 'has_strand',
 		);
+
+override 'dump' => sub {
+    my $self = shift;
+  print join "\t",
+    $self->chromosome,
+    $self->start,
+    $self->end,
+    $self->strand,
+    "\n";
+};
 
 no Moose;
 
@@ -39,6 +49,8 @@ intervals.
                                                  end => "4300",
                                                  strand => "+",
                                                 );
+  $feat->dump();
+
 =head1 DESCRIPTION
 
 This module provides an object-oriented interface for storing
@@ -48,6 +60,21 @@ simple wrapper for BED4 elements.
 
 This class inherits from L<Bio::ViennaNGS::FeatureInterval> and is the
 base classs for L<Bio::ViennaNGS::Feature>.
+
+=head1 METHODS
+
+=over
+
+=item dump()
+
+Title   : dump
+
+Usage   : C<$obj-E<gt>dump;>
+
+Function: Print a tab-separated representation of C<$obj> (a BED4
+          line).
+
+=back
 
 =head1 SEE ALSO
 
@@ -67,7 +94,7 @@ Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014-2017 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2014-2018 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.0 or,
