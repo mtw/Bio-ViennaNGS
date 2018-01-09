@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2018-01-09 17:54:25 mtw>
+# Last changed Time-stamp: <2018-01-09 23:56:07 mtw>
 
 package Bio::ViennaNGS::FeatureInterval;
 
@@ -49,11 +49,11 @@ sub BUILD { # call a parser method, depending on $self->instanceOf
 
 sub dump {
   my $self = shift;
-  print join "\t",
-    $self->chromosome,
-    $self->start,
-    $self->end,
-    "\n";
+  print join("\t",
+	     $self->chromosome,
+	     $self->start,
+	     $self->end),
+	       "\n";
 }
 
 no Moose;

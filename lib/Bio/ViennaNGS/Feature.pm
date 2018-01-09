@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2018-01-09 17:57:47 mtw>
+# Last changed Time-stamp: <2018-01-09 23:54:58 mtw>
 
 package Bio::ViennaNGS::Feature;
 
@@ -24,15 +24,15 @@ has 'score' => (
 	       );
 
 override 'dump' => sub {
-    my $self = shift;
-  print join "\t",
-    $self->chromosome,
-    $self->start,
-    $self->end,
-    $self->name,
-    $self->score,
-    $self->strand,
-    "\n";
+  my $self = shift;
+  print join("\t",
+	     $self->chromosome,
+	     $self->start,
+	     $self->end,
+	     $self->name,
+	     $self->score,
+	     $self->strand),
+	       "\n";
 };
 
 no Moose;

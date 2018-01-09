@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2018-01-09 17:55:29 mtw>
+# Last changed Time-stamp: <2018-01-09 23:56:32 mtw>
 
 package Bio::ViennaNGS::MinimalFeature;
 
@@ -19,13 +19,13 @@ has 'strand' => (
 		);
 
 override 'dump' => sub {
-    my $self = shift;
-  print join "\t",
-    $self->chromosome,
-    $self->start,
-    $self->end,
-    $self->strand,
-    "\n";
+  my $self = shift;
+  print join("\t",
+	     $self->chromosome,
+	     $self->start,
+	     $self->end,
+	     $self->strand),
+	       "\n";
 };
 
 no Moose;
