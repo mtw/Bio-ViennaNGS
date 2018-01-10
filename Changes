@@ -200,3 +200,4 @@ Revision history for Perl extension Bio::ViennaNGS.
 0.17.6
 	- added dump()method to Bio::ViennaNGS::FeatureInterval,
 	  Bio::ViennaNGS::MinimalFeature and Bio::ViennaNGS::Feature
+	- make all attributes of Bio::ViennaNGS::FeatureInterval rw

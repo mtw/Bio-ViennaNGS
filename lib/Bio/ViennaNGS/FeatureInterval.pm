@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2018-01-09 23:56:07 mtw>
+# Last changed Time-stamp: <2018-01-10 00:28:46 mtw>
 
 package Bio::ViennaNGS::FeatureInterval;
 
@@ -10,21 +10,21 @@ use Moose;
 use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
 
 has 'chromosome' => (
-		     is  => 'ro',
+		     is  => 'rw',
 		     isa => 'Str',
 		     required => 1,
 		     predicate => 'has_chromosome',
 	     );
 
 has 'start' => (
-		is      => 'ro',
+		is      => 'rw',
 		isa     => 'Int',
 		required => 1,
 		predicate => 'has_start',
 	       );
 
 has 'end' => (
-	      is      => 'ro',
+	      is      => 'rw',
 	      isa     => 'Int',
 	      required => 1,
 	      predicate => 'has_end',
