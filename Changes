@@ -197,7 +197,7 @@ Revision history for Perl extension Bio::ViennaNGS.
 0.17.5 Mon Aug 07 2017
 	- added scripts/fasta_regex.pl
 
-0.17.6
+0.18 Thu Feb 15 2018
 	- added dump()method to Bio::ViennaNGS::FeatureInterval,
 	  Bio::ViennaNGS::MinimalFeature and Bio::ViennaNGS::Feature
 	- make all attributes of Bio::ViennaNGS::FeatureInterval rw
