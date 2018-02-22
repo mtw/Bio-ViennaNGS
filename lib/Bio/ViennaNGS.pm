@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2018-02-15 12:52:17 mtw>
+# Last changed Time-stamp: <2018-02-22 17:38:19 mtw>
 
 package Bio::ViennaNGS;
 use Exporter;
@@ -201,10 +201,13 @@ Please ensure that all third-party utilities are available on your
 system, and that hey can be found and executed by the Perl
 interpreter.
 
-=head1 SOURCE AVAILABILITY
+=head1 SOFTWARE AVAILABILITY
 
 Source code for this distribution is available from the L<ViennaNGS
 Github repository|https://github.com/mtw/Bio-ViennaNGS>.
+
+A pre-compiled binary distribution for Linux and MacOS is available
+from Bioconda, e.g. via I<conda install perl-bio-viennangs>.
 
 =head1 PAPERS
 
@@ -212,12 +215,12 @@ If the L<Bio::ViennaNGS> suite is useful for your work or if you use
 any component of the distribution in a custom pipeline, please cite
 the following publication:
 
-B<"ViennaNGS - A toolbox for building efficient next-generation sequencing
-analysis pipelines">
+ "ViennaNGS - A toolbox for building efficient next-generation
+ sequencing analysis pipelines"
+ Michael T. Wolfinger, Joerg Fallmann, Florian Eggenhofer and Fabian
+ Amman; F1000Research (2015), 4:50
 
-I<Michael T. Wolfinger, Joerg Fallmann, Florian Eggenhofer and Fabian Amman>
-
-F1000Research 2015, 4:50 (doi: L<10.12688E<sol>f1000research.6157.2|http://dx.doi.org/10.12688/f1000research.6157.2>)
+doi: L<10.12688E<sol>f1000research.6157.2|http://dx.doi.org/10.12688/f1000research.6157.2>)
 
 =head1 NOTES
 
@@ -288,7 +291,7 @@ test Windows compatibility.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014-2017 Michael T. Wolfinger
+Copyright (C) 2014-2018 Michael T. Wolfinger
 E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
