@@ -201,3 +201,6 @@ Revision history for Perl extension Bio::ViennaNGS.
 	- added dump()method to Bio::ViennaNGS::FeatureInterval,
 	  Bio::ViennaNGS::MinimalFeature and Bio::ViennaNGS::Feature
 	- make all attributes of Bio::ViennaNGS::FeatureInterval rw
+
+0.19.1
+	- ignore case in regex match in fasta_regex.pl
