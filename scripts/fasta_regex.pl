@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-08-17 18:11:05 mtw>
+# Last changed Time-stamp: <2018-03-08 11:52:26 mtw>
 #
 # Find sequence motifs in (multi)-Fasta files
 #
@@ -86,7 +86,7 @@ foreach my $id (keys %$ps){
  # print ">FASTA Id $id ($start-$end)\n";
   my $seq = $fastaO->stranded_subsequence($id,$start, $end,$strand);
  # print "$seq\n";
-  while ($seq =~ m/($motif)/g){ # we need those parentheses here !!!
+  while ($seq =~ m/($motif)/gi){ # we need those parentheses here !!!
     my $p = pos($seq)-length($1);
     my $q = $p+length($1);
     my $n = $name."_$p-$q";
