@@ -207,3 +207,9 @@ Revision history for Perl extension Bio::ViennaNGS.
 	- allow keeping temporary bedGraph files in BAM to bigWig and
 	  BED to bigWig conversion
 	- refactored temporary file handling in Bio::ViennaNGS::Peak
+	- ignore case in regex match in scripts/fasta_regex.pl
+	- refactored scripts/bed2bedGraph.pl
+	- argument error checks in Fasta.pm
+
+0.19 Tue 3 Jul 2018     
+        - added Bio::ViennaNGS::FeatureIntervalN

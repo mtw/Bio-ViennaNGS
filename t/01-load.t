@@ -17,7 +17,7 @@ BEGIN {
       use_ok('Bio::ViennaNGS::FeatureChain')  ||  print "Bail out! Cannot load Bio::RNA::ViennaNGS::FeatureChain\n";
       use_ok('Bio::ViennaNGS::FeatureLine')  ||  print "Bail out! Cannot load Bio::RNA::ViennaNGS::FeatureLine\n";
       use_ok('Bio::ViennaNGS::FeatureInterval')  ||  print "Bail out! Cannot load Bio::RNA::ViennaNGS::Featureinterval\n";
-      use_ok('Bio::ViennaNGS::FeatureIntervalN')  ||  print "Bail out! Cannot load Bio::RNA::ViennaNGS::FeatureintervalN\n"
+      use_ok('Bio::ViennaNGS::FeatureIntervalN')  ||  print "Bail out! Cannot load Bio::RNA::ViennaNGS::FeatureintervalN\n";
       use_ok('Bio::ViennaNGS::FeatureIO')  ||  print "Bail out! Cannot load Bio::RNA::ViennaNGS::FeatureIO\n";
       use_ok('Bio::ViennaNGS::MinimalFeature')  ||  print "Bail out! Cannot load Bio::RNA::ViennaNGS::MinimalFeature\n";
       use_ok('Bio::ViennaNGS::Peak')  ||  print "Bail out! Cannot load Bio::RNA::ViennaNGS::Peak\n";
