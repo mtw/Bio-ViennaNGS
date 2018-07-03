@@ -1,9 +1,9 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2018-05-24 14:11:57 mtw>
+# Last changed Time-stamp: <2018-07-03 15:38:30 mtw>
 
 package Bio::ViennaNGS;
 use Exporter;
-use version; our $VERSION = version->declare("v0.18.1");
+use version; our $VERSION = version->declare("v0.19");
 our @ISA = qw(Exporter);
 our @EXPORT = ($VERSION);
 1;
@@ -55,6 +55,9 @@ chaining gene annotation features.
 
 =item L<Bio::ViennaNGS::FeatureInterval>: A L<Moose> interface for
 handling elementary genomic intervals, corresponding to BED3.
+
+=item L<Bio::ViennaNGS::FeatureIntervalN>: A L<Moose> interface for
+handling named genomic intervals.
 
 =item L<Bio::ViennaNGS::FeatureIO>: A L<Moose> interface for efficient
 input/output handling of genomic annotation formats.
