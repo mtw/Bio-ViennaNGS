@@ -202,5 +202,8 @@ Revision history for Perl extension Bio::ViennaNGS.
 	  Bio::ViennaNGS::MinimalFeature and Bio::ViennaNGS::Feature
 	- make all attributes of Bio::ViennaNGS::FeatureInterval rw
 
-0.19.1
+0.18.1 Thu 24 May 2018
 	- ignore case in regex match in fasta_regex.pl
+	- allow keeping temporary bedGraph files in BAM to bigWig and
+	  BED to bigWig conversion
+	- refactored temporary file handling in Bio::ViennaNGS::Peak

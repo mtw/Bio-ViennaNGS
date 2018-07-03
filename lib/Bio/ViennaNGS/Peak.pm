@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-10 19:08:23 michl>
+# Last changed Time-stamp: <2018-07-03 12:20:53 mtw>
 
 package Bio::ViennaNGS::Peak;
 
@@ -11,6 +11,7 @@ use Path::Class;
 use List::Util qw(sum sum0 min max first);
 use Bio::ViennaNGS::Util qw(sortbed);
 use namespace::autoclean;
+use File::Temp qw(tempfile);
 use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
 
 has 'data' => (
@@ -33,12 +34,6 @@ has 'peaks' => (
 		 predicate => 'has_peaks',
 		 default => sub { {} },
 	       );
-
-has 'winsize' => (
-		  is => 'ro',
-		  isa => 'Int',
-		  predicate => 'has_winsize',
-		 );
 
 has 'winsize' => (
 		  is => 'ro',
@@ -120,7 +115,7 @@ sub populate_data {
 
 sub raw_peaks {
   my ($self,$dest,$prefix,$log) = @_;
-  my ($fn,$fn_u,$outfile,$maxidx,$have_pstart,$pstart,$pend,$chr);
+  my ($fn,$tfn,$tfh,$maxidx,$have_pstart,$pstart,$pend,$chr);
   my ($winstart, $winend, $winsum, $mean, $lastmax, $from, $to);
   my ($index_of_maxwin);
   my $suffix = "rawpeaks.bed";
@@ -130,14 +125,11 @@ sub raw_peaks {
   croak "ERROR [$this_function]: $dest does not exist\n"
     unless (-d $dest);
 
-  if (defined $log){
-    open(LOG, ">", $log) or croak "$!";
-  }
+  if (defined $log){open(LOG, ">", $log) or croak "$!"}
   else {croak "ERROR [$this_function] \$log not defined";}
 
-  $fn   = $prefix.".".$suffix;
-  $fn_u = $prefix.".u.".$suffix;
-  $outfile = file($dest,$fn_u);
+  $fn = $prefix.".".$suffix;   # filename of final, sorted RAWPEAKS bed file
+  (undef,$tfn) = tempfile('RAWPEAKS_XXXXXXX',UNLINK=>0);
 
   croak "ERROR [$this_function]: $self->data not available\n"
     unless ($self->has_data);
@@ -145,7 +137,7 @@ sub raw_peaks {
   croak "ERROR [$this_function]: $self->region not available\n"
     unless ($self->has_region);
 
-  open(RAWPEAKS, ">", $fn_u) or croak $!;
+  open ($tfh, ">", $tfn) or croak $!;
   $lastmax = 0;
   foreach $chr (keys (%{$self->data})){
 
@@ -154,7 +146,7 @@ sub raw_peaks {
     $have_pstart = 0;
     $pstart      = -1;
     $pend        = -1;
-    print LOG "processing chr $chr [+] strand $maxidx\n";
+    if (defined $log){print LOG "processing chr $chr [+] strand $maxidx\n"}
     croak "$chr has not been parsed in input data"
       unless (exists $self->region->{$chr}{pos}{start});
 
@@ -180,6 +172,8 @@ sub raw_peaks {
 	  $have_pstart = 0;
 	  $from = min($pstart,$pend);
 	  $to   = max($pstart, $pend);
+	  next if ($from<0);
+	  next if ($to<0);
 	  # now add +- $flex nt to raw peaks, required fro better peak boundary determination below
 	  if ($from-$flex > 0){$from = $from - $flex;}
 	  $to= $to+$flex; # we dont know the chromsize here, hence override it in case
@@ -192,8 +186,8 @@ sub raw_peaks {
 		    maxindex => $index_of_maxwin,
 		   );
 	  push (@{ $self->peaks->{$chr} }, \%pk);
-	  print LOG "**PEAK $chr [+] $from-$to max at $index_of_maxwin\n";
-	  print RAWPEAKS "$chr\t$from\t$to\tRAW\t0\t+\n";
+	  if (defined $log){print LOG "**PEAK $chr [+] $from-$to max at $index_of_maxwin\n"}
+	  print $tfh "$chr\t$from\t$to\tRAW\t0\t+\n";
 
 	  # reset parameters
 	  $lastmax = 0;
@@ -209,7 +203,7 @@ sub raw_peaks {
     $have_pstart = 0;
     $pstart      = -1;
     $pend        = -1;
-    print LOG "processing chr $chr [-] strand $maxidx\n";
+    if (defined $log){print LOG "processing chr $chr [-] strand $maxidx\n"}
     croak "$chr has not been parsed in input data"
       unless (exists $self->region->{$chr}{neg}{start});
 
@@ -235,6 +229,8 @@ sub raw_peaks {
 	  $have_pstart = 0;
 	  $from = min($pstart,$pend);
 	  $to   = max($pstart, $pend);
+	  next if ($from<0);
+	  next if ($to<0);
 	  # now add +- $flex nt to raw peaks, required fro better peak boundary determination below
 	  if ($from-$flex > 0){$from = $from - $flex;}
 	  $to = $to+$flex; # we dont know the chromsize here, hence override it in case
@@ -247,8 +243,8 @@ sub raw_peaks {
 		    maxindex => $index_of_maxwin,
 		   );
 	  push (@{ $self->peaks->{$chr} }, \%pk);
-	  print LOG "**PEAK $chr [-] $from-$to max at $index_of_maxwin\n"; 
-	  print RAWPEAKS "$chr\t$from\t$to\tRAW\t0\t-\n";
+	  if (defined $log){print LOG "**PEAK $chr [-] $from-$to max at $index_of_maxwin\n"}
+	  print $tfh "$chr\t$from\t$to\tRAW\t0\t-\n";
 
 	  # reset parameters
 	  $lastmax = 0;
@@ -261,28 +257,26 @@ sub raw_peaks {
     #print LOG Dumper($self->peaks);
 
   } # end foreach
-  close(RAWPEAKS);
+  close($tfh);
   close(LOG);
-  sortbed($fn_u,$dest,$fn,1,$log);
+  sortbed($tfn,$dest,$fn,0,$log);
+  unlink($tfn);
 }
 
 sub final_peaks {
   my ($self,$dest,$prefix,$log) = @_;
-  my ($fn,$fn_u,$outfile,$strand,$max,$idx,$val,$peak,$position,$pleft,$pright,$str);
+  my ($fn,$tfn,$tfh,$strand,$max,$idx,$val,$peak,$position,$pleft,$pright,$str);
   my $suffix = "candidatepeaks.bed";
   my $this_function = (caller(0))[3];
 
   croak "ERROR [$this_function]: $dest does not exist\n"
     unless (-d $dest);
 
-  if (defined $log){
-    open(LOG, ">>", $log) or croak "$!";
-  }
+  if (defined $log){open(LOG, ">>", $log) or croak "$!";}
   else {croak "ERROR [$this_function] \$log not defined";}
 
   $fn   = $prefix.".".$suffix;
-  $fn_u = $prefix.".u.".$suffix;
-  $outfile = file($dest,$fn_u);
+  (undef,$tfn) = tempfile('CANDIDATEPEAKS_XXXXXXX',UNLINK=>0);
 
   croak "ERROR [$this_function]: $self->data not available\n"
     unless ($self->has_data);
@@ -290,22 +284,21 @@ sub final_peaks {
   croak "ERROR [$this_function]: $self->peaks not available\n"
     unless ($self->has_peaks);
 
-  open(CANDIDATEPEAKS, ">", $fn_u) or croak $!;
-
+  open($tfh, ">", $tfn) or croak $!;
   foreach my $chr (keys (%{$self->peaks})){
-    print LOG "filtering candidate peaks in $chr\n";
+    if (defined $log){print LOG "filtering candidate peaks in $chr\n";}
 
     foreach $peak ( @{$self->peaks->{$chr}}){
       my $have_pleft = 0; # we have found a proper left end
       my $have_pright = 0; # we have found a proper right end
       $strand = $$peak{strand};
-      print LOG ">>processing peak $$peak{start}-$$peak{end} [$strand] ";
+      if (defined $log){print LOG ">>processing peak $$peak{start}-$$peak{end} [$strand] ";}
       $max = max @{$self->data->{$chr}{$strand}}[$$peak{start}..$$peak{end}]; # max peak elevation
-      print LOG "max is $max";
+      if (defined $log){print LOG "max is $max";}
       if ($max < $self->mincov){print LOG " ..SKIPPING\n";next;}
       $idx = first { @{$self->data->{$chr}{$strand}}[$_] eq $max } $$peak{start}..$$peak{end}; # coordinate
       #print LOG Dumper(\$peak);
-      print LOG " at $idx ..KEEPING\n";
+      if (defined $log){print LOG " at $idx ..KEEPING\n";}
 
       # process regions left/right of the maximum to identify peak boundaries
       # validity check first
@@ -315,26 +308,30 @@ sub final_peaks {
       # find left end
       for ($position = $idx; $position>$$peak{start}; $position--){
 	$val =  ${$self->data->{$chr}{$strand}}[$position];
-	print LOG "** VAL_L at pos $position $val - \$have_pleft=$have_pleft ";
+	if (defined $log){print LOG "** VAL_L at pos $position $val - \$have_pleft=$have_pleft ";}
 	if ( $val < $max*$self->threshold){
 	  $have_pleft = 1;
-	  print LOG "exiting 'cause $val < ".$max*$self->threshold." - \$have_pleft=$have_pleft\n";
+	  if (defined $log){
+	    print LOG "exiting 'cause $val < ".$max*$self->threshold." - \$have_pleft=$have_pleft\n";
+	  }
 	  last;
 	}
-	print LOG "\n";
+	if (defined $log){print LOG "\n";}
       }
       $pleft = $position;
 
       # find right end
       for ($position = $idx; $position<=$$peak{end}; $position++){
 	$val =  ${$self->data->{$chr}{$strand}}[$position];
-	print LOG "** VAL_R at pos $position $val - \$have_pright=$have_pright ";
+	if (defined $log){print LOG "** VAL_R at pos $position $val - \$have_pright=$have_pright ";}
 	if ( $val < $max*$self->threshold){
 	  $have_pright = 1;
-	  print LOG "exiting 'cause $val < ".$max*$self->threshold."- \$have_pright=$have_pright\n";
+	  if (defined $log){
+	    print LOG "exiting 'cause $val < ".$max*$self->threshold."- \$have_pright=$have_pright\n";
+	  }
 	  last;
 	}
-	print LOG "\n";
+	if (defined $log){print LOG "\n";}
       }
       $pright = $position;
       if ($strand eq "neg"){
@@ -343,17 +340,18 @@ sub final_peaks {
       else{
 	$str = '+';
       }
-      print LOG "# PEAK characterized at $chr:$pleft-$pright\n";
+      if (defined $log){print LOG "# PEAK characterized at $chr:$pleft-$pright\n";}
 
       if ($have_pleft == 1 && $have_pright == 1){ # print only if its a proper peak
 	if ($pright-$pleft<=$self->length){ # filter peak length 
-	  print CANDIDATEPEAKS "$chr\t$pleft\t$pright\tCANDIDATE\t$max\t$str\n";
+	  if (defined $log){print $tfh "$chr\t$pleft\t$pright\tCANDIDATE\t$max\t$str\n";}
 	}
       }
     } # end foreach $peak
   } # end foreach $chr
-  close(CANDIDATEPEAKS);
-  sortbed($fn_u,$dest,$fn,1,$log);
+  close($tfh);
+  sortbed($tfn,$dest,$fn,0,$log);
+  unlink($tfn);
 }
 __PACKAGE__->meta->make_immutable;
 
@@ -509,7 +507,7 @@ Michael T. Wolfinger, E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2015-2017 by Michael T. Wolfinger
+Copyright (C) 2015-2018 by Michael T. Wolfinger
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.0 or,
