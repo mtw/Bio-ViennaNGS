@@ -3,7 +3,7 @@
 
 package Bio::ViennaNGS;
 use Exporter;
-use version; our $VERSION = version->declare("v0.19");
+use version; our $VERSION = version->declare("v0.19.1");
 our @ISA = qw(Exporter);
 our @EXPORT = ($VERSION);
 1;

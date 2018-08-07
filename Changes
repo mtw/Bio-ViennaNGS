@@ -213,3 +213,6 @@ Revision history for Perl extension Bio::ViennaNGS.
 
 0.19 Tue 3 Jul 2018     
         - added Bio::ViennaNGS::FeatureIntervalN
+
+0.19.1 Tue 7 Aug 2018
+	- add Fasta test to distribution

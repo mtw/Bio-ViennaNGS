@@ -9,9 +9,7 @@ use Path::Class;
 use Carp;
 use Moose;
 use namespace::autoclean;
-use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
-
-#my $VERSION = $Bio::ViennaNGS::VER;
+use version; our $VERSION = version->declare(eval($Bio::ViennaNGS::VERSION));
 
 has 'accession' => (
 		    is => 'rw',
