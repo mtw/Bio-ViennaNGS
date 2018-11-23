@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 21;
+use Test::More tests => 22;
 
 BEGIN {
       use_ok('Bio::ViennaNGS') ||  print "Bail out! Cannot load Bio::RNA::ViennaNGS\n";
@@ -14,6 +14,7 @@ BEGIN {
       use_ok('Bio::ViennaNGS::ExtFeature')  ||  print "Bail out! Cannot load Bio::RNA::ViennaNGS::ExtFeature\n";
       use_ok('Bio::ViennaNGS::Fasta')  ||  print "Bail out! Cannot load Bio::RNA::ViennaNGS::Fasta\n";
       use_ok('Bio::ViennaNGS::Feature')  ||  print "Bail out! Cannot load Bio::RNA::ViennaNGS::Feature\n";
+      use_ok('Bio::ViennaNGS::FeatureBase')  ||  print "Bail out! Cannot load Bio::RNA::ViennaNGS::FeatureBase\n";
       use_ok('Bio::ViennaNGS::FeatureChain')  ||  print "Bail out! Cannot load Bio::RNA::ViennaNGS::FeatureChain\n";
       use_ok('Bio::ViennaNGS::FeatureLine')  ||  print "Bail out! Cannot load Bio::RNA::ViennaNGS::FeatureLine\n";
       use_ok('Bio::ViennaNGS::FeatureInterval')  ||  print "Bail out! Cannot load Bio::RNA::ViennaNGS::Featureinterval\n";
@@ -38,6 +39,7 @@ diag( "Test Bio::ViennaNGS::Expression $Bio::ViennaNGS::Expression::VERSION, Per
 diag( "Test Bio::ViennaNGS::ExtFeature $Bio::ViennaNGS::ExtFeature::VERSION, Perl $], $^X" );
 diag( "Test Bio::ViennaNGS::Fasta $Bio::ViennaNGS::Fasta::VERSION, Perl $], $^X" );
 diag( "Test Bio::ViennaNGS::Feature $Bio::ViennaNGS::Feature::VERSION, Perl $], $^X" );
+diag( "Test Bio::ViennaNGS::FeatureBase $Bio::ViennaNGS::FeatureBase::VERSION, Perl $], $^X" );
 diag( "Test Bio::ViennaNGS::FeatureChain $Bio::ViennaNGS::FeatureChain::VERSION, Perl $], $^X" );
 diag( "Test Bio::ViennaNGS::FeatureLine $Bio::ViennaNGS::FeatureLine::VERSION, Perl $], $^X" );
 diag( "Test Bio::ViennaNGS::FeatureInterval $Bio::ViennaNGS::FeatureInterval::VERSION, Perl $], $^X" );

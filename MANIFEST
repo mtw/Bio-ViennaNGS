@@ -11,6 +11,7 @@ lib/Bio/ViennaNGS/Expression.pm
 lib/Bio/ViennaNGS/ExtFeature.pm
 lib/Bio/ViennaNGS/Fasta.pm
 lib/Bio/ViennaNGS/Feature.pm
+lib/Bio/ViennaNGS/FeatureBase.pm
 lib/Bio/ViennaNGS/FeatureChain.pm
 lib/Bio/ViennaNGS/FeatureInterval.pm
 lib/Bio/ViennaNGS/FeatureIntervalN.pm

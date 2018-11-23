@@ -41,6 +41,7 @@ WriteMakefile(
 				    "Moose"      		   => '0',
 				    "MooseX::Clone"                => '0',
 				    "Moose::Util::TypeConstraints" => '0',
+				    "Moose::Role"                  => '0',
 				    "namespace::autoclean"         => '0',
 				    "Path::Class" 	           => '0',
 				    "Math::Round"                  => '0',

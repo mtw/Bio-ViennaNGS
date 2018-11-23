@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-10 19:13:43 michl>
+# Last changed Time-stamp: <2018-11-23 17:43:57 mtw>
 
 package Bio::ViennaNGS::Subtypes;
 
@@ -20,4 +20,9 @@ coerce 'Bio::ViennaNGS::MyFasta'
 subtype 'Bio::ViennaNGS::PlusOrMinus',
   as 'Str',
   where { /[\+\-\.]/ },
-  message { "$_ is neither +/- nor ."};
+  message { "[SUBTYPE ISSUE]: expecting '+','-', or '.', however ($_) is neither."};
+
+subtype 'Bio::ViennaNGS::ZeroOrOne',
+  as 'Int',
+  where { $_ == 0 or $_ == 1 },
+  message { "[SUBTYPE ISSUE]: expecting '0' or '1', however ($_) is neither." };
