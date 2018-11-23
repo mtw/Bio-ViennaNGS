@@ -215,4 +215,7 @@ Revision history for Perl extension Bio::ViennaNGS.
         - added Bio::ViennaNGS::FeatureIntervalN
 
 0.19.1 Tue 7 Aug 2018
-	- add Fasta test to distribution
+	- added Fasta test to distribution
+
+0.19.2 Fri 23 Nov 2018
+ 	- added FeatureBase role; adjusted Feature classes & tests

@@ -28,6 +28,6 @@ use Bio::ViennaNGS::MinimalFeature;
   my $strand = "+";
   my @arg = (chromosome => $chr, start => $start, end => $end, strand => $strand);
   my $MF = new_ok('Bio::ViennaNGS::MinimalFeature'=> \@arg);
-  ok($MF->_length == 23457, 'length of Featureinterval');
+  ok($MF->_length == 23456, 'length of Featureinterval (base 0)');
 }
 

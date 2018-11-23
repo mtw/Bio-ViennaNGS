@@ -25,13 +25,17 @@ L<Bio::ViennaNGS> Feature* classes is zero-based or one-based
 package Bio::ViennaNGS::FeatureBase;
 
 use Moose::Role;
+use Bio::ViennaNGS;
 use Bio::ViennaNGS::Subtypes;
+use version; our $VERSION = version->declare("$Bio::ViennaNGS::VERSION");
 
 has 'base' => (
 	       is => 'rw',
 	       isa => 'Bio::ViennaNGS::ZeroOrOne',
 	       default => 0,
 	      );
+
+1;
 
 =head1 DEPENDENCIES
 

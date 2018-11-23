@@ -28,6 +28,6 @@ use Bio::ViennaNGS::BedGraphEntry;
   my $value = 234433.434354;
   my @arg = (chromosome => $chr, start => $start, end => $end, dataValue => $value);
   my $BGE = new_ok('Bio::ViennaNGS::BedGraphEntry'=> \@arg);
-  ok($BGE->_length == 23457, 'length of underlying Featureinterval');
+  ok($BGE->_length == 23456, 'length of underlying Featureinterval (base 0)');
 }
 

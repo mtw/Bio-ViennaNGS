@@ -6,7 +6,7 @@ use Path::Class;
 use File::Share ':all';
 use Data::Dumper;
 use FindBin qw($Bin);
-use constant TEST_COUNT => 17;
+use constant TEST_COUNT => 18;
 
 use lib "$Bin/../lib", "$Bin/../blib/lib", "$Bin/../blib/arch";
 
@@ -26,7 +26,7 @@ use Bio::ViennaNGS::FeatureChain;
 {
   my $chr = "NC_012345.6";
   my $start1 = 1100; my $start2 = 2345; my $start3 = 2987; my $start4 = 5437;
-  my $end1 = 1346; my $end2 = 2544; my $end3 = 3076; my $end4 = 6789;
+  my $end1 = 1346; my $end2 = 2545; my $end3 = 3076; my $end4 = 6789;
   my $name1 = "feat1"; my $name2 = "feat2"; my $name3 = "feat3"; my $name4 = "feat4";
   my $strand = "+";
   my @arg1 = (chromosome => $chr, start => $start1, end => $end1, strand => $strand, name => $name1);
@@ -37,15 +37,16 @@ use Bio::ViennaNGS::FeatureChain;
   my $Feature2 = new_ok('Bio::ViennaNGS::Feature'=> \@arg2);
   my $Feature3 = new_ok('Bio::ViennaNGS::Feature'=> \@arg3);
   my $Feature4 = new_ok('Bio::ViennaNGS::Feature'=> \@arg4);
-  ok($Feature1->_length == 246, 'length of Feature1');
-  ok($Feature2->_length == 199, 'length of Feature2');
-  ok($Feature3->_length == 89, 'length of Feature3');
-  ok($Feature4->_length == 1352, 'length of Feature4');
+  ok($Feature1->_length == 245, 'length of Feature1 (base 0)');
+  ok($Feature2->_length == 199, 'length of Feature2 (base 0)');
+  ok($Feature3->_length == 88, 'length of Feature3 (base 0)');
+  ok($Feature4->_length == 1351, 'length of Feature4 (base 0)');
 
-  my @arg_fc = (type => "test", chain => [$Feature1,$Feature2]);
+  my @arg_fc = (type => "test", chain => [$Feature1,$Feature2], base => 0);
   my $FC1 = new_ok("Bio::ViennaNGS::FeatureChain" => \@arg_fc);
 
   ok($FC1->_entries == 2, "elements in FeatureChain->chain ArrayRef");
+  ok($FC1->base == 0, "FeatureChain contains canonical BED entried");
 
   # check if the object implements all methods
   can_ok($FC1, qw(count_entries sort_chain_ascending as_bed12_line as_bed6_array));

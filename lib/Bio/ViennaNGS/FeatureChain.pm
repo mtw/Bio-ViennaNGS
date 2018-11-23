@@ -48,16 +48,12 @@ has '_entries' => (
 		   lazy => 1,
 		  );
 
-#has 'foo' => (
-#	      is => 'ro',
-#	      isa => 'Str',
-#	      default => "AAA",
-#	     );
+with 'Bio::ViennaNGS::FeatureBase';
 
 sub BUILD {
   my $self = shift;
   my $this_function = (caller(0))[3];
- # carp"INFO [$this_function]";
+
   confess "ERROR [$this_function] \$self->chain not available"
     unless ($self->has_chain);
   $self->count_entries();
