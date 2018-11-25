@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2017-06-10 19:07:22 michl>
+# Last changed Time-stamp: <2018-11-25 13:08:22 mtw>
 package Bio::ViennaNGS::FeatureIO;
 
 use Bio::ViennaNGS;
@@ -58,6 +58,8 @@ has '_entries' => ( # of elements in $self->data
 		   lazy => 1,
 		  );
 
+with 'Bio::ViennaNGS::FeatureBase';
+
 sub BUILD { # call a parser method, depending on $self->instanceOf
   my $self = shift;
   my $this_function = (caller(0))[3];
@@ -115,6 +117,7 @@ sub count_entries {
   $self->_entries($cnt);
 }
 
+# TODO ensure FeatureBase is handled correctly
 sub parse_bedgraph_file{
   my ($self,$filename) = @_;
   my $this_function = (caller(0))[3];
@@ -141,7 +144,8 @@ sub parse_bed6_file{
   $file = read_file( $file, array_ref => 1, chomp =>1 );
 
   if ($typ == 2){ # initialize an empty FeatureChain object
-    $fc = Bio::ViennaNGS::FeatureChain->new(type => "feature");
+    $fc = Bio::ViennaNGS::FeatureChain->new(type => "feature",
+					    base => $self->base);
    }
 
   #  print "********** in parse_bed6: typ= $typ ************\n";
@@ -152,14 +156,15 @@ sub parse_bed6_file{
 					 end=>$feat[2],
 					 name=>$feat[3],
 					 score=>$feat[4],
-					 strand=>$feat[5]);
+					 strand=>$feat[5],
+					 base=>$self->base);
     if($typ == 0){ # ArrayRef of individual Feature objects
       push @{$self->data}, $feat;
     }
     elsif ($typ == 1) { # ArrayRef of FeatureChain objects, one per Feature object
       $fc = Bio::ViennaNGS::FeatureChain->new(type => "feature",
-					      chain => [$feat]);
-      #      $fc->count_entries();
+					      chain => [$feat],
+					      base => $self->base);
       push @{$self->data}, $fc;
     }
     elsif($typ == 2){
@@ -167,7 +172,7 @@ sub parse_bed6_file{
       $fc->count_entries();
     }
     else{
-      croak "ERROR [$this_function] don't know how to handle typ $typ";
+      croak "ERROR [$this_function] don't know how to handle type $typ";
     }
   } #end foreach
   if ($typ == 2) { push @{$self->data}, $fc; }
