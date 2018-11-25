@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2018-01-10 00:28:46 mtw>
+# Last changed Time-stamp: <2018-11-25 21:40:36 mtw>
 
 package Bio::ViennaNGS::FeatureInterval;
 
@@ -48,14 +48,12 @@ sub BUILD { # call a parser method, depending on $self->instanceOf
     confess "ERROR [$this_function] \$self->end must be > than \$self->start for 0-based start coordinates [==> start ".eval($self->start)." end ".eval($self->end)." <==]"
       unless ($self->end > $self->start);
     $len = eval($self->end)-eval($self->start)-1;
-    print "len $len\n";
     $self->_length($len);
   }
   else {
     confess "ERROR [$this_function] \$self->end must be >= than \$self->start for 0-based start coordinates [==> start ".eval($self->start)." end ".eval($self->end)." <==]"
       unless ($self->end >= $self->start);
     $len = $self->end-$self->start;
-    print "len $len\n";
     $self->_length($len);
   }
 }
