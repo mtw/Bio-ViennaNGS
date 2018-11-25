@@ -1,5 +1,5 @@
 # -*-CPerl-*-
-# Last changed Time-stamp: <2018-11-25 13:08:22 mtw>
+# Last changed Time-stamp: <2018-11-25 14:37:31 mtw>
 package Bio::ViennaNGS::FeatureIO;
 
 use Bio::ViennaNGS;
@@ -226,6 +226,7 @@ feature annotation classes
 					       file => "file.bed6",
 					       filetype => 'Bed6',
 					       instanceOf => 'Feature',
+                                               base => 0,
 					      );
 
   # initialize a FeatureIO object from a Bed12 file
@@ -233,12 +234,14 @@ feature annotation classes
 					       file => "file.bed12",
 					       filetype => 'Bed12',
 					       instanceOf => 'Bed',
+                                               base => 0,
 					      );
 
   # initialize a FeatureIO object from a bedGraph file
   my $obj = Bio::ViennaNGS::FeatureIO->new(file       => "file.bg",
                                            filetype   => "BedGraph",
                                            instanceOf => "BedGraph",
+                                           base => 0,
                                           );
 
 
@@ -275,6 +278,10 @@ adjusted to L<Bio::ViennaNGS::FeatureChain> in the future.
 In case of pasring bedGraph data, C<$self-E<gt>instanceOf> is ignored
 and C<$self-E<gt>data> holds an ArrayRef to individual
 L<Bio::ViennaNGS::BedGraph> objects.
+
+L<Bio::ViennaNGS::FeatureIO> implements the
+L<Bio::ViennaNGS::FeatureBase> role, i.e. it is aware of 0-based
+(default) or 1-based features (aka BED intervals).
 
 =head1 METHODS
 
@@ -315,7 +322,7 @@ Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014-2016 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
+Copyright (C) 2014-2018 Michael T. Wolfinger E<lt>michael@wolfinger.euE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.0 or,
