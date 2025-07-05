@@ -6,7 +6,7 @@ use Path::Class;
 use File::Share ':all';
 use Data::Dumper;
 use FindBin qw($Bin);
-use constant TEST_COUNT => 194;
+use constant TEST_COUNT => 204;
 
 use lib "$Bin/../lib", "$Bin/../blib/lib", "$Bin/../blib/arch";
 
@@ -28,6 +28,8 @@ use Bio::ViennaNGS::FeatureIO;
   ok($infile_bed12);
   my ($infile_bed6) = dist_file('Bio-ViennaNGS','data1/NC_000913.CDS.bed6');
   ok($infile_bed6);
+  my $infile_bg = dist_file('Bio-ViennaNGS','data1/example.bg');
+  ok($infile_bg);
 
 
   #------
@@ -79,5 +81,20 @@ use Bio::ViennaNGS::FeatureIO;
      ok($fo->base=="0", "FeatureChain entry is 0-based");
     }
   }
+
+  #------
+  # test parsing of BedGraph into an array of Bio::ViennaNGS::BedGraphEntry objects
+  my @arg_bg = (file => $infile_bg, filetype => 'BedGraph', instanceOf => 'BedGraph');
+  my $FIO_BG = new_ok("Bio::ViennaNGS::FeatureIO" => \@arg_bg);
+
+  ok($FIO_BG->_entries == 3, "elements in ArrayRef");
+  foreach my $bge (@{$FIO_BG->data}){
+    isa_ok( $bge, 'Bio::ViennaNGS::BedGraphEntry');
+  }
+  my $first = ${$FIO_BG->data}[0];
+  ok($first->chromosome eq 'chr1', 'chromosome parsed');
+  ok($first->start == 0, 'start parsed');
+  ok($first->end == 10, 'end parsed');
+  ok($first->dataValue == 1.5, 'value parsed');
 }
 
