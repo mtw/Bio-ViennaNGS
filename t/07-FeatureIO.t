@@ -87,7 +87,7 @@ use Bio::ViennaNGS::FeatureIO;
   my @arg_bg = (file => $infile_bg, filetype => 'BedGraph', instanceOf => 'BedGraph');
   my $FIO_BG = new_ok("Bio::ViennaNGS::FeatureIO" => \@arg_bg);
 
-  ok($FIO_BG->_entries == 3, "elements in ArrayRef");
+  ok(scalar(@{$FIO_BG->data}) == 3, "elements in ArrayRef");
   foreach my $bge (@{$FIO_BG->data}){
     isa_ok( $bge, 'Bio::ViennaNGS::BedGraphEntry');
   }
